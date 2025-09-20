@@ -1,6 +1,6 @@
-FROM golang:1.25 AS apiBuilder
+FROM golang:1.25-alpine AS apiBuilder
 WORKDIR /opt
-RUN apt-get update && apt-get install -y make
+RUN apk update && apk add --no-cache make
 COPY . /opt/
 RUN go mod download
 ARG GIT_TAG=?
