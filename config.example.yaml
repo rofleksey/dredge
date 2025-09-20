@@ -1,0 +1,32 @@
+log:
+  telegram:
+    token: "your_telegram_bot_token_here"
+    chat_id: "your_telegram_chat_id_here"
+
+sentry:
+  dsn: "https://examplePublicKey@o0.ingest.sentry.io/0"
+  environment: "production"
+  traces_sample_rate: 1.0
+
+db:
+  user: "postgres"
+  pass: "postgres"
+  host: "localhost:5432"
+  database: "dredge"
+
+twitch:
+  client_id: "your_twitch_client_id_here"
+  client_secret: "your_twitch_client_secret_here"
+  refresh_token: "your_twitch_refresh_token_here"
+
+stalk:
+  streamers:
+    - "streamer1"
+    - "streamer2"
+    - "streamer3"
+  keywords:
+    - "keyword1"
+    - "keyword2"
+  substrings:
+    - "substring1"
+    - "substring2"
