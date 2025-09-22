@@ -235,11 +235,15 @@ components:
           type: 'string'
         text:
           type: 'string'
+        created:
+          type: 'string'
+          format: 'date-time'
       required:
         - 'id'
         - 'channel'
         - 'username'
         - 'text'
+        - 'created'
       type: 'object'
     SendMessageRequest:
       properties:
@@ -262,4 +266,39 @@ components:
             type: 'string'
       required:
         - 'usernames'
+      type: 'object'
+    WsMessageMessage:
+      properties:
+        cmd:
+          enum:
+            - 'message'
+          type: 'string'
+        id:
+          type: 'string'
+          x-oapi-codegen-extra-tags:
+            exhaustruct: 'optional'
+        message:
+          $ref: '#/components/schemas/Message'
+      required:
+        - 'cmd'
+        - 'id'
+        - 'message'
+      type: 'object'
+    WsMessage:
+      discriminator:
+        mapping:
+          message: '#/components/schemas/WsMessageMessage'
+        propertyName: 'cmd'
+      oneOf:
+        - $ref: '#/components/schemas/WsMessageMessage'
+      properties:
+        cmd:
+          type: 'string'
+        id:
+          type: 'string'
+          x-oapi-codegen-extra-tags:
+            exhaustruct: 'optional'
+      required:
+        - 'cmd'
+        - 'id'
       type: 'object'

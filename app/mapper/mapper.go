@@ -11,5 +11,6 @@ func MapMessage(m database.Message) api.Message {
 		Id:       m.ID,
 		Text:     m.Text,
 		Username: m.Username,
+		Created:  m.Created,
 	}
 }

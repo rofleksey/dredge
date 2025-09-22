@@ -8,18 +8,27 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gofiber/fiber/v2"
+	"github.com/oapi-codegen/runtime"
 )
 
 // Defines values for GeneralError.
 const (
 	GeneralErrorTrue GeneralError = true
+)
+
+// Defines values for WsMessageMessageCmd.
+const (
+	WsMessageMessageCmdMessage WsMessageMessageCmd = "message"
 )
 
 // General defines model for General.
@@ -50,10 +59,11 @@ type LoginResponse struct {
 
 // Message defines model for Message.
 type Message struct {
-	Channel  string `json:"channel"`
-	Id       string `json:"id"`
-	Text     string `json:"text"`
-	Username string `json:"username"`
+	Channel  string    `json:"channel"`
+	Created  time.Time `json:"created"`
+	Id       string    `json:"id"`
+	Text     string    `json:"text"`
+	Username string    `json:"username"`
 }
 
 // SearchRequest defines model for SearchRequest.
@@ -76,6 +86,23 @@ type SendMessageRequest struct {
 	Username string `json:"username"`
 }
 
+// WsMessage defines model for WsMessage.
+type WsMessage struct {
+	Cmd   string `json:"cmd"`
+	Id    string `exhaustruct:"optional" json:"id"`
+	union json.RawMessage
+}
+
+// WsMessageMessage defines model for WsMessageMessage.
+type WsMessageMessage struct {
+	Cmd     WsMessageMessageCmd `json:"cmd"`
+	Id      string              `exhaustruct:"optional" json:"id"`
+	Message Message             `json:"message"`
+}
+
+// WsMessageMessageCmd defines model for WsMessageMessage.Cmd.
+type WsMessageMessageCmd string
+
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = LoginRequest
 
@@ -84,6 +111,112 @@ type SearchMessagesJSONRequestBody = SearchRequest
 
 // SendMessageJSONRequestBody defines body for SendMessage for application/json ContentType.
 type SendMessageJSONRequestBody = SendMessageRequest
+
+// AsWsMessageMessage returns the union data inside the WsMessage as a WsMessageMessage
+func (t WsMessage) AsWsMessageMessage() (WsMessageMessage, error) {
+	var body WsMessageMessage
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromWsMessageMessage overwrites any union data inside the WsMessage as the provided WsMessageMessage
+func (t *WsMessage) FromWsMessageMessage(v WsMessageMessage) error {
+	t.Cmd = "message"
+
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeWsMessageMessage performs a merge with any union data inside the WsMessage, using the provided WsMessageMessage
+func (t *WsMessage) MergeWsMessageMessage(v WsMessageMessage) error {
+	t.Cmd = "message"
+
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t WsMessage) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"cmd"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t WsMessage) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "message":
+		return t.AsWsMessageMessage()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t WsMessage) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	object := make(map[string]json.RawMessage)
+	if t.union != nil {
+		err = json.Unmarshal(b, &object)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	object["cmd"], err = json.Marshal(t.Cmd)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'cmd': %w", err)
+	}
+
+	object["id"], err = json.Marshal(t.Id)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'id': %w", err)
+	}
+
+	b, err = json.Marshal(object)
+	return b, err
+}
+
+func (t *WsMessage) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	if err != nil {
+		return err
+	}
+	object := make(map[string]json.RawMessage)
+	err = json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["cmd"]; found {
+		err = json.Unmarshal(raw, &t.Cmd)
+		if err != nil {
+			return fmt.Errorf("error reading 'cmd': %w", err)
+		}
+	}
+
+	if raw, found := object["id"]; found {
+		err = json.Unmarshal(raw, &t.Id)
+		if err != nil {
+			return fmt.Errorf("error reading 'id': %w", err)
+		}
+	}
+
+	return err
+}
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -523,19 +656,22 @@ func (sh *strictHandler) GetUsers(ctx *fiber.Ctx) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"//8WtojVWxQAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -8,6 +8,7 @@ import (
 	"dredge/app/service/auth"
 	"dredge/app/service/limits"
 	"dredge/app/service/messages"
+	"dredge/app/service/pubsub"
 	"dredge/app/service/stalk"
 	"dredge/pkg/config"
 	"dredge/pkg/database"
@@ -49,7 +50,7 @@ func main() {
 		slog.Error("Sentry initialization failed", slog.Any("error", err))
 	}
 	defer sentry.Flush(time.Second)
-	defer sentry.RecoverWithContext(appCtx)
+	//defer sentry.RecoverWithContext(appCtx)
 
 	slog.ErrorContext(appCtx, "Service restarted")
 
@@ -84,11 +85,14 @@ func main() {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
+	do.Provide(di, pubsub.New)
 	do.Provide(di, auth.New)
 	do.Provide(di, limits.New)
 	do.Provide(di, accounts.New)
 	do.Provide(di, messages.New)
 	do.Provide(di, stalk.New)
+
+	wsController := controller.NewWS(di)
 
 	server := controller.NewStrictServer(di)
 	handler := api.NewStrictHandler(server, nil)
@@ -104,6 +108,7 @@ func main() {
 
 	middleware.FiberMiddleware(app, di)
 	routes.StaticRoutes(app)
+	routes.WSRoutes(app, wsController)
 
 	apiGroup := app.Group("/v1")
 	api.RegisterHandlersWithOptions(apiGroup, handler, api.FiberServerOptions{

@@ -2,7 +2,9 @@ package stalk
 
 import (
 	"context"
+	"dredge/app/api"
 	"dredge/app/client/twitch_irc"
+	"dredge/app/service/pubsub"
 	"dredge/pkg/config"
 	"dredge/pkg/database"
 	"fmt"
@@ -20,19 +22,21 @@ var _ do.Shutdownable = (*Service)(nil)
 var nonAlphaNumericRegexp = regexp.MustCompile(`[^a-zA-Z0-9\s]+`)
 
 type Service struct {
-	appCtx  context.Context
-	cfg     *config.Config
-	queries *database.Queries
-	client  *twitch_irc.Client
+	appCtx        context.Context
+	cfg           *config.Config
+	queries       *database.Queries
+	pubsubService *pubsub.Service
+	client        *twitch_irc.Client
 }
 
 func New(di *do.Injector) (*Service, error) {
 	cfg := do.MustInvoke[*config.Config](di)
 
 	service := &Service{
-		appCtx:  do.MustInvoke[context.Context](di),
-		queries: do.MustInvoke[*database.Queries](di),
-		cfg:     cfg,
+		appCtx:        do.MustInvoke[context.Context](di),
+		queries:       do.MustInvoke[*database.Queries](di),
+		pubsubService: do.MustInvoke[*pubsub.Service](di),
+		cfg:           cfg,
 	}
 
 	client, err := twitch_irc.NewClient(twitch_irc.Config{
@@ -83,6 +87,8 @@ func (s *Service) isInterestingMessage(text string) bool {
 }
 
 func (s *Service) HandleMessage(channel, username, messageID, text string, _ map[string]string) {
+	now := time.Now()
+
 	slog.Debug("Message",
 		slog.String("channel", channel),
 		slog.String("username", username),
@@ -92,7 +98,7 @@ func (s *Service) HandleMessage(channel, username, messageID, text string, _ map
 
 	if err := s.queries.CreateMessage(s.appCtx, database.CreateMessageParams{
 		ID:       messageID,
-		Created:  time.Now(),
+		Created:  now,
 		Channel:  channel,
 		Username: username,
 		Text:     text,
@@ -105,6 +111,13 @@ func (s *Service) HandleMessage(channel, username, messageID, text string, _ map
 			slog.Any("error", err),
 		)
 	}
+	s.pubsubService.NotifyMessage(api.Message{
+		Channel:  channel,
+		Id:       messageID,
+		Text:     text,
+		Username: username,
+		Created:  now,
+	})
 
 	if !s.isInterestingMessage(text) {
 		return
