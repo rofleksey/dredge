@@ -11,6 +11,9 @@ import (
 )
 
 type Config struct {
+	BaseApiURL   string `yaml:"baseApiURL" validate:"required"`
+	BaseFrontURL string `yaml:"baseFrontURL" validate:"required"`
+
 	Log struct {
 		Telegram struct {
 			Token  string `yaml:"token"`
@@ -31,17 +34,32 @@ type Config struct {
 		Database string `yaml:"database" validate:"required"`
 	} `yaml:"db"`
 
+	JWT struct {
+		Secret string `yaml:"secret" validate:"required"`
+	} `yaml:"jwt"`
+
+	Admin struct {
+		Password string `yaml:"password" validate:"required"`
+	} `yaml:"admin"`
+
 	Twitch struct {
 		ClientID     string `yaml:"client_id" validate:"required"`
 		ClientSecret string `yaml:"client_secret" validate:"required"`
-		RefreshToken string `yaml:"refresh_token" validate:"required"`
 	} `yaml:"twitch"`
 
+	Accounts []Account `yaml:"accounts" validate:"required,min=1"`
+
 	Stalk struct {
-		Streamers  []string `yaml:"streamers" validate:"required"`
-		Keywords   []string `yaml:"keywords" validate:"required"`
-		Substrings []string `yaml:"substrings" validate:"required"`
+		Streamers    []string `yaml:"streamers"`
+		Keywords     []string `yaml:"keywords"`
+		Substrings   []string `yaml:"substrings"`
+		ExcludeUsers []string `yaml:"exclude_users"`
 	} `yaml:"stalk"`
+}
+
+type Account struct {
+	Username     string `yaml:"username" validate:"required"`
+	RefreshToken string `yaml:"refresh_token" validate:"required"`
 }
 
 func Load() (*Config, error) {
@@ -58,6 +76,13 @@ func Load() (*Config, error) {
 	if err := yaml.Unmarshal(data, &result); err != nil {
 		sentry.CaptureException(err)
 		return nil, fmt.Errorf("failed to parse YAML config: %w", err)
+	}
+
+	if result.BaseApiURL == "" {
+		result.BaseApiURL = "https://dredge.rofleksey.ru"
+	}
+	if result.BaseFrontURL == "" {
+		result.BaseFrontURL = "https://dredge.rofleksey.ru"
 	}
 
 	if result.Sentry.TracesSampleRate == 0 {

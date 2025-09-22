@@ -2,7 +2,7 @@ package stalk
 
 import (
 	"context"
-	"dredge/app/client/twitch"
+	"dredge/app/client/twitch_irc"
 	"dredge/pkg/config"
 	"dredge/pkg/database"
 	"fmt"
@@ -23,8 +23,7 @@ type Service struct {
 	appCtx  context.Context
 	cfg     *config.Config
 	queries *database.Queries
-
-	client *twitch.Client
+	client  *twitch_irc.Client
 }
 
 func New(di *do.Injector) (*Service, error) {
@@ -36,13 +35,14 @@ func New(di *do.Injector) (*Service, error) {
 		cfg:     cfg,
 	}
 
-	client, err := twitch.NewClient(twitch.Config{
+	client, err := twitch_irc.NewClient(twitch_irc.Config{
 		ClientID:     cfg.Twitch.ClientID,
 		ClientSecret: cfg.Twitch.ClientSecret,
-		RefreshToken: cfg.Twitch.RefreshToken,
+		Username:     cfg.Accounts[0].Username,
+		RefreshToken: cfg.Accounts[0].RefreshToken,
 	}, service.HandleMessage)
 	if err != nil {
-		return nil, fmt.Errorf("twitch.NewClient: %w", err)
+		return nil, fmt.Errorf("twitch_irc.NewClient: %w", err)
 	}
 	service.client = client
 
@@ -82,7 +82,7 @@ func (s *Service) isInterestingMessage(text string) bool {
 	return false
 }
 
-func (s *Service) HandleMessage(channel, username, messageID, text string, tags map[string]string) {
+func (s *Service) HandleMessage(channel, username, messageID, text string, _ map[string]string) {
 	slog.Debug("Message",
 		slog.String("channel", channel),
 		slog.String("username", username),
@@ -111,7 +111,7 @@ func (s *Service) HandleMessage(channel, username, messageID, text string, tags 
 	}
 
 	slog.Error(text,
-		slog.String("channel", channel),
+		slog.String("channel", "https://twitch.tv/"+channel),
 		slog.String("username", username),
 	)
 }

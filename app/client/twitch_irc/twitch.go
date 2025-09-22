@@ -1,9 +1,9 @@
-package twitch
+package twitch_irc
 
 import (
 	"context"
+	"dredge/app/client/twitch_api"
 	"fmt"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -11,17 +11,16 @@ import (
 	"log/slog"
 
 	"github.com/gempir/go-twitch-irc/v4"
-	"github.com/nicklaw5/helix/v2"
 )
 
 type MessageHandler func(channel, username, messageID, text string, tags map[string]string)
 
 type Client struct {
-	cfg               Config
-	userClient        *helix.Client
-	ircClient         *twitch.Client
-	messageHandler    MessageHandler
-	refreshMutex      sync.Mutex
+	cfg            Config
+	apiClient      *twitch_api.Client
+	ircClient      *twitch.Client
+	messageHandler MessageHandler
+
 	connectedChannels map[string]bool
 	channelsMutex     sync.RWMutex
 }
@@ -29,6 +28,7 @@ type Client struct {
 type Config struct {
 	ClientID     string
 	ClientSecret string
+	Username     string
 	RefreshToken string
 }
 
@@ -37,54 +37,27 @@ func NewClient(cfg Config, messageHandler MessageHandler) (*Client, error) {
 		panic("MessageHandler must not be nil")
 	}
 
+	apiClient, err := twitch_api.NewClient(twitch_api.Config{
+		ClientID:     cfg.ClientID,
+		ClientSecret: cfg.ClientSecret,
+		Username:     cfg.Username,
+		RefreshToken: cfg.RefreshToken,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user client: %v", err)
+	}
+
 	client := &Client{
 		cfg:               cfg,
+		apiClient:         apiClient,
 		messageHandler:    messageHandler,
 		connectedChannels: make(map[string]bool),
 	}
 
-	userClient, accessToken, err := client.createUserClient()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create user client: %v", err)
-	}
-	client.userClient = userClient
-
-	client.ircClient = twitch.NewClient(cfg.ClientID, "oauth:"+accessToken)
+	client.ircClient = twitch.NewClient(cfg.ClientID, "oauth:"+apiClient.GetAccessToken())
 	client.setupIRCListeners()
 
 	return client, nil
-}
-
-func (c *Client) createUserClient() (*helix.Client, string, error) {
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			MaxIdleConns:    10,
-			IdleConnTimeout: 30 * time.Second,
-		},
-		Timeout: 10 * time.Second,
-	}
-
-	client, err := helix.NewClient(&helix.Options{
-		ClientID:     c.cfg.ClientID,
-		ClientSecret: c.cfg.ClientSecret,
-		RefreshToken: c.cfg.RefreshToken,
-		HTTPClient:   httpClient,
-	})
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to create helix client: %v", err)
-	}
-
-	resp, err := client.RefreshUserAccessToken(c.cfg.RefreshToken)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to refresh access token: %v", err)
-	}
-	if resp.StatusCode != 200 {
-		return nil, "", fmt.Errorf("failed to refresh token: status %d: %s", resp.StatusCode, resp.ErrorMessage)
-	}
-
-	accessToken := resp.Data.AccessToken
-	client.SetUserAccessToken(accessToken)
-	return client, accessToken, nil
 }
 
 func (c *Client) setupIRCListeners() {
@@ -144,30 +117,14 @@ func (c *Client) TokenRefreshLoop(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			c.refreshTokens()
+			c.RefreshTokens()
 		}
 	}
 }
 
-func (c *Client) refreshTokens() {
-	c.refreshMutex.Lock()
-	defer c.refreshMutex.Unlock()
+func (c *Client) RefreshTokens() {
+	c.apiClient.RefreshToken()
 
-	slog.Debug("Refreshing Twitch tokens")
-
-	resp, err := c.userClient.RefreshUserAccessToken(c.cfg.RefreshToken)
-	if err != nil {
-		slog.Error("Failed to refresh user token", slog.Any("error", err))
-		return
-	}
-
-	if resp.StatusCode != 200 {
-		slog.Error("Failed to refresh token", slog.Int("status", resp.StatusCode), slog.String("error", resp.ErrorMessage))
-		return
-	}
-
-	accessToken := resp.Data.AccessToken
-	c.userClient.SetUserAccessToken(accessToken)
-	c.ircClient.SetIRCToken("oauth:" + accessToken)
-	slog.Debug("Twitch tokens refreshed successfully")
+	newToken := c.apiClient.GetAccessToken()
+	c.ircClient.SetIRCToken("oauth:" + newToken)
 }

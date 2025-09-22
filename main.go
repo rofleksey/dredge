@@ -2,10 +2,18 @@ package main
 
 import (
 	"context"
+	"dredge/app/api"
+	"dredge/app/controller"
+	"dredge/app/service/accounts"
+	"dredge/app/service/auth"
+	"dredge/app/service/limits"
+	"dredge/app/service/messages"
 	"dredge/app/service/stalk"
 	"dredge/pkg/config"
 	"dredge/pkg/database"
+	"dredge/pkg/middleware"
 	"dredge/pkg/migration"
+	"dredge/pkg/routes"
 	sentry2 "dredge/pkg/sentry"
 	"dredge/pkg/tlog"
 	"log/slog"
@@ -14,6 +22,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/do"
@@ -75,7 +84,45 @@ func main() {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
+	do.Provide(di, auth.New)
+	do.Provide(di, limits.New)
+	do.Provide(di, accounts.New)
+	do.Provide(di, messages.New)
 	do.Provide(di, stalk.New)
+
+	server := controller.NewStrictServer(di)
+	handler := api.NewStrictHandler(server, nil)
+
+	app := fiber.New(fiber.Config{
+		AppName:          "Dredge API",
+		ErrorHandler:     middleware.ErrorHandler,
+		ProxyHeader:      "X-Forwarded-For",
+		ReadTimeout:      time.Second * 60,
+		WriteTimeout:     time.Second * 60,
+		DisableKeepalive: false,
+	})
+
+	middleware.FiberMiddleware(app, di)
+	routes.StaticRoutes(app)
+
+	apiGroup := app.Group("/v1")
+	api.RegisterHandlersWithOptions(apiGroup, handler, api.FiberServerOptions{
+		BaseURL: "",
+		Middlewares: []api.MiddlewareFunc{
+			middleware.NewOpenAPIValidator(),
+		},
+	})
+
+	routes.NotFoundRoute(app)
+
+	go func() {
+		defer cancel()
+
+		log.Info("Server started on port 8080")
+		if err := app.Listen(":8080"); err != nil {
+			log.Warnf("Server stopped! Reason: %v", err)
+		}
+	}()
 
 	slog.InfoContext(appCtx, "Listening for incoming messages...")
 	if err = do.MustInvoke[*stalk.Service](di).Run(); err != nil {

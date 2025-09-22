@@ -1,0 +1,265 @@
+openapi: '3.0.4'
+info:
+  contact:
+    name: 'Dredge'
+    url: 'https://Dredge.rofleksey.ru'
+  title: 'Dredge API'
+  version: '1.0.0'
+servers:
+  - description: 'API'
+    url: '/v1'
+paths:
+  /login:
+    post:
+      summary: 'Login'
+      operationId: 'login'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Bad Request'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Unauthorized'
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Forbidden'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Internal Server Error'
+  /message/searh:
+    post:
+      summary: 'Search messages'
+      operationId: 'searchMessages'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Bad Request'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Unauthorized'
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Forbidden'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Internal Server Error'
+  /message/send:
+    post:
+      summary: 'Send message'
+      operationId: 'sendMessage'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+        required: true
+      responses:
+        '200':
+          description: 'Success'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Bad Request'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Unauthorized'
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Forbidden'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Internal Server Error'
+  /users:
+    get:
+      summary: 'Get users'
+      operationId: 'getUsers'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUsersResponse'
+          description: 'Success'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Bad Request'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Unauthorized'
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Forbidden'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General'
+          description: 'Internal Server Error'
+
+components:
+  schemas:
+    General:
+      properties:
+        error:
+          default: true
+          enum:
+            - true
+          type: 'boolean'
+        msg:
+          type: 'string'
+        statusCode:
+          type: 'integer'
+          x-omitempty: true
+      required:
+        - 'error'
+        - 'msg'
+        - 'statusCode'
+      type: 'object'
+    LoginRequest:
+      properties:
+        username:
+          type: 'string'
+        password:
+          type: 'string'
+      required:
+        - 'username'
+        - 'password'
+      type: 'object'
+    LoginResponse:
+      properties:
+        token:
+          type: 'string'
+      required:
+        - 'token'
+      type: 'object'
+    SearchRequest:
+      properties:
+        query:
+          type: 'string'
+        offset:
+          type: 'integer'
+        limit:
+          type: 'integer'
+      required:
+        - 'query'
+        - 'offset'
+        - 'limit'
+      type: 'object'
+    SearchResponse:
+      properties:
+        messages:
+          type: 'array'
+          items:
+            $ref: '#/components/schemas/Message'
+        totalCount:
+          type: 'integer'
+      required:
+        - 'messages'
+        - 'totalCount'
+      type: 'object'
+    Message:
+      properties:
+        id:
+          type: 'string'
+        channel:
+          type: 'string'
+        username:
+          type: 'string'
+        text:
+          type: 'string'
+      required:
+        - 'id'
+        - 'channel'
+        - 'username'
+        - 'text'
+      type: 'object'
+    SendMessageRequest:
+      properties:
+        username:
+          type: 'string'
+        channel:
+          type: 'string'
+        text:
+          type: 'string'
+      required:
+        - 'username'
+        - 'channel'
+        - 'text'
+      type: 'object'
+    GetUsersResponse:
+      properties:
+        usernames:
+          type: 'array'
+          items:
+            type: 'string'
+      required:
+        - 'usernames'
+      type: 'object'

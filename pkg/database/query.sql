@@ -2,6 +2,9 @@
 INSERT INTO messages (id, created, channel, username, text)
 VALUES ($1, $2, $3, $4, $5);
 
+-- name: CountMessages :one
+SELECT COUNT(*) from messages;
+
 -- name: GetMigrations :many
 SELECT *
 FROM migration

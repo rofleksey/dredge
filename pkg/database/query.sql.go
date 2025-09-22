@@ -10,6 +10,20 @@ import (
 	"time"
 )
 
+const countMessages = `-- name: CountMessages :one
+SELECT COUNT(*) from messages
+`
+
+// CountMessages
+//
+//	SELECT COUNT(*) from messages
+func (q *Queries) CountMessages(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countMessages)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createMessage = `-- name: CreateMessage :exec
 INSERT INTO messages (id, created, channel, username, text)
 VALUES ($1, $2, $3, $4, $5)

@@ -9,6 +9,10 @@ import (
 )
 
 type Querier interface {
+	//CountMessages
+	//
+	//  SELECT COUNT(*) from messages
+	CountMessages(ctx context.Context) (int64, error)
 	//CreateMessage
 	//
 	//  INSERT INTO messages (id, created, channel, username, text)
