@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/elliotchance/pie/v2"
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -79,18 +80,25 @@ func FiberMiddleware(app *fiber.App, di *do.Injector) {
 		},
 	}))
 
-	app.Use(func(ctx *fiber.Ctx) error {
-		token := strings.TrimPrefix(ctx.Get("Authorization"), "Bearer ")
-		if token != cfg.Admin.Password {
+	app.Use(jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{Key: []byte(cfg.JWT.Secret)},
+		SuccessHandler: func(ctx *fiber.Ctx) error {
+			tokenOpt := ctx.Locals("user")
+			if tokenOpt == nil {
+				return ctx.Next()
+			}
+
+			ctx.Locals("admin", true)
+			newUserCtx := context.WithValue(ctx.UserContext(), "admin", true)
+			newUserCtx = context.WithValue(newUserCtx, util.UsernameContextKey, "admin")
+			ctx.SetUserContext(newUserCtx)
+
 			return ctx.Next()
-		}
-
-		ctx.Locals("admin", true)
-
-		newUserCtx := context.WithValue(ctx.UserContext(), "admin", true)
-		newUserCtx = context.WithValue(newUserCtx, util.UsernameContextKey, "admin")
-		ctx.SetUserContext(newUserCtx)
-
-		return ctx.Next()
-	})
+		},
+		ErrorHandler: func(ctx *fiber.Ctx, _ error) error {
+			return ctx.Next()
+		},
+		TokenLookup: "query:token,header:Authorization",
+		AuthScheme:  "Bearer",
+	}))
 }
