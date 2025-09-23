@@ -9,7 +9,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-func parseSearchQuery(query string) (*SearchParams, error) {
+func parseSearchQuery(query string) (SearchParams, error) {
 	var params SearchParams
 
 	usernamePattern := regexp.MustCompile(`username:([^\s]+)`)
@@ -42,7 +42,7 @@ func parseSearchQuery(query string) (*SearchParams, error) {
 
 	params.TextQuery = strings.TrimSpace(query)
 
-	return &params, nil
+	return params, nil
 }
 
 func parseDate(dateStr string) (time.Time, error) {
@@ -63,8 +63,10 @@ func parseDate(dateStr string) (time.Time, error) {
 	return time.Time{}, fmt.Errorf("unable to parse date: %s", dateStr)
 }
 
-func buildSearchQuery(params *SearchParams, offset, limit int) (string, []interface{}, error) {
-	query := sq.Select("id", "created", "username", "channel", "text").
+func buildSearchQuery(params SearchParams, offset, limit int) (string, []interface{}, error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+
+	query := psql.Select("id", "created", "username", "channel", "text").
 		From("messages").
 		OrderBy("created DESC").
 		Limit(uint64(limit)).

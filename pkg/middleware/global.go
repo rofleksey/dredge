@@ -22,7 +22,7 @@ func FiberMiddleware(app *fiber.App, di *do.Injector) {
 
 	staticOrigins := []string{
 		cfg.BaseApiURL,
-		"capacitor://localhost", "http://localhost", "https://localhost", "http://localhost:4321",
+		"capacitor://localhost", "http://localhost", "https://localhost", "http://localhost:4321", "http://localhost:5173",
 		"http://localhost:1234", "http://localhost:3000", "http://localhost:9000", "http://localhost:8080",
 	}
 

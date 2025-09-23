@@ -5,9 +5,5 @@ import (
 )
 
 func StaticRoutes(app *fiber.App) {
-	app.Static("/uploads", "./data/uploads", fiber.Static{
-		ByteRange: true,
-		Download:  true,
-	})
-	app.Static("/thumbs", "./data/thumbs")
+	app.Static("/", "./frontend/dist")
 }
