@@ -4,11 +4,11 @@
       <div class="header-content">
         <div class="logo">
           <i class="material-icons">chat</i>
-          <span>Twitch Message Manager</span>
+          <span>Dredge</span>
         </div>
         <div class="user-selector">
           <i class="material-icons">person</i>
-          <select v-model="selectedUser">
+          <select v-model="selectedUserId">
             <option v-for="user in availableUsers" :key="user.id" :value="user.id">{{ user.username }}</option>
           </select>
         </div>
@@ -19,20 +19,22 @@
       <section class="messages-section">
         <div class="search-container">
           <div class="search-input">
-            <input type="text" v-model="searchQuery" placeholder="username:user channel:general date:2023-01-01~2023-12-31 search text" @keyup.enter="searchMessages">
+            <input type="text" v-model="searchQuery"
+                   placeholder="Enter query"
+                   @keyup.enter="searchMessages">
             <button @click="searchMessages">
               <i class="material-icons">search</i>
               Search
             </button>
           </div>
           <div class="query-examples">
-            Query examples: "username:user123", "channel:general hello world", "date:2023-10-01~2023-10-31"
+            Query: "channel:$channel username:$username date:$start~$end $text"
           </div>
         </div>
 
         <div class="messages-container">
           <div class="messages-header">
-            <h2>Messages</h2>
+            <h3>Messages</h3>
             <div v-if="isRealtime" class="realtime-indicator">
               <div class="live-dot"></div>
               <span>Live Updates</span>
@@ -53,10 +55,15 @@
             <div v-else>
               <div v-for="message in messages" :key="message.id" class="message">
                 <div class="message-header">
-                  <span class="message-username">{{ message.username }}</span>
-                  <span class="message-timestamp">{{ formatDate(message.created) }}</span>
+                  <div>
+                    <span class="message-username">{{ message.username }}</span>
+                    &nbsp;
+                    <span class="message-channel">#{{ message.channel }}</span>
+                  </div>
+
+                  <div class="message-timestamp">{{ formatDate(message.created) }}</div>
                 </div>
-                <div class="message-channel">#{{ message.channel }}</div>
+
                 <div class="message-text">{{ message.text }}</div>
               </div>
             </div>
@@ -75,14 +82,14 @@
 
         <div class="send-message-container">
           <div class="send-message-input">
-            <input type="text" v-model="newMessage" placeholder="Type your message..." @keyup.enter="sendMessage">
-            <button @click="sendMessage">
+            <input type="text" v-model="messageText" placeholder="Type your message..." @keyup.enter="onSendMessage">
+            <button @click="onSendMessage">
               <i class="material-icons">send</i>
             </button>
           </div>
           <div class="channel-info">
-            <span>Sending as: {{ getSelectedUsername() }}</span>
-            <span>Channel: {{ currentChannel || 'None selected' }}</span>
+            <span v-if="selectedUsername">Sending as: {{ selectedUsername }}</span>
+            <span v-if="currentChannel">Channel: {{ currentChannel }}</span>
           </div>
         </div>
       </section>
@@ -113,9 +120,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useApiClient } from './lib/api/api'
-import type { Message } from './lib/oapi'
+import {ref, onMounted, computed} from 'vue'
+import {useApiClient} from './lib/api/api'
+import type {Message} from './lib/oapi'
+
+const pageSize = 13
 
 // @ts-ignore
 const FRAME_PARENT = encodeURIComponent(process.env.NODE_ENV === 'development' ? "localhost" : window.location.hostname)
@@ -125,21 +134,20 @@ const apiClient = useApiClient()
 const searchQuery = ref('')
 const messages = ref<Message[]>([])
 const currentPage = ref(1)
-const pageSize = 20
+
 const totalPages = ref(1)
 const loading = ref(false)
 const isRealtime = ref(false)
-const selectedUser = ref(1)
-const newMessage = ref('')
+const selectedUserId = ref(1)
+const messageText = ref('')
 const currentChannel = ref<string | null>(null)
-const availableUsers = ref<Array<{id: number, username: string}>>([])
-
+const availableUsers = ref<Array<{ id: number, username: string }>>([])
 const totalCount = ref(0)
 
-const getSelectedUsername = () => {
-  const user = availableUsers.value.find(u => u.id === selectedUser.value)
-  return user ? user.username : 'Select account'
-}
+const selectedUsername = computed(() => {
+  const user = availableUsers.value.find(u => u.id === selectedUserId.value)
+  return user?.username ?? null
+})
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString()
@@ -151,7 +159,7 @@ const searchMessages = async () => {
 
   try {
     const response = await apiClient.api.searchMessages({
-      searchRequest:  {
+      searchRequest: {
         query: searchQuery.value,
         offset: (currentPage.value - 1) * pageSize,
         limit: pageSize
@@ -219,24 +227,31 @@ const nextPage = () => {
   }
 }
 
-const sendMessage = async () => {
-  if (!newMessage.value.trim() || !currentChannel.value) return
+function onSendMessage() {
+  const channel = currentChannel.value
+  const username = selectedUsername.value
+  const text = messageText.value.trim()
 
-  try {
-    await apiClient.api.sendMessage({
-      sendMessageRequest: {
-        username: getSelectedUsername(),
-        channel: currentChannel.value,
-        text: newMessage.value
-      }
-    })
-    newMessage.value = ''
+  if (!channel || !username || !text) {
+    return
+  }
 
-    if (isRealtime.value) {
-      await loadMessages()
+  sendMessage(channel, username, text).catch((e) => {
+    console.error('Error sending message:', e)
+  })
+}
+
+async function sendMessage(channel: string, username: string, text: string) {
+  await apiClient.api.sendMessage({
+    sendMessageRequest: {
+      username,
+      channel,
+      text
     }
-  } catch (error) {
-    console.error('Error sending message:', error)
+  })
+
+  if (isRealtime.value) {
+    await loadMessages()
   }
 }
 
@@ -406,6 +421,12 @@ main {
   transition: background-color 0.2s;
 }
 
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .search-input button:hover {
   background-color: var(--primary-dark);
 }
@@ -440,7 +461,7 @@ main {
 }
 
 .message {
-  padding: 0.75rem;
+  padding: 0.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
@@ -470,13 +491,14 @@ main {
 .message-text {
   font-size: 0.9rem;
   line-height: 1.4;
+  text-align: left;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem;
+  padding: 0.5rem;
   gap: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -606,9 +628,15 @@ main {
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .empty-state {

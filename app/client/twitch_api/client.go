@@ -74,7 +74,7 @@ func (c *Client) GetUserIDByUsername(username string) (string, error) {
 		return "", fmt.Errorf("failed to get user info: no users found")
 	}
 
-	return resp.Data.Users[0].Login, nil
+	return resp.Data.Users[0].ID, nil
 }
 
 func (c *Client) SendMessage(channel, text string) error {
