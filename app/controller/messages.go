@@ -12,6 +12,10 @@ import (
 )
 
 func (s *Server) SearchMessages(ctx context.Context, req api.SearchMessagesRequestObject) (api.SearchMessagesResponseObject, error) {
+	if !s.authService.IsAdmin(ctx) {
+		return nil, oops.With("statusCode", http.StatusUnauthorized).New("Unauthorized")
+	}
+
 	offset := req.Body.Offset
 	limit := req.Body.Limit
 
@@ -39,6 +43,10 @@ func (s *Server) SearchMessages(ctx context.Context, req api.SearchMessagesReque
 }
 
 func (s *Server) SendMessage(ctx context.Context, req api.SendMessageRequestObject) (api.SendMessageResponseObject, error) {
+	if !s.authService.IsAdmin(ctx) {
+		return nil, oops.With("statusCode", http.StatusUnauthorized).New("Unauthorized")
+	}
+
 	if !s.limitsService.AllowGlobalRps(ctx, "send_message", 1) {
 		return nil, oops.With("statusCode", http.StatusTooManyRequests).New("Too many requests")
 	}

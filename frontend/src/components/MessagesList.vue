@@ -14,9 +14,9 @@
       <div v-for="message in messages" :key="message.id" class="message">
         <div class="message-header">
           <div>
-            <span class="message-username">{{ message.username }}</span>
+            <span class="message-username clickable" @click="$emit('username-click', message.username)">{{ message.username }}</span>
             &nbsp;
-            <span class="message-channel">#{{ message.channel }}</span>
+            <span class="message-channel clickable" @click="$emit('channel-click', message.channel)">#{{ message.channel }}</span>
           </div>
 
           <div class="message-timestamp">{{ formatDate(message.created) }}</div>
@@ -34,6 +34,11 @@ import type { Message } from '../lib/oapi'
 defineProps<{
   messages: Message[]
   loading: boolean
+}>()
+
+defineEmits<{
+  'username-click': [username: string]
+  'channel-click': [channel: string]
 }>()
 
 const formatDate = (dateString: string) => {
@@ -74,6 +79,16 @@ const formatDate = (dateString: string) => {
 
 .message-channel {
   color: var(--text-secondary);
+}
+
+.clickable {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.clickable:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .message-text {

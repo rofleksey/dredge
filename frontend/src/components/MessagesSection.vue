@@ -18,6 +18,8 @@
       <MessagesList
           :messages="messages"
           :loading="loading"
+          @username-click="$emit('username-click', $event)"
+          @channel-click="$emit('channel-click', $event)"
       />
 
       <Pagination
@@ -64,6 +66,8 @@ defineEmits<{
   (e: 'prev-page'): void
   (e: 'next-page'): void
   (e: 'send-message'): void
+  (e: 'username-click', username: string): void
+  (e: 'channel-click', channel: string): void
 }>()
 </script>
 
