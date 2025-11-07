@@ -3,7 +3,6 @@ WORKDIR /opt
 RUN apk update && apk add --no-cache make
 COPY . /opt/
 RUN go mod download
-COPY --from=frontBuilder /opt/frontend/dist/ /opt/frontend/dist/
 ARG GIT_TAG
 ARG GIT_COMMIT
 ARG GIT_COMMIT_DATE
@@ -18,7 +17,4 @@ RUN apk update && \
     update-ca-certificates && \
     ulimit -n 100000
 COPY --from=apiBuilder /opt/dredge /opt/dredge
-EXPOSE 8080
-HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8080/v1/healthz || exit 1
 CMD [ "./dredge", "run" ]
