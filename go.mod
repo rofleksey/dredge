@@ -9,7 +9,6 @@ require (
 	github.com/getsentry/sentry-go v0.35.3
 	github.com/getsentry/sentry-go/otel v0.35.3
 	github.com/go-playground/validator/v10 v10.27.0
-	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/nicklaw5/helix/v2 v2.31.1
 	github.com/phsym/console-slog v0.3.1
 	github.com/samber/do v1.6.0
@@ -29,7 +28,6 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.38.0
 	go.opentelemetry.io/otel/trace v1.38.0
 	go.szostok.io/version v1.2.0
-	golang.org/x/time v0.13.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -52,6 +50,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/elliotchance/pie/v2 v2.9.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect

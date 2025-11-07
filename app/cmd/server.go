@@ -101,6 +101,7 @@ func runBot(_ *cobra.Command, _ []string) {
 	go do.MustInvoke[*twitch_api.Client](di).RunRefreshLoop(appCtx)
 	go do.MustInvoke[*twitch_irc.Client](di).RunRefreshLoop(appCtx)
 	go do.MustInvoke[*twitch.Service](di).RunFetchLoop(appCtx)
+	do.MustInvoke[*alert.Service](di).Init()
 
 	go func() {
 		sigint := make(chan os.Signal, 1)

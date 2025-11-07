@@ -1,9 +1,11 @@
 package alert
 
-import "regexp"
+import (
+	"dredge/app/config"
+	"regexp"
+)
 
 type Selector struct {
-	Channel  *regexp.Regexp
-	Username *regexp.Regexp
-	Message  *regexp.Regexp
+	AlertEntry config.AlertEntry
+	MsgRegex   *regexp.Regexp
 }

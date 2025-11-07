@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"regexp"
 
+	"github.com/elliotchance/pie/v2"
 	"github.com/samber/do"
 )
 
@@ -26,24 +27,8 @@ func New(di *do.Injector) (*Service, error) {
 
 	selectors := make([]Selector, 0, len(cfg.Alert.List))
 	for _, entry := range cfg.Alert.List {
-		if entry.Channel == "" {
-			entry.Channel = ".*"
-		}
-		if entry.Username == "" {
-			entry.Username = ".*"
-		}
 		if entry.Message == "" {
 			entry.Message = ".*"
-		}
-
-		channelRegex, err := regexp.Compile(entry.Channel)
-		if err != nil {
-			return nil, fmt.Errorf("invalid channel regex '%s': %w", entry.Channel, err)
-		}
-
-		usernameRegex, err := regexp.Compile(entry.Username)
-		if err != nil {
-			return nil, fmt.Errorf("invalid username regex '%s': %w", entry.Username, err)
 		}
 
 		messageRegex, err := regexp.Compile(entry.Message)
@@ -52,9 +37,8 @@ func New(di *do.Injector) (*Service, error) {
 		}
 
 		selectors = append(selectors, Selector{
-			Channel:  channelRegex,
-			Username: usernameRegex,
-			Message:  messageRegex,
+			AlertEntry: entry,
+			MsgRegex:   messageRegex,
 		})
 	}
 
@@ -68,25 +52,31 @@ func New(di *do.Injector) (*Service, error) {
 }
 
 func (s *Service) isMessageAlertable(channel, username, text string) bool {
-	for _, excludeUsername := range s.cfg.Alert.ExcludeUsernames {
-		if username == excludeUsername {
-			return false
-		}
+	if pie.Contains(s.cfg.Alert.ExcludeUsernames, username) {
+		return false
 	}
 
 	for _, selector := range s.selectors {
-		if selector.Channel.MatchString(channel) ||
-			selector.Username.MatchString(username) ||
-			selector.Message.MatchString(text) {
-			return true
+		if pie.Contains(selector.AlertEntry.ExcludeChannels, channel) {
+			continue
 		}
+
+		if pie.Contains(selector.AlertEntry.ExcludeUsernames, username) {
+			continue
+		}
+
+		if !selector.MsgRegex.MatchString(text) {
+			continue
+		}
+
+		return true
 	}
 
 	return false
 }
 
-func (s *Service) handleMessage(channel, username, messageID, text string, tags map[string]string) {
-	if !s.isMessageAlertable(channel, username, messageID) {
+func (s *Service) handleMessage(channel, username, _, text string, _ map[string]string) {
+	if !s.isMessageAlertable(channel, username, text) {
 		return
 	}
 

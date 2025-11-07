@@ -52,9 +52,9 @@ type Twitch struct {
 }
 
 type AlertEntry struct {
-	Channel  string `json:"channel"`
-	Username string `json:"username"`
-	Message  string `json:"message"`
+	ExcludeChannels  []string `json:"exclude_channels"`
+	ExcludeUsernames []string `json:"exclude_usernames"`
+	Message          string   `json:"message"`
 }
 
 type Alert struct {

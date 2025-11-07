@@ -45,7 +45,7 @@ func NewClient(di *do.Injector) (*Client, error) {
 func (c *Client) setupIRCListeners() {
 	c.ircClient.OnPrivateMessage(func(message twitch.PrivateMessage) {
 		username := strings.ToLower(message.User.Name)
-		channel := strings.TrimPrefix(message.Channel, "#")
+		channel := strings.ToLower(strings.TrimPrefix(message.Channel, "#"))
 		text := strings.TrimSpace(message.Message)
 
 		c.mutex.Lock()
