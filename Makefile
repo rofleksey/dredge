@@ -12,14 +12,12 @@ gen:
 
 .PHONY: lint
 lint:
-	@npx @redocly/cli lint
-	@npx golangci-lint run
+	@golangci-lint run
 
 .PHONY: build
 build:
-	@echo "Building application..."
-	@go build -ldflags "-X dredge/pkg/build.Tag=${GIT_TAG}" .
+	@go build -ldflags "-s -w -X go.szostok.io/version.version=${GIT_TAG} -X 'go.szostok.io/version.buildDate=`date`' -X go.szostok.io/version.commit=${GIT_COMMIT} -X go.szostok.io/version.commitDate=${GIT_COMMIT_DATE}" .
 
 .PHONY: run
 run:
-	@./dredge
+	@./dredge server

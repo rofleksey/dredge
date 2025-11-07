@@ -2,6 +2,7 @@ version: "2"
 run:
   tests: false
 linters:
+  default: none
   enable:
     - asasalint
     - asciicheck
@@ -36,7 +37,6 @@ linters:
     - grouper
     - iface
     - importas
-    - inamedparam
     - interfacebloat
     - intrange
     - loggercheck
@@ -49,7 +49,6 @@ linters:
     - nilnesserr
     - nilnil
     - noctx
-    - nolintlint
     - nosprintfhostport
     - paralleltest
     - prealloc
@@ -74,19 +73,17 @@ linters:
     - unparam
     - usestdlibvars
     - usetesting
-    - wastedassign
-    - wrapcheck
     - zerologlint
   settings:
+    tagliatelle:
+      case:
+        rules:
+          yaml: snake
     exhaustive:
       default-signifies-exhaustive: true
     exhaustruct:
+      allow-empty-returns: true
       exclude:
-        - .*iiko_api.*
-        - .*api.AgentMessage*
-        - .*api.PilotPayload*
-        - .*internalOrderCtx*
-        - .*mdcData.*
         - .*500JSONResponse
         - .*404JSONResponse
         - .*403JSONResponse
@@ -100,10 +97,10 @@ linters:
         - .*recover.Config.*
         - .*openapi3filter.Options.*
         - .+fibermiddleware.Options.*
-        - .*bot.*Params.*
-        - .*LogConfig.*
-        - .*slogtelegram.Option.*
-        - .*slogloki.Option.*
+        - .*slog-telegram.*
+        - .*console-slog.*
+        - .*sentry.*
+        - .*cobra.*
   exclusions:
     generated: lax
     presets:
