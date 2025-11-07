@@ -113,7 +113,11 @@ func runBot(_ *cobra.Command, _ []string) {
 		cancel()
 	}()
 
-	<-appCtx.Done()
+	if err = do.MustInvoke[*twitch_irc.Client](di).Connect(); err != nil {
+		slog.Error("Failed to run irc client",
+			slog.Any("error", err),
+		)
+	}
 
 	slog.Info("Waiting for services to finish...")
 	_ = di.Shutdown()

@@ -61,7 +61,9 @@ type Alert struct {
 	// List of alert entries
 	List []AlertEntry `yaml:"list" validate:"required"`
 	// List of usernames to exclude
-	ExcludeUsernames []string `yaml:"exclude_usernames" validate:"required"`
+	ExcludeUsernames []string `yaml:"exclude_usernames"`
+	// List of channels to monitor even if they are offline
+	PermanentChannels []string `yaml:"permanent_channels"`
 }
 
 func Load(configPath string) (*Config, error) {

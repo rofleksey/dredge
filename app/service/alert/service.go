@@ -89,4 +89,8 @@ func (s *Service) handleMessage(channel, username, _, text string, _ map[string]
 
 func (s *Service) Init() {
 	s.ircClient.SetListener(s.handleMessage)
+
+	for _, streamName := range s.cfg.Alert.PermanentChannels {
+		s.ircClient.JoinChannel(streamName)
+	}
 }

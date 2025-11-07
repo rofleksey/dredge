@@ -4,6 +4,7 @@ import (
 	"context"
 	"dredge/app/client/twitch_api"
 	"dredge/app/client/twitch_irc"
+	"dredge/app/config"
 	"dredge/app/util/telemetry"
 	"fmt"
 	"log/slog"
@@ -19,6 +20,7 @@ import (
 var serviceName = "twitch"
 
 type Service struct {
+	cfg       *config.Config
 	tracing   *telemetry.Tracing
 	apiClient *twitch_api.Client
 	ircClient *twitch_irc.Client
@@ -28,6 +30,7 @@ type Service struct {
 
 func New(di *do.Injector) (*Service, error) {
 	return &Service{
+		cfg:           do.MustInvoke[*config.Config](di),
 		tracing:       do.MustInvoke[*telemetry.Tracing](di),
 		apiClient:     do.MustInvoke[*twitch_api.Client](di),
 		ircClient:     do.MustInvoke[*twitch_irc.Client](di),
@@ -64,6 +67,10 @@ func (s *Service) doFetch(ctx context.Context) error {
 			return oops.Errorf("fetchAllLiveStreams: context canceled")
 		case <-time.After(3 * time.Second):
 		}
+	}
+
+	for _, streamName := range s.cfg.Alert.PermanentChannels {
+		newChannelMap[streamName] = struct{}{}
 	}
 
 	slog.Debug("Fetch finished",
