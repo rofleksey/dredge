@@ -1,0 +1,56 @@
+:root {
+  --bg-base: #0e0e10;
+  --bg-elevated: #18181b;
+  --bg-hover: #26262c;
+  --border: #2f2f35;
+  --text: #efeff1;
+  --text-muted: #adadb8;
+  --accent: #9147ff;
+  --accent-bright: #bf94ff;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  min-height: 100%;
+  color: var(--text);
+  font-family:
+    'Inter',
+    'Roobert',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  height: 100dvh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn-submit-spinner {
+  flex-shrink: 0;
+  width: 0.9em;
+  height: 0.9em;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  animation: btn-spin 0.55s linear infinite;
+}

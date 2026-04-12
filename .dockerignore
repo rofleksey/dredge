@@ -1,0 +1,30 @@
+# Largely aligned with .gitignore. Intentional differences (must stay in the build context):
+# - internal/transport/http/gen/ — NOT ignored: Dockerfile does not run `make gen`; the image build needs ogen output present on disk.
+# - config.yaml — NOT ignored: final stage COPY expects it (local secret file; still shipped into the image by that Dockerfile).
+
+.git
+**/.git
+
+bin/
+dist/
+.idea/
+.vscode/
+.cursor/
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+internal/gen/
+**/mocks/
+
+# Web UI: omit host-built assets; keep .gitkeep so the tree exists before the frontend stage COPY.
+internal/webui/static/*
+!internal/webui/static/.gitkeep
+
+# Frontend (see also frontend/.gitignore): deps and host output — npm ci / npm run build run in the image.
+**/node_modules
+frontend/dist
+frontend/dist-ssr
+frontend/logs
+**/*.local

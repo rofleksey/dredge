@@ -1,0 +1,32 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - ineffassign
+    - unused
+    - wsl_v5
+  settings:
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 10
+  exclusions:
+    paths:
+      - internal/transport/http/gen/.*\.go$
+      - internal/gen/.*\.go$
+      - .*/mocks/.*\.go$
+
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    paths:
+      - internal/transport/http/gen/.*\.go$
+      - internal/gen/.*\.go$
+      - .*/mocks/.*\.go$

@@ -1,0 +1,1754 @@
+openapi: 3.0.3
+info:
+  title: Dredge API
+  version: 0.1.0
+  description: |
+    WebSocket (live events): GET `/ws` with header `Authorization: Bearer <JWT>`,
+    or query `?token=<JWT>` (required for browser WebSockets that cannot set headers).
+    Upgrade is handled outside this OpenAPI surface; clients should connect to the same base URL as `servers`.
+servers:
+  - url: http://localhost:8080
+paths:
+  /auth/login:
+    post:
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Unauthorized
+  /me:
+    get:
+      operationId: me
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "401":
+          description: Unauthorized
+  /settings/twitch-users:
+    get:
+      operationId: listTwitchUsers
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Twitch users (streamers/channels); monitored flag controls IRC monitoring
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TwitchUser"
+    post:
+      operationId: createTwitchUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTwitchUserRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TwitchUser"
+        "400":
+          description: Invalid request (e.g. unknown Twitch channel)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/twitch-users/update:
+    post:
+      operationId: updateTwitchUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTwitchUserPostRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TwitchUser"
+        "404":
+          description: Twitch user not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/channel-blacklist:
+    get:
+      operationId: listChannelBlacklist
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Blacklisted channel logins (lowercase)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      operationId: setChannelBlacklist
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelBlacklistChange"
+      responses:
+        "204":
+          description: Updated
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/suspicion-settings:
+    get:
+      operationId: getSuspicionSettings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Suspicion thresholds
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuspicionSettings"
+    patch:
+      operationId: updateSuspicionSettings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SuspicionSettings"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuspicionSettings"
+  /settings/rules:
+    get:
+      operationId: listRules
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Rule list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rule"
+    post:
+      operationId: createRule
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRuleRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rule"
+  /settings/rules/count:
+    get:
+      operationId: countRules
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Total rule count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountResponse"
+  /settings/rules/update:
+    post:
+      operationId: updateRule
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRulePostRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rule"
+        "404":
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/rules/delete:
+    post:
+      operationId: deleteRule
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteByIDRequest"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/notifications:
+    get:
+      operationId: listNotifications
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Notification entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NotificationEntry"
+    post:
+      operationId: createNotification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNotificationRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationEntry"
+  /settings/notifications/update:
+    post:
+      operationId: updateNotification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNotificationPostRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationEntry"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/notifications/delete:
+    post:
+      operationId: deleteNotification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteByIDRequest"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/twitch-accounts:
+    get:
+      operationId: listTwitchAccounts
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Twitch accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TwitchAccount"
+    post:
+      operationId: createTwitchAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTwitchAccountRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TwitchAccount"
+  /settings/twitch-accounts/count:
+    get:
+      operationId: countTwitchAccounts
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Active Twitch account count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountResponse"
+  /settings/twitch-accounts/update:
+    post:
+      operationId: updateTwitchAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTwitchAccountPostRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TwitchAccount"
+        "404":
+          description: Twitch account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/twitch-accounts/delete:
+    post:
+      operationId: deleteTwitchAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteByIDRequest"
+      responses:
+        "204":
+          description: Deleted (soft)
+        "404":
+          description: Twitch account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/twitch-accounts/oauth/start:
+    post:
+      operationId: startTwitchOAuth
+      summary: Start Twitch authorization (browser) to link an account without pasting a refresh token
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartTwitchOAuthRequest"
+      responses:
+        "200":
+          description: Open this URL in a browser to authorize on Twitch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartTwitchOAuthResponse"
+  /twitch/send:
+    post:
+      operationId: sendMessage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientNotice"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientNotice"
+        "422":
+          description: Send failed (e.g. token or IRC)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientNotice"
+        "502":
+          description: Upstream or connection failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientNotice"
+  /twitch/chat/history:
+    get:
+      operationId: listChatHistory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: channel
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        "200":
+          description: Recent chat messages for the channel (oldest first)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatHistoryEntry"
+        "404":
+          description: Channel is not monitored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/messages:
+    get:
+      operationId: listTwitchMessages
+      security:
+        - bearerAuth: []
+      description: Search persisted chat messages (newest first). Omit filters to list recent messages.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor_created_at
+          in: query
+          description: Keyset cursor; use with cursor_id from the last message of the previous page
+          schema:
+            type: string
+            format: date-time
+        - name: cursor_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: username
+          in: query
+          description: Filter by chatter login (substring match, case-insensitive)
+          schema:
+            type: string
+        - name: text
+          in: query
+          description: Filter by message body (substring match, case-insensitive)
+          schema:
+            type: string
+        - name: channel
+          in: query
+          description: Filter by channel login
+          schema:
+            type: string
+        - name: created_from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: created_to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: chatter_user_id
+          in: query
+          description: Filter by Twitch numeric user id of the chatter
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Matching messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatHistoryEntry"
+  /twitch/messages/count:
+    get:
+      operationId: countTwitchMessages
+      security:
+        - bearerAuth: []
+      description: Count messages matching the same filters as list (ignores limit/cursor).
+      parameters:
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: text
+          in: query
+          schema:
+            type: string
+        - name: channel
+          in: query
+          schema:
+            type: string
+        - name: created_from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: created_to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: chatter_user_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountResponse"
+  /twitch/users:
+    get:
+      operationId: listTwitchDirectoryUsers
+      security:
+        - bearerAuth: []
+      description: List known Twitch users (chatters and channels) for directory search
+      parameters:
+        - name: username
+          in: query
+          description: Substring match on login (case-insensitive)
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor_id
+          in: query
+          description: Keyset cursor (with cursor_marked when paging)
+          schema:
+            type: integer
+            format: int64
+        - name: cursor_marked
+          in: query
+          description: Marked flag from the last row of the previous page
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Users (marked first, then id desc)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TwitchUser"
+  /twitch/users/count:
+    get:
+      operationId: countTwitchDirectoryUsers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: username
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountResponse"
+  /twitch/users/profile:
+    post:
+      operationId: getTwitchUserProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetTwitchUserProfileRequest"
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TwitchUserProfile"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/channels/live:
+    post:
+      operationId: getChannelLive
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetChannelLiveRequest"
+      responses:
+        "200":
+          description: Channel profile and live state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChannelLive"
+        "404":
+          description: Unknown channel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/channels/chatters:
+    post:
+      operationId: listChannelChatters
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListChannelChattersRequest"
+      responses:
+        "200":
+          description: Chat participants from the IRC-maintained channel_chatters snapshot
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChannelChatterEntry"
+        "404":
+          description: Twitch account or channel not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/watch/hints:
+    get:
+      operationId: getWatchUiHints
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: SPA polling intervals derived from server config
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchUiHints"
+  /twitch/irc-monitor/status:
+    get:
+      operationId: getIrcMonitorStatus
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: In-memory IRC monitor connection and per-channel join state (not persisted)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IrcMonitorStatus"
+  /twitch/streams:
+    get:
+      operationId: listRecordedStreams
+      security:
+        - bearerAuth: []
+      description: Recorded stream sessions for monitored channels (newest first)
+      parameters:
+        - name: channel_login
+          in: query
+          description: Filter by channel login
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor_started_at
+          in: query
+          description: Keyset cursor; use with cursor_id from the last row of the previous page
+          schema:
+            type: string
+            format: date-time
+        - name: cursor_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Streams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecordedStream"
+  /twitch/streams/{streamId}:
+    get:
+      operationId: getRecordedStream
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Stream metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordedStream"
+        "404":
+          description: Stream not found or channel not monitored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/streams/{streamId}/messages:
+    get:
+      operationId: listRecordedStreamMessages
+      security:
+        - bearerAuth: []
+      description: Chat messages tagged with this stream (newest first)
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor_created_at
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: cursor_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: text
+          in: query
+          schema:
+            type: string
+        - name: chatter_user_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatHistoryEntry"
+        "404":
+          description: Stream not found or channel not monitored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/streams/{streamId}/activity:
+    get:
+      operationId: listRecordedStreamActivity
+      security:
+        - bearerAuth: []
+      description: Non-message activity in the stream time window (newest first)
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor_created_at
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: cursor_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Activity events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserActivityEvent"
+        "404":
+          description: Stream not found or channel not monitored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/streams/{streamId}/leaderboard:
+    get:
+      operationId: getRecordedStreamLeaderboard
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: sort
+          in: query
+          schema:
+            $ref: "#/components/schemas/StreamLeaderboardSort"
+        - name: q
+          in: query
+          description: Filter chatter login (substring, case-insensitive)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leaderboard rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StreamLeaderboardEntry"
+        "404":
+          description: Stream not found or channel not monitored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/users/activity:
+    post:
+      operationId: listTwitchUserActivity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListTwitchUserActivityRequest"
+      responses:
+        "200":
+          description: Activity events (newest first)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserActivityEvent"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /twitch/users/activity/timeline:
+    post:
+      operationId: getTwitchUserActivityTimeline
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetTwitchUserActivityTimelineRequest"
+      responses:
+        "200":
+          description: Merged chat presence intervals in the window
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityTimelineSegment"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CountResponse:
+      type: object
+      required: [total]
+      properties:
+        total:
+          type: integer
+          format: int64
+    DeleteByIDRequest:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+    UpdateTwitchUserPostRequest:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+        monitored:
+          type: boolean
+        marked:
+          type: boolean
+        is_sus:
+          type: boolean
+        sus_type:
+          type: string
+          nullable: true
+        sus_description:
+          type: string
+          nullable: true
+        sus_auto_suppressed:
+          type: boolean
+          description: Set true when clearing suspicion to block automatic re-marking; set false to allow auto detection again
+    UpdateRulePostRequest:
+      type: object
+      required: [id, regex, included_users, denied_users, included_channels, denied_channels]
+      properties:
+        id:
+          type: integer
+          format: int64
+        regex:
+          type: string
+        included_users:
+          type: string
+        denied_users:
+          type: string
+        included_channels:
+          type: string
+        denied_channels:
+          type: string
+    UpdateNotificationPostRequest:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+        provider:
+          type: string
+          enum: [telegram, webhook]
+        settings:
+          type: object
+          additionalProperties: true
+        enabled:
+          type: boolean
+    UpdateTwitchAccountPostRequest:
+      type: object
+      required: [id, account_type]
+      properties:
+        id:
+          type: integer
+          format: int64
+        account_type:
+          type: string
+          enum: [main, bot]
+    GetTwitchUserProfileRequest:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+    GetChannelLiveRequest:
+      type: object
+      required: [login]
+      properties:
+        login:
+          type: string
+    ListTwitchUserActivityRequest:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+        cursor_created_at:
+          type: string
+          format: date-time
+        cursor_id:
+          type: integer
+          format: int64
+    GetTwitchUserActivityTimelineRequest:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+        from:
+          type: string
+          format: date-time
+          description: Range start (RFC3339). Defaults to 7 days before `to`.
+        to:
+          type: string
+          format: date-time
+          description: Range end (RFC3339). Defaults to now.
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+    Account:
+      type: object
+      required: [id, email, role]
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        role:
+          type: string
+    TwitchUser:
+      type: object
+      required: [id, username, monitored, marked, is_sus, sus_auto_suppressed]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Twitch numeric user id
+        username:
+          type: string
+          description: Canonical Twitch login (lowercase)
+        monitored:
+          type: boolean
+          description: When true, this channel is joined for IRC monitoring and keyword alerts
+        marked:
+          type: boolean
+        is_sus:
+          type: boolean
+        sus_type:
+          type: string
+          nullable: true
+        sus_description:
+          type: string
+          nullable: true
+        sus_auto_suppressed:
+          type: boolean
+          description: When true, automatic suspicion will not mark this user until cleared in settings
+    TwitchUserProfile:
+      type: object
+      required: [id, username, monitored, marked, message_count, presence_seconds_this_week, is_sus, sus_auto_suppressed, followed_channels, channel_blacklist]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Twitch numeric user id
+        username:
+          type: string
+        monitored:
+          type: boolean
+        marked:
+          type: boolean
+        is_sus:
+          type: boolean
+        sus_type:
+          type: string
+          nullable: true
+        sus_description:
+          type: string
+          nullable: true
+        sus_auto_suppressed:
+          type: boolean
+        message_count:
+          type: integer
+          format: int64
+          description: Number of persisted chat messages attributed to this user as chatter
+        presence_seconds_this_week:
+          type: integer
+          format: int64
+          description: Sum of IRC chat presence intervals since Monday 00:00 UTC this week
+        account_created_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Twitch account creation time from Helix (when populated by enrichment)
+        followed_monitored_channels:
+          type: array
+          items:
+            $ref: "#/components/schemas/FollowedMonitoredChannel"
+        followed_channels:
+          type: array
+          description: Full list of channels this user follows (from GQL enrichment)
+          items:
+            $ref: "#/components/schemas/FollowedChannelEntry"
+        channel_blacklist:
+          type: array
+          description: Current global blacklist (for client-side pinning and filtering)
+          items:
+            type: string
+    FollowedMonitoredChannel:
+      type: object
+      required: [channel_id, channel_login]
+      properties:
+        channel_id:
+          type: integer
+          format: int64
+        channel_login:
+          type: string
+        followed_at:
+          type: string
+          format: date-time
+          nullable: true
+    FollowedChannelEntry:
+      type: object
+      required: [channel_id, channel_login, on_blacklist]
+      properties:
+        channel_id:
+          type: integer
+          format: int64
+        channel_login:
+          type: string
+        followed_at:
+          type: string
+          format: date-time
+          nullable: true
+        on_blacklist:
+          type: boolean
+          description: True when this followed channel login is on the global blacklist
+    SuspicionSettings:
+      type: object
+      required:
+        - auto_check_account_age
+        - account_age_sus_days
+        - auto_check_blacklist
+        - auto_check_low_follows
+        - low_follows_threshold
+        - max_gql_follow_pages
+      properties:
+        auto_check_account_age:
+          type: boolean
+        account_age_sus_days:
+          type: integer
+          description: Accounts newer than this many days are suspicious
+        auto_check_blacklist:
+          type: boolean
+        auto_check_low_follows:
+          type: boolean
+        low_follows_threshold:
+          type: integer
+          description: Suspicious when total follow count is strictly below this value
+        max_gql_follow_pages:
+          type: integer
+          description: Safety cap when paginating GQL follows per user (default 1 page)
+    ChannelBlacklistChange:
+      type: object
+      required: [login, add]
+      properties:
+        login:
+          type: string
+        add:
+          type: boolean
+          description: When true, add to blacklist; when false, remove
+    ListChannelChattersRequest:
+      type: object
+      required: [account_id, login]
+      properties:
+        account_id:
+          type: integer
+          format: int64
+          description: Twitch OAuth account id (must exist; used for consistency with other channel APIs)
+        login:
+          type: string
+          description: Channel login
+        session_started_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When set, message_count is the number of persisted chat lines per chatter since this time (e.g. current stream started_at)
+    ChannelChatterEntry:
+      type: object
+      required: [login, user_twitch_id, present_since]
+      properties:
+        login:
+          type: string
+          description: Chatter login (lowercase)
+        user_twitch_id:
+          type: integer
+          format: int64
+        present_since:
+          type: string
+          format: date-time
+          description: When this chatter was first seen in the channel for the current stretch (IRC JOIN or NAMES sync)
+        account_created_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Twitch account creation from Helix when enrichment has populated it
+        message_count:
+          type: integer
+          format: int64
+          nullable: true
+          description: Populated when session_started_at was sent in the request
+    RecordedStream:
+      type: object
+      required: [id, channel_id, channel_login, helix_stream_id, started_at, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        channel_id:
+          type: integer
+          format: int64
+          description: twitch_users.id of the broadcaster
+        channel_login:
+          type: string
+        helix_stream_id:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Null while the broadcast is still live
+        title:
+          type: string
+          nullable: true
+        game_name:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    StreamLeaderboardSort:
+      type: string
+      enum:
+        - presence_desc
+        - presence_asc
+        - messages_desc
+        - messages_asc
+        - login_az
+        - login_za
+        - account_new
+        - account_old
+    StreamLeaderboardEntry:
+      type: object
+      required: [login, user_twitch_id, presence_seconds, message_count]
+      properties:
+        login:
+          type: string
+        user_twitch_id:
+          type: integer
+          format: int64
+        presence_seconds:
+          type: integer
+          format: int64
+        message_count:
+          type: integer
+          format: int64
+        account_created_at:
+          type: string
+          format: date-time
+          nullable: true
+    WatchUiHints:
+      type: object
+      required: [viewer_poll_interval_seconds, channel_chatters_sync_interval_seconds]
+      properties:
+        viewer_poll_interval_seconds:
+          type: integer
+          format: int64
+          description: How often the watch UI should refresh Helix stream metadata (viewer count, live state)
+        channel_chatters_sync_interval_seconds:
+          type: integer
+          format: int64
+          description: How often the server refreshes IRC NAMES into channel_chatters
+    IrcMonitorStatus:
+      type: object
+      required: [connected, channels]
+      properties:
+        connected:
+          type: boolean
+          description: IRC monitor TCP session is connected
+        channels:
+          type: array
+          items:
+            type: object
+            required: [login, irc_ok]
+            properties:
+              login:
+                type: string
+              irc_ok:
+                type: boolean
+                description: True after the monitor has received self-JOIN for this channel
+    ChannelLive:
+      type: object
+      required: [broadcaster_id, broadcaster_login, display_name, profile_image_url, is_live]
+      properties:
+        broadcaster_id:
+          type: integer
+          format: int64
+        broadcaster_login:
+          type: string
+        display_name:
+          type: string
+        profile_image_url:
+          type: string
+        is_live:
+          type: boolean
+        title:
+          type: string
+          nullable: true
+        game_name:
+          type: string
+          nullable: true
+        viewer_count:
+          type: integer
+          format: int64
+          nullable: true
+        channel_chatter_count:
+          type: integer
+          format: int64
+          nullable: true
+          description: >
+            Count of users in the IRC-maintained chat snapshot (channel_chatters).
+            Compare to viewer_count for the delta shown in the watch UI.
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+    UserActivityEvent:
+      type: object
+      required: [id, username, event_type, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+          description: Chatter login (profile user)
+        event_type:
+          type: string
+          enum: [chat_online, chat_offline, message]
+        channel:
+          type: string
+          description: Channel login when event is tied to a channel
+          nullable: true
+        details:
+          type: object
+          additionalProperties: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    ActivityTimelineSegment:
+      type: object
+      required: [channel_id, channel_login, start, end]
+      properties:
+        channel_id:
+          type: integer
+          format: int64
+        channel_login:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+    CreateTwitchUserRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: Channel login or display name; resolved via Twitch Helix
+    UpdateTwitchUserRequest:
+      type: object
+      properties:
+        monitored:
+          type: boolean
+        marked:
+          type: boolean
+    ErrorMessage:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+    ClientNotice:
+      type: object
+      required: [severity, code, message]
+      properties:
+        severity:
+          type: string
+          enum: [error, warning]
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    Rule:
+      type: object
+      required: [id, regex, included_users, denied_users, included_channels, denied_channels]
+      properties:
+        id:
+          type: integer
+          format: int64
+        regex:
+          type: string
+        included_users:
+          type: string
+        denied_users:
+          type: string
+        included_channels:
+          type: string
+        denied_channels:
+          type: string
+    CreateRuleRequest:
+      type: object
+      required: [regex]
+      properties:
+        regex:
+          type: string
+        included_users:
+          type: string
+          default: "*"
+        denied_users:
+          type: string
+          default: ""
+        included_channels:
+          type: string
+          default: "*"
+        denied_channels:
+          type: string
+          default: ""
+    UpdateRuleRequest:
+      type: object
+      required: [regex, included_users, denied_users, included_channels, denied_channels]
+      properties:
+        regex:
+          type: string
+        included_users:
+          type: string
+        denied_users:
+          type: string
+        included_channels:
+          type: string
+        denied_channels:
+          type: string
+    NotificationEntry:
+      type: object
+      required: [id, provider, settings, enabled, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        provider:
+          type: string
+          enum: [telegram, webhook]
+        settings:
+          type: object
+          additionalProperties: true
+        enabled:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    CreateNotificationRequest:
+      type: object
+      required: [provider, settings]
+      properties:
+        provider:
+          type: string
+          enum: [telegram, webhook]
+        settings:
+          type: object
+          additionalProperties: true
+        enabled:
+          type: boolean
+          default: true
+    UpdateNotificationRequest:
+      type: object
+      properties:
+        provider:
+          type: string
+          enum: [telegram, webhook]
+        settings:
+          type: object
+          additionalProperties: true
+        enabled:
+          type: boolean
+    TwitchAccount:
+      type: object
+      required: [id, username, account_type, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        account_type:
+          type: string
+          enum: [main, bot]
+        created_at:
+          type: string
+          format: date-time
+    CreateTwitchAccountRequest:
+      type: object
+      required: [id, username, refresh_token]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Twitch user id for this OAuth identity (same as Helix user id)
+        username:
+          type: string
+        refresh_token:
+          type: string
+        account_type:
+          type: string
+          enum: [main, bot]
+          default: main
+    UpdateTwitchAccountRequest:
+      type: object
+      required: [account_type]
+      properties:
+        account_type:
+          type: string
+          enum: [main, bot]
+    StartTwitchOAuthRequest:
+      type: object
+      properties:
+        return_url:
+          type: string
+          description: >
+            Optional SPA URL to open after OAuth (same scheme/host/port as configured twitch.oauth_return_url).
+            For hash routers, include the route in the fragment (e.g. http://localhost/#/settings?t=1).
+    StartTwitchOAuthResponse:
+      type: object
+      required: [authorize_url]
+      properties:
+        authorize_url:
+          type: string
+          description: Twitch authorize URL; redirect the user here (e.g. window.location.assign)
+    SendMessageRequest:
+      type: object
+      required: [account_id, channel, message]
+      properties:
+        account_id:
+          type: integer
+          format: int64
+        channel:
+          type: string
+        message:
+          type: string
+    ChatHistoryEntry:
+      type: object
+      required: [id, channel, user, message, keyword_match, chatter_marked, chatter_is_sus, source, created_at, badge_tags]
+      properties:
+        id:
+          type: integer
+          format: int64
+        channel:
+          type: string
+          description: Channel login where the message appeared
+        user:
+          type: string
+        chatter_user_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: Twitch user id of the chatter when known
+        chatter_marked:
+          type: boolean
+          description: Whether the chatter is marked in dredge
+        chatter_is_sus:
+          type: boolean
+          description: Whether the chatter is flagged as suspicious
+        message:
+          type: string
+        keyword_match:
+          type: boolean
+        source:
+          type: string
+          description: "irc: observed in chat; sent: posted via dredge"
+          enum: [irc, sent]
+        created_at:
+          type: string
+          format: date-time
+        badge_tags:
+          type: array
+          description: Twitch chat roles / badges for display (e.g. mod, VIP, verified bot, other badges)
+          items:
+            type: string
+            enum: [moderator, vip, bot, other]

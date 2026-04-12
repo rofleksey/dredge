@@ -1,0 +1,42 @@
+server:
+  address: ":8080"
+  # Public web UI origin (CORS + WebSocket Origin); no path or fragment.
+  base_url: "http://localhost:5173"
+  # Prometheus metrics listen address only (main server does not expose /metrics).
+  metrics_address: ":9090"
+  # POST /auth/login attempts per client IP per rolling minute (0 = unlimited).
+  login_rate_limit_per_minute: 10
+database:
+  dsn: "postgres://postgres:postgres@127.0.0.1:5432/dredge?sslmode=disable"
+  # Optional pool tuning (omit to use pgx defaults).
+  # max_conns: 25
+  # min_conns: 0
+jwt:
+  secret: "change-me-very-secret-key"
+  ttl: "24h"
+admin:
+  email: "owner@example.com"
+  password: "change-me-admin-password"
+twitch:
+  client_id: "replace-me"
+  client_secret: "replace-me"
+  # Register this exact URL as an OAuth Redirect URL in the Twitch app (dev vs prod).
+  oauth_redirect_uri: "http://localhost:8080/oauth/twitch/callback"
+  # Browser URL after Twitch redirects back (SPA with hash routing: …/#/settings).
+  oauth_return_url: "http://localhost:5173/#/settings"
+  # Daily Helix enrichment (account created_at, follow times) — UTC, robfig/cron v3 syntax.
+  enrichment_cron: "0 3 * * *"
+  # How often the watch UI should poll Helix for stream metadata (viewer count, live). Default 10s.
+  viewer_poll_interval: 10s
+  # How often IRC NAMES lists are merged into channel_chatters. Default 10s.
+  channel_chatters_sync_interval: 10s
+  # How often the backend polls Helix to record stream sessions (default: same as viewer_poll_interval).
+  stream_session_poll_interval: 10s
+observability:
+  service_name: "dredge-backend"
+  log_level: "debug"
+  sentry_dsn: ""
+  # none: human-readable console only. otlp: also send logs via OTLP/HTTP (see OTEL_EXPORTER_OTLP_*).
+  log_exporter: "none"
+  # none: no trace export (recommended for local). stdout: dump spans as JSON to stderr (very noisy).
+  trace_exporter: "none"

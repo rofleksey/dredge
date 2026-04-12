@@ -1,0 +1,36 @@
+---
+description: Dredge project layout, tooling, and boundaries
+alwaysApply: true
+---
+
+# Dredge
+
+- **Module:** `github.com/rofleksey/dredge` (Go 1.25+).
+- **App entry:** `cmd/dredge/main.go`. **DI / wiring:** `internal/app/fx.go` (uber/fx).
+
+## Layout
+
+- **HTTP API:** OpenAPI in `api/openapi.yaml`; **ogen** output in `internal/transport/http/gen` — do not hand-edit generated files.
+- **Handlers:** `internal/transport/http/server.go` (`Handler`, `Security`) — implement generated interfaces and return `gen.*` response types.
+- **Services:** `internal/service/{auth,settings,twitch}`; small interfaces in each `types.go`; mocks under `**/mocks/` (generated).
+- **DB:** `internal/repository/postgres`, SQL migrations in `migrations/`.
+- **WebSocket:** `internal/transport/ws`.
+- **Observability:** `internal/observability` (zap, tracing, metrics).
+
+## Regeneration (never edit outputs by hand)
+
+- OpenAPI → Go: `make gen` (or `make generate`).
+- Mocks: `make mocks` after changing `internal/service/*/types.go` interfaces.
+
+## Config
+
+- Copy `config.example.yaml` to `config.yaml` locally; `config.yaml` is gitignored.
+
+## Checks
+
+- Tests: `make test`. Lint: `make lint` (golangci-lint; see `.golangci.yml`). Build: `make build`.
+
+## Testing (agents and contributors)
+
+- Add or extend **automated tests** for new functionality (services, routing, config parsing, pure helpers, etc.); follow existing patterns (`testing`, `testify`, table tests where appropriate).
+- Before finishing work, run **`make test`** and ensure **all tests pass**, including any tests that already existed in the branch.

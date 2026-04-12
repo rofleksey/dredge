@@ -1,0 +1,16 @@
+bin/
+dist/
+.idea/
+.vscode/
+*.log
+*.tmp
+*.swp
+.DS_Store
+internal/transport/http/gen/
+internal/gen/
+config.yaml
+**/mocks/
+
+# Web UI build output (populate via `make webui` / Makefile); keep directory with .gitkeep
+internal/webui/static/*
+!internal/webui/static/.gitkeep
