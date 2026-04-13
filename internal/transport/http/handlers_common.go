@@ -48,6 +48,7 @@ func chatHistoryEntityToGen(m entity.ChatHistoryMessage) gen.ChatHistoryEntry {
 		ChatterUserID: chatter,
 		ChatterMarked: m.ChatterMarked,
 		ChatterIsSus:  m.ChatterIsSus,
+		FirstMessage:  m.FirstMessage,
 		Message:       m.Message,
 		KeywordMatch:  m.KeywordMatch,
 		Source:        src,

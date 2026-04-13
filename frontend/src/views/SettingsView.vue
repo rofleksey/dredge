@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
@@ -49,6 +50,11 @@ const suspicionDraft = reactive<SuspicionSettings>({
 const newChannel = reactive({ name: '' });
 
 const ruleModalOpen = ref(false);
+const regexTestModalOpen = ref(false);
+const regexTestPattern = ref('');
+const regexTestSample = ref('');
+const regexTestMatches = ref<boolean | null>(null);
+const regexTestCompileError = ref<string | null>(null);
 const ruleDraft = reactive({
   regex: '',
   included_users: '*',
@@ -274,6 +280,39 @@ async function setChannelMonitored(id: number, monitored: boolean): Promise<void
       description: 'Could not update channel.',
     });
   }
+}
+
+const runRegexTestDebounced = useDebounceFn(async () => {
+  regexTestMatches.value = null;
+  regexTestCompileError.value = null;
+  try {
+    const res = await DefaultService.testRuleRegex({
+      requestBody: {
+        pattern: regexTestPattern.value,
+        sample: regexTestSample.value,
+      },
+    });
+    regexTestMatches.value = res.matches;
+    regexTestCompileError.value = res.compile_error ?? null;
+  } catch {
+    regexTestCompileError.value = 'Request failed';
+  }
+}, 320);
+
+watch([regexTestPattern, regexTestSample], () => {
+  if (!regexTestModalOpen.value) {
+    return;
+  }
+  void runRegexTestDebounced();
+});
+
+function openRegexTestModal(): void {
+  regexTestPattern.value = '';
+  regexTestSample.value = '';
+  regexTestMatches.value = null;
+  regexTestCompileError.value = null;
+  regexTestModalOpen.value = true;
+  void runRegexTestDebounced();
 }
 
 function openRuleModal(): void {
@@ -653,6 +692,7 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
         </ul>
         <p class="row-actions">
           <button type="button" class="btn-secondary" @click="openRuleModal">Add rule</button>
+          <button type="button" class="btn-secondary" @click="openRegexTestModal">Test regex</button>
         </p>
       </section>
 
@@ -796,6 +836,27 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
         </label>
       </section>
     </div>
+
+    <AppModal :open="regexTestModalOpen" title="Test regex" @close="regexTestModalOpen = false">
+      <div class="stack modal-form">
+        <label>
+          <span>Pattern</span>
+          <input v-model="regexTestPattern" autocomplete="off" placeholder="regular expression" />
+        </label>
+        <label>
+          <span>Sample text</span>
+          <textarea v-model="regexTestSample" rows="3" autocomplete="off" placeholder="string to match" />
+        </label>
+        <p v-if="regexTestCompileError" class="regex-test-err">{{ regexTestCompileError }}</p>
+        <p v-else-if="regexTestMatches !== null" class="regex-test-ok">
+          {{ regexTestMatches ? 'Matches.' : 'Does not match.' }}
+        </p>
+        <p v-else class="muted small">Enter a pattern and sample…</p>
+        <footer class="modal-actions">
+          <button type="button" class="btn-secondary" @click="regexTestModalOpen = false">Close</button>
+        </footer>
+      </div>
+    </AppModal>
 
     <AppModal :open="ruleModalOpen" title="New rule" @close="ruleModalOpen = false">
       <form class="stack modal-form" autocomplete="off" @submit.prevent="saveRuleModal">

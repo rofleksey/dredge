@@ -8,17 +8,10 @@ import (
 )
 
 func (h *Handler) ListChannelBlacklist(ctx context.Context) ([]string, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
 	return h.sett.ListChannelBlacklist(ctx)
 }
 
 func (h *Handler) SetChannelBlacklist(ctx context.Context, req *gen.ChannelBlacklistChange) (gen.SetChannelBlacklistRes, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	if err := h.sett.SetChannelBlacklist(ctx, req.Login, req.Add); err != nil {
 		return &gen.ErrorMessage{Message: err.Error()}, nil
 	}
@@ -27,10 +20,6 @@ func (h *Handler) SetChannelBlacklist(ctx context.Context, req *gen.ChannelBlack
 }
 
 func (h *Handler) GetSuspicionSettings(ctx context.Context) (*gen.SuspicionSettings, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	s, err := h.sett.GetSuspicionSettings(ctx)
 	if err != nil {
 		return nil, err
@@ -40,10 +29,6 @@ func (h *Handler) GetSuspicionSettings(ctx context.Context) (*gen.SuspicionSetti
 }
 
 func (h *Handler) UpdateSuspicionSettings(ctx context.Context, req *gen.SuspicionSettings) (*gen.SuspicionSettings, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	s := suspicionGenToEntity(req)
 
 	out, err := h.sett.UpdateSuspicionSettings(ctx, s)

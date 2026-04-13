@@ -145,24 +145,24 @@ func TestRepository_integration(t *testing.T) {
 	_, err = repo.UpdateNotificationEntry(ctx, notif.ID, entity.ToPointer("webhook"), map[string]any{"u": "x"}, entity.ToPointer(false))
 	require.NoError(t, err)
 
-	_, err = repo.InsertChatMessage(ctx, 0, nil, "x", "b", false, "irc", nil)
+	_, err = repo.InsertChatMessage(ctx, 0, nil, "x", "b", false, "irc", nil, false)
 	require.Error(t, err)
 
-	_, err = repo.InsertChatMessage(ctx, channelID, nil, "x", "b", false, "", nil)
+	_, err = repo.InsertChatMessage(ctx, channelID, nil, "x", "b", false, "", nil, false)
 	require.Error(t, err)
 
-	_, err = repo.InsertChatMessage(ctx, channelID, nil, "   ", "b", false, "irc", nil)
+	_, err = repo.InsertChatMessage(ctx, channelID, nil, "   ", "b", false, "irc", nil, false)
 	require.Error(t, err)
 
-	_, err = repo.InsertChatMessageForChannelLogin(ctx, "  ", nil, "u", "b", false, "irc", nil)
+	_, err = repo.InsertChatMessageForChannelLogin(ctx, "  ", nil, "u", "b", false, "irc", nil, false)
 	require.Error(t, err)
 
 	chatterPtr := chatterID
-	msgID, err := repo.InsertChatMessage(ctx, channelID, &chatterPtr, "chatter1", "hello world", true, "irc", []string{"moderator"})
+	msgID, err := repo.InsertChatMessage(ctx, channelID, &chatterPtr, "chatter1", "hello world", true, "irc", []string{"moderator"}, true)
 	require.NoError(t, err)
 	assert.Greater(t, msgID, int64(0))
 
-	_, err = repo.InsertChatMessageForChannelLogin(ctx, "channel1", &chatterPtr, "chatter1", "second", false, "irc", nil)
+	_, err = repo.InsertChatMessageForChannelLogin(ctx, "channel1", &chatterPtr, "chatter1", "second", false, "irc", nil, false)
 	require.NoError(t, err)
 
 	ok, err := repo.IsMonitoredChannel(ctx, "#channel1")

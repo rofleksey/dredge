@@ -25,6 +25,8 @@ const props = withDefaults(
     userIsSus?: boolean;
     /** Tooltip when suspicious (e.g. reason from live updates) */
     suspiciousTitle?: string;
+    /** Twitch first message in channel (IRC) */
+    firstMessage?: boolean;
   }>(),
   {
     createdAt: undefined,
@@ -35,6 +37,7 @@ const props = withDefaults(
     userMarked: false,
     userIsSus: false,
     suspiciousTitle: '',
+    firstMessage: false,
   },
 );
 
@@ -64,10 +67,12 @@ const timeLabel = computed(() => {
       kw: keyword,
       sent: fromSent && !keyword,
       marked: userMarked && !keyword,
+      'first-msg': firstMessage && !keyword,
     }"
   >
     <span v-if="timeLabel" class="ts">{{ timeLabel }}</span>
     <span v-if="showChannel && channelLogin" class="chan" title="Channel">#{{ channelLogin }}</span>
+    <span v-if="firstMessage" class="first-msg-pill" title="First message in this channel">1st</span>
     <span v-if="badgeStr" class="badges" aria-hidden="true">{{ badgeStr }}</span>
     <TwitchUserLink
       :login="user"
@@ -99,6 +104,24 @@ li {
     background: rgba(255, 193, 7, 0.1);
     border-left: 2px solid rgba(255, 193, 7, 0.55);
   }
+
+  &.first-msg:not(.kw) {
+    background: rgba(56, 189, 248, 0.08);
+    border-left: 2px solid rgba(56, 189, 248, 0.45);
+  }
+}
+
+.first-msg-pill {
+  display: inline-block;
+  margin-right: 0.25rem;
+  padding: 0.05rem 0.28rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent, #38bdf8);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 0.2rem;
+  vertical-align: middle;
 }
 
 .ts {

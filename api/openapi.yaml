@@ -286,6 +286,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
+  /settings/rules/test-regex:
+    post:
+      operationId: testRuleRegex
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestRuleRegexRequest"
+      responses:
+        "200":
+          description: Match result or compile error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestRuleRegexResponse"
   /settings/notifications:
     get:
       operationId: listNotifications
@@ -1777,9 +1795,27 @@ components:
           type: string
         message:
           type: string
+    TestRuleRegexRequest:
+      type: object
+      required: [pattern, sample]
+      properties:
+        pattern:
+          type: string
+        sample:
+          type: string
+    TestRuleRegexResponse:
+      type: object
+      required: [matches]
+      properties:
+        matches:
+          type: boolean
+        compile_error:
+          type: string
+          nullable: true
+          description: Set when the pattern does not compile
     ChatHistoryEntry:
       type: object
-      required: [id, channel, user, message, keyword_match, chatter_marked, chatter_is_sus, source, created_at, badge_tags]
+      required: [id, channel, user, message, keyword_match, chatter_marked, chatter_is_sus, first_message, source, created_at, badge_tags]
       properties:
         id:
           type: integer
@@ -1800,6 +1836,9 @@ components:
         chatter_is_sus:
           type: boolean
           description: Whether the chatter is flagged as suspicious
+        first_message:
+          type: boolean
+          description: Whether this was the chatter's first message in this channel (Twitch IRC)
         message:
           type: string
         keyword_match:

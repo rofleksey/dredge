@@ -41,6 +41,8 @@ export type { StartTwitchOAuthResponse } from './models/StartTwitchOAuthResponse
 export type { StreamLeaderboardEntry } from './models/StreamLeaderboardEntry';
 export { StreamLeaderboardSort } from './models/StreamLeaderboardSort';
 export type { SuspicionSettings } from './models/SuspicionSettings';
+export type { TestRuleRegexRequest } from './models/TestRuleRegexRequest';
+export type { TestRuleRegexResponse } from './models/TestRuleRegexResponse';
 export { TwitchAccount } from './models/TwitchAccount';
 export type { TwitchUser } from './models/TwitchUser';
 export type { TwitchUserProfile } from './models/TwitchUserProfile';

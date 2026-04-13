@@ -35,8 +35,8 @@ type Store interface {
 	GetTwitchAccountByTwitchUserID(ctx context.Context, twitchUserID int64) (entity.TwitchAccount, error)
 	UpdateTwitchRefreshToken(ctx context.Context, id int64, refreshToken string) error
 
-	InsertChatMessage(ctx context.Context, channelTwitchUserID int64, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string) (int64, error)
-	InsertChatMessageForChannelLogin(ctx context.Context, channelLogin string, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string) (int64, error)
+	InsertChatMessage(ctx context.Context, channelTwitchUserID int64, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string, firstMessage bool) (int64, error)
+	InsertChatMessageForChannelLogin(ctx context.Context, channelLogin string, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string, firstMessage bool) (int64, error)
 	UpsertTwitchUserFromChat(ctx context.Context, id int64, username string) (inserted bool, err error)
 	IsMonitoredChannel(ctx context.Context, channel string) (bool, error)
 	// MonitoredChannelTwitchUserID returns the twitch_users.id for a monitored channel by login (ok=false if not monitored).

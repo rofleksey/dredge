@@ -15,10 +15,6 @@ func (h *Handler) ListTwitchUsers(ctx context.Context) ([]gen.TwitchUser, error)
 	ctx, span := h.obs.StartSpan(ctx, "handler.list_twitch_users")
 	defer span.End()
 
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	list, err := h.sett.ListTwitchUsers(ctx)
 	if err != nil {
 		h.obs.LogError(ctx, span, "list twitch users failed", err)
@@ -36,10 +32,6 @@ func (h *Handler) ListTwitchUsers(ctx context.Context) ([]gen.TwitchUser, error)
 func (h *Handler) CreateTwitchUser(ctx context.Context, req *gen.CreateTwitchUserRequest) (gen.CreateTwitchUserRes, error) {
 	ctx, span := h.obs.StartSpan(ctx, "handler.create_twitch_user")
 	defer span.End()
-
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
 
 	resolved, err := h.twitch.ResolveChannel(ctx, req.Name)
 	if err != nil {
@@ -73,10 +65,6 @@ func (h *Handler) CreateTwitchUser(ctx context.Context, req *gen.CreateTwitchUse
 func (h *Handler) UpdateTwitchUser(ctx context.Context, req *gen.UpdateTwitchUserPostRequest) (gen.UpdateTwitchUserRes, error) {
 	ctx, span := h.obs.StartSpan(ctx, "handler.update_twitch_user")
 	defer span.End()
-
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
 
 	patch := entity.TwitchUserPatch{}
 

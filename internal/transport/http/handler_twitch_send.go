@@ -15,10 +15,6 @@ func (h *Handler) SendMessage(ctx context.Context, req *gen.SendMessageRequest) 
 	ctx, span := h.obs.StartSpan(ctx, "handler.send_message")
 	defer span.End()
 
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	err := h.twitch.SendMessage(ctx, req.AccountID, req.Channel, req.Message)
 	if err != nil {
 		h.obs.LogError(ctx, span, "send message failed", err, zap.Int64("account_id", req.AccountID), zap.String("channel", req.Channel))

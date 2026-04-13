@@ -11,10 +11,6 @@ import (
 )
 
 func (h *Handler) ListNotifications(ctx context.Context) ([]gen.NotificationEntry, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	list, err := h.sett.ListNotifications(ctx)
 	if err != nil {
 		return nil, err
@@ -29,10 +25,6 @@ func (h *Handler) ListNotifications(ctx context.Context) ([]gen.NotificationEntr
 }
 
 func (h *Handler) CreateNotification(ctx context.Context, req *gen.CreateNotificationRequest) (*gen.NotificationEntry, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	enabled := true
 	if req.Enabled.IsSet() {
 		enabled = req.Enabled.Value
@@ -49,10 +41,6 @@ func (h *Handler) CreateNotification(ctx context.Context, req *gen.CreateNotific
 }
 
 func (h *Handler) UpdateNotification(ctx context.Context, req *gen.UpdateNotificationPostRequest) (gen.UpdateNotificationRes, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	var prov *string
 
 	if req.Provider.IsSet() {
@@ -86,10 +74,6 @@ func (h *Handler) UpdateNotification(ctx context.Context, req *gen.UpdateNotific
 }
 
 func (h *Handler) DeleteNotification(ctx context.Context, req *gen.DeleteByIDRequest) (gen.DeleteNotificationRes, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	if err := h.sett.DeleteNotification(ctx, req.ID); err != nil {
 		if errors.Is(err, entity.ErrNotificationNotFound) {
 			return &gen.ErrorMessage{Message: "notification not found"}, nil

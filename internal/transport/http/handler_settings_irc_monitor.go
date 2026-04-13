@@ -9,10 +9,6 @@ import (
 )
 
 func (h *Handler) GetIrcMonitorSettings(ctx context.Context) (*gen.IrcMonitorSettings, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	s, err := h.sett.GetIrcMonitorSettings(ctx)
 	if err != nil {
 		return nil, err
@@ -22,10 +18,6 @@ func (h *Handler) GetIrcMonitorSettings(ctx context.Context) (*gen.IrcMonitorSet
 }
 
 func (h *Handler) UpdateIrcMonitorSettings(ctx context.Context, req *gen.IrcMonitorSettings) (*gen.IrcMonitorSettings, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	in := ircMonitorGenToEntity(req)
 
 	out, err := h.sett.UpdateIrcMonitorSettings(ctx, in)

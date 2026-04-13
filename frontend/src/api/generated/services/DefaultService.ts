@@ -32,6 +32,8 @@ import type { StartTwitchOAuthResponse } from '../models/StartTwitchOAuthRespons
 import type { StreamLeaderboardEntry } from '../models/StreamLeaderboardEntry';
 import type { StreamLeaderboardSort } from '../models/StreamLeaderboardSort';
 import type { SuspicionSettings } from '../models/SuspicionSettings';
+import type { TestRuleRegexRequest } from '../models/TestRuleRegexRequest';
+import type { TestRuleRegexResponse } from '../models/TestRuleRegexResponse';
 import type { TwitchAccount } from '../models/TwitchAccount';
 import type { TwitchUser } from '../models/TwitchUser';
 import type { TwitchUserProfile } from '../models/TwitchUserProfile';
@@ -279,6 +281,22 @@ export class DefaultService {
             errors: {
                 404: `Rule not found`,
             },
+        });
+    }
+    /**
+     * @returns TestRuleRegexResponse Match result or compile error
+     * @throws ApiError
+     */
+    public static testRuleRegex({
+        requestBody,
+    }: {
+        requestBody: TestRuleRegexRequest,
+    }): CancelablePromise<TestRuleRegexResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/settings/rules/test-regex',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

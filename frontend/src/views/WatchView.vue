@@ -81,6 +81,7 @@ type ChatLine = {
   userIsSus: boolean;
   susTitle?: string;
   fromSent: boolean;
+  firstMessage: boolean;
   at: number;
   badgeTags: ChatBadgeTag[];
   createdAtIso?: string;
@@ -93,6 +94,18 @@ type ChatRow =
 
 function normCh(c: string): string {
   return c.replace(/^#/, '').toLowerCase();
+}
+
+/** Rejects error-shaped JSON bodies so we do not keep a stale LIVE strip when the API returns `{ message }`. */
+function parseChannelLivePayload(data: unknown): ChannelLive | null {
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+  const o = data as Record<string, unknown>;
+  if (typeof o.broadcaster_login !== 'string') {
+    return null;
+  }
+  return data as ChannelLive;
 }
 
 /** Prefer last opened channel from local storage when it is still a monitored channel or a valid manual login. */
@@ -214,8 +227,12 @@ function formatViewerDisplay(live: Pick<ChannelLive, 'viewer_count' | 'channel_c
   return `${v} (${sign}${d})`;
 }
 
-const viewerPollMs = computed(() => (watchHints.value?.viewer_poll_interval_seconds ?? 10) * 1000);
-const chattersSyncMs = computed(() => (watchHints.value?.channel_chatters_sync_interval_seconds ?? 10) * 1000);
+const viewerPollMs = computed(() =>
+  Math.max(1000, (watchHints.value?.viewer_poll_interval_seconds ?? 10) * 1000),
+);
+const chattersSyncMs = computed(() =>
+  Math.max(1000, (watchHints.value?.channel_chatters_sync_interval_seconds ?? 10) * 1000),
+);
 
 const onlineMonitored = computed(() =>
   [...monitoredSidebar.value.filter((f) => f.is_live)].sort((a, b) =>
@@ -311,8 +328,9 @@ async function refreshMonitoredSidebar(silent = false): Promise<void> {
     );
     monitoredSidebar.value = list.map((c, i) => {
       const live = results[i];
-      if (live && typeof live === 'object' && 'broadcaster_login' in live) {
-        return live as ChannelLive;
+      const parsed = parseChannelLivePayload(live);
+      if (parsed) {
+        return parsed;
       }
       return {
         broadcaster_id: c.id,
@@ -344,8 +362,11 @@ async function pollChannelLive(): Promise<void> {
   }
   try {
     const live = await DefaultService.getChannelLive({ requestBody: { login } });
-    if (live && typeof live === 'object' && 'broadcaster_login' in live) {
-      channelLive.value = live as ChannelLive;
+    const parsed = parseChannelLivePayload(live);
+    if (parsed) {
+      channelLive.value = parsed;
+    } else {
+      channelLive.value = null;
     }
   } catch {
     /* keep previous channelLive */
@@ -383,6 +404,7 @@ const displayLines = computed((): ChatLine[] => {
       userIsSus,
       susTitle: effectiveSuspicionTitle(uid, userIsSus, ov),
       fromSent: h.source === ChatHistoryEntry.source.SENT,
+      firstMessage: Boolean(h.first_message),
       at,
       badgeTags,
       createdAtIso: h.created_at,
@@ -417,6 +439,7 @@ const displayLines = computed((): ChatLine[] => {
         susTitle:
           e.type === 'chat_message' ? effectiveSuspicionTitle(uid, userIsSus, ov) : undefined,
         fromSent: e.type === 'message_sent',
+        firstMessage: e.type === 'chat_message' && Boolean(e.first_message),
         at,
         badgeTags,
         createdAtIso: e.created_at,
@@ -544,7 +567,8 @@ watch(
     const login = normCh(ch);
     loadingChannelMeta.value = true;
     try {
-      channelLive.value = await DefaultService.getChannelLive({ requestBody: { login } });
+      const live = await DefaultService.getChannelLive({ requestBody: { login } });
+      channelLive.value = parseChannelLivePayload(live);
     } catch {
       channelLive.value = null;
     } finally {
@@ -610,17 +634,21 @@ watch(viewerModalOpen, (open) => {
   resumeViewerModalPoll();
 });
 
-watch(
-  displayRows,
-  async () => {
-    await nextTick();
-    const el = chatEl.value;
-    if (el) {
-      el.scrollTop = el.scrollHeight;
-    }
-  },
-  { deep: true },
-);
+const chatScrollSig = computed(() => {
+  const lines = displayLines.value;
+  if (!lines.length) {
+    return '';
+  }
+  return `${lines.length}:${lines[lines.length - 1].key}`;
+});
+
+watch(chatScrollSig, async () => {
+  await nextTick();
+  const el = chatEl.value;
+  if (el) {
+    el.scrollTop = el.scrollHeight;
+  }
+});
 
 function selectChannel(raw: string): void {
   const login = normCh(raw);
@@ -831,6 +859,7 @@ async function sendChat(): Promise<void> {
               :user-is-sus="row.line.userIsSus"
               :suspicious-title="row.line.susTitle"
               :from-sent="row.line.fromSent"
+              :first-message="row.line.firstMessage"
               :badge-tags="row.line.badgeTags"
               :show-timestamp="false"
               :created-at="row.line.createdAtIso"

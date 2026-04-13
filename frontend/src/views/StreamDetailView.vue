@@ -367,6 +367,7 @@ function loadMoreActivity(): void {
               :created-at="m.created_at"
               :chatter-user-id="m.chatter_user_id ?? null"
               :highlight-channel="meta.channel_login"
+              :first-message="m.first_message"
             />
           </li>
         </ul>

@@ -40,13 +40,6 @@ func NewHandler(a *auth.Service, sett *settings.Service, t *twitchsvc.Service, o
 	return &Handler{auth: a, sett: sett, twitch: t, twitchOAuth: oauth, obs: obs}
 }
 
-func requireAdmin(ctx context.Context) error {
-	if role, _ := ctx.Value(roleCtxKey).(string); role != "admin" {
-		return ogenerrors.ErrSecurityRequirementIsNotSatisfied
-	}
-	return nil
-}
-
 // LiveWebsocketWelcomer supplies optional JSON payloads queued to the client right after a successful WS upgrade.
 type LiveWebsocketWelcomer interface {
 	LiveWebSocketWelcomePayloads(ctx context.Context) ([]any, error)
@@ -77,6 +70,11 @@ func LiveWebsocketHandler(authSvc *auth.Service, hub *ws.Hub, welcomer LiveWebso
 		userID, role, err := authSvc.ParseToken(r.Context(), token)
 		if err != nil || userID <= 0 || role == "" {
 			http.Error(w, "invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		if role != "admin" {
+			http.Error(w, "forbidden", http.StatusForbidden)
 			return
 		}
 

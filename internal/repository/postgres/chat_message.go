@@ -18,7 +18,7 @@ func normalizeChannelName(ch string) string {
 }
 
 // InsertChatMessage stores a chat line for history and replay in the UI.
-func (r *Repository) InsertChatMessage(ctx context.Context, channelTwitchUserID int64, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string) (int64, error) {
+func (r *Repository) InsertChatMessage(ctx context.Context, channelTwitchUserID int64, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string, firstMessage bool) (int64, error) {
 	ctx, span := r.obs.StartSpan(ctx, "repo.insert_chat_message")
 	defer span.End()
 
@@ -53,10 +53,10 @@ func (r *Repository) InsertChatMessage(ctx context.Context, channelTwitchUserID 
 	var msgID int64
 
 	err = r.pool.QueryRow(ctx, `
-		INSERT INTO chat_messages (twitch_user_id, chatter_twitch_user_id, username, body, keyword_match, msg_type, badge_tags, stream_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)
+		INSERT INTO chat_messages (twitch_user_id, chatter_twitch_user_id, username, body, keyword_match, msg_type, badge_tags, first_message, stream_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9)
 		RETURNING id
-	`, channelTwitchUserID, chatter, chatterUsername, body, keywordMatch, msgType, badgeJSON, stream).Scan(&msgID)
+	`, channelTwitchUserID, chatter, chatterUsername, body, keywordMatch, msgType, badgeJSON, firstMessage, stream).Scan(&msgID)
 	if err != nil {
 		r.obs.LogError(ctx, span, "insert chat message failed", err,
 			zap.Int64("twitch_user_id", channelTwitchUserID), zap.String("username", chatterUsername))
@@ -66,7 +66,7 @@ func (r *Repository) InsertChatMessage(ctx context.Context, channelTwitchUserID 
 }
 
 // InsertChatMessageForChannelLogin resolves the channel by username (must exist).
-func (r *Repository) InsertChatMessageForChannelLogin(ctx context.Context, channelLogin string, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string) (int64, error) {
+func (r *Repository) InsertChatMessageForChannelLogin(ctx context.Context, channelLogin string, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string, firstMessage bool) (int64, error) {
 	ch := normalizeChannelName(channelLogin)
 	if ch == "" {
 		return 0, errors.New("invalid chat message insert")
@@ -77,7 +77,7 @@ func (r *Repository) InsertChatMessageForChannelLogin(ctx context.Context, chann
 		return 0, err
 	}
 
-	return r.InsertChatMessage(ctx, id, chatterTwitchUserID, chatterUsername, body, keywordMatch, msgType, badgeTags)
+	return r.InsertChatMessage(ctx, id, chatterTwitchUserID, chatterUsername, body, keywordMatch, msgType, badgeTags, firstMessage)
 }
 
 // IsMonitoredChannel reports whether the normalized channel username is monitored.
@@ -147,7 +147,7 @@ func scanChatHistoryRow(rows pgx.Rows) (entity.ChatHistoryMessage, error) {
 		chatterIsSus  sql.NullBool
 	)
 
-	err := rows.Scan(&m.ID, &m.Channel, &m.Username, &chatter, &chatterMarked, &chatterIsSus, &m.Message, &m.KeywordMatch, &m.MsgType, &badgeRaw, &m.CreatedAt)
+	err := rows.Scan(&m.ID, &m.Channel, &m.Username, &chatter, &chatterMarked, &chatterIsSus, &m.Message, &m.KeywordMatch, &m.MsgType, &badgeRaw, &m.FirstMessage, &m.CreatedAt)
 	if err != nil {
 		return m, err
 	}
@@ -191,7 +191,7 @@ func (r *Repository) ListChatHistory(ctx context.Context, channel string, limit 
 	}
 
 	rows, err := r.pool.Query(ctx, `
-		SELECT m.id, u.username, m.username, m.chatter_twitch_user_id, COALESCE(cu.marked, false), COALESCE(cu.is_sus, false), m.body, m.keyword_match, m.msg_type, m.badge_tags, m.created_at
+		SELECT m.id, u.username, m.username, m.chatter_twitch_user_id, COALESCE(cu.marked, false), COALESCE(cu.is_sus, false), m.body, m.keyword_match, m.msg_type, m.badge_tags, m.first_message, m.created_at
 		FROM (
 			SELECT m.id
 			FROM chat_messages m
@@ -246,7 +246,7 @@ func (r *Repository) ListChatMessages(ctx context.Context, f entity.ChatMessageL
 
 	var b strings.Builder
 	b.WriteString(`
-		SELECT m.id, uc.username, m.username, m.chatter_twitch_user_id, COALESCE(cu.marked, false), COALESCE(cu.is_sus, false), m.body, m.keyword_match, m.msg_type, m.badge_tags, m.created_at
+		SELECT m.id, uc.username, m.username, m.chatter_twitch_user_id, COALESCE(cu.marked, false), COALESCE(cu.is_sus, false), m.body, m.keyword_match, m.msg_type, m.badge_tags, m.first_message, m.created_at
 		FROM chat_messages m
 		INNER JOIN twitch_users uc ON uc.id = m.twitch_user_id
 		LEFT JOIN twitch_users cu ON cu.id = m.chatter_twitch_user_id

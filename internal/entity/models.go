@@ -131,6 +131,7 @@ type ChatHistoryMessage struct {
 	KeywordMatch        bool
 	MsgType             string
 	BadgeTags           []string
+	FirstMessage        bool
 	CreatedAt           time.Time
 }
 

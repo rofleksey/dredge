@@ -56,10 +56,6 @@ func (h *Handler) CountTwitchDirectoryUsers(ctx context.Context, params gen.Coun
 }
 
 func (h *Handler) CountTwitchAccounts(ctx context.Context) (*gen.CountResponse, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	n, err := h.sett.CountTwitchAccounts(ctx)
 	if err != nil {
 		return nil, err

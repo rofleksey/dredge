@@ -790,6 +790,7 @@ function formatPresenceWeek(sec: number): string {
             :user-marked="m.chatter_marked"
             :user-is-sus="rowChatterIsSus(m)"
             :suspicious-title="rowChatterSusTitle(m)"
+            :first-message="m.first_message"
             show-channel
             :channel-login="m.channel"
           />

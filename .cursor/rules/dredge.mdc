@@ -8,6 +8,14 @@ alwaysApply: true
 - **Module:** `github.com/rofleksey/dredge` (Go 1.25+).
 - **App entry:** `cmd/dredge/main.go`. **DI / wiring:** `internal/app/fx.go` (uber/fx).
 
+## Authentication
+
+- All **HTTP** operations defined in OpenAPI and the **WebSocket** `/ws` endpoint require an authenticated user with **admin** role, **except**:
+  - `POST /auth/login` (unauthenticated)
+  - `me` (authenticated session/bootstrap; Bearer required, not admin-gated)
+  - `GET /health` (no auth; liveness)
+- Enforced in code via ogen middleware and `LiveWebsocketHandler`; keep this list in sync when adding routes.
+
 ## Layout
 
 - **HTTP API:** OpenAPI in `api/openapi.yaml`; **ogen** output in `internal/transport/http/gen` — do not hand-edit generated files.

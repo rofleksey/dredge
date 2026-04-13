@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     username TEXT NOT NULL CHECK (username = lower(username)),
     body TEXT NOT NULL,
     keyword_match BOOLEAN NOT NULL DEFAULT false,
+    first_message BOOLEAN NOT NULL DEFAULT false,
     msg_type TEXT NOT NULL DEFAULT 'irc',
     badge_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

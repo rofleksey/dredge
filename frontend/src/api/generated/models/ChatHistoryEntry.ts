@@ -21,6 +21,10 @@ export type ChatHistoryEntry = {
      * Whether the chatter is flagged as suspicious
      */
     chatter_is_sus: boolean;
+    /**
+     * Whether this was the chatter's first message in this channel (Twitch IRC)
+     */
+    first_message: boolean;
     message: string;
     keyword_match: boolean;
     /**

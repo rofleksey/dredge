@@ -69,25 +69,13 @@ func TestHandler_CountTwitchDirectoryUsers(t *testing.T) {
 	assert.Equal(t, int64(3), res.Total)
 }
 
-func TestHandler_CountTwitchAccounts_admin(t *testing.T) {
+func TestHandler_CountTwitchAccounts(t *testing.T) {
 	h, ctrl, repo := testHandler(t)
 	defer ctrl.Finish()
 
 	repo.EXPECT().CountTwitchAccounts(gomock.Any()).Return(int64(2), nil)
 
-	ctx := context.WithValue(context.WithValue(context.Background(), userIDCtxKey, int64(1)), roleCtxKey, "admin")
-
-	res, err := h.CountTwitchAccounts(ctx)
+	res, err := h.CountTwitchAccounts(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, int64(2), res.Total)
-}
-
-func TestHandler_CountTwitchAccounts_forbidden(t *testing.T) {
-	h, ctrl, _ := testHandler(t)
-	defer ctrl.Finish()
-
-	ctx := context.WithValue(context.WithValue(context.Background(), userIDCtxKey, int64(1)), roleCtxKey, "user")
-
-	_, err := h.CountTwitchAccounts(ctx)
-	require.Error(t, err)
 }

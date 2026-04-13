@@ -19,6 +19,7 @@ export type LiveEvent =
       keyword_match?: boolean;
       chatter_marked?: boolean;
       chatter_is_sus?: boolean;
+      first_message?: boolean;
       badge_tags?: ChatBadgeTag[];
       created_at?: string;
       receivedAt: number;
@@ -100,6 +101,7 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
         keyword_match: Boolean(o.keyword_match),
         chatter_marked: Boolean(o.chatter_marked),
         chatter_is_sus: Boolean(o.chatter_is_sus),
+        first_message: Boolean(o.first_message),
         badge_tags: parseBadgeTags(o.badge_tags),
         created_at: typeof o.created_at === 'string' ? o.created_at : undefined,
         receivedAt: ts,

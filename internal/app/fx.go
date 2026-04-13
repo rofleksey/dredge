@@ -85,11 +85,21 @@ func fxOptions() fx.Option {
 			func(h *httptransport.Handler, sec *httptransport.Security, limiter *httptransport.LoginLimiter) (*gen.Server, error) {
 				return gen.NewServer(h, sec,
 					gen.WithMiddleware(httptransport.LoginRateLimitMiddleware(limiter)),
+					gen.WithMiddleware(httptransport.RequireAdminMiddleware()),
 					gen.WithErrorHandler(httptransport.OgenErrorHandler()),
 				)
 			},
 			func(cfg config.Config, authSvc *auth.Service, srv *gen.Server, hub *ws.Hub, tw *twitchsvc.Service, oauth *twitchsvc.OAuth, sett *settings.Service, obs *observability.Stack, origin config.AllowedWebOrigin) (*http.Server, error) {
 				mux := http.NewServeMux()
+				mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+					if r.Method != http.MethodGet {
+						http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+						return
+					}
+					w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+					w.WriteHeader(http.StatusOK)
+					_, _ = w.Write([]byte("ok"))
+				})
 				mux.Handle("/ws", httptransport.LiveWebsocketHandler(authSvc, hub, tw, obs.Logger))
 				mux.Handle(httptransport.TwitchOAuthCallbackPath, httptransport.NewTwitchOAuthCallback(oauth, sett, obs))
 				mux.Handle("/", webui.NewMux(srv))

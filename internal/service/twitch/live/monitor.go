@@ -103,7 +103,7 @@ func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled 
 			}
 		}
 
-		_, err := r.repo.InsertChatMessageForChannelLogin(persistCtx, ch, chatterID, chatterLogin, msg.Message, keyword, "irc", badgeTags)
+		_, err := r.repo.InsertChatMessageForChannelLogin(persistCtx, ch, chatterID, chatterLogin, msg.Message, keyword, "irc", badgeTags, msg.FirstMessage)
 		if err != nil {
 			r.obs.Logger.Warn("persist chat message failed", zap.Error(err), zap.String("channel", ch))
 		}
@@ -133,6 +133,7 @@ func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled 
 			"keyword_match":   keyword,
 			"chatter_marked":  chatterMarked,
 			"chatter_is_sus":  chatterIsSus,
+			"first_message":   msg.FirstMessage,
 			"badge_tags":      badgeTags,
 			"created_at":      ts.Format(time.RFC3339Nano),
 		}

@@ -3,6 +3,7 @@ package httptransport
 import (
 	"context"
 	"errors"
+	"regexp"
 
 	"go.uber.org/zap"
 
@@ -13,10 +14,6 @@ import (
 func (h *Handler) ListRules(ctx context.Context) ([]gen.Rule, error) {
 	ctx, span := h.obs.StartSpan(ctx, "handler.list_rules")
 	defer span.End()
-
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
 
 	list, err := h.sett.ListRules(ctx)
 	if err != nil {
@@ -33,10 +30,6 @@ func (h *Handler) ListRules(ctx context.Context) ([]gen.Rule, error) {
 }
 
 func (h *Handler) CountRules(ctx context.Context) (*gen.CountResponse, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	n, err := h.sett.CountRules(ctx)
 	if err != nil {
 		return nil, err
@@ -47,10 +40,6 @@ func (h *Handler) CountRules(ctx context.Context) (*gen.CountResponse, error) {
 func (h *Handler) CreateRule(ctx context.Context, req *gen.CreateRuleRequest) (*gen.Rule, error) {
 	ctx, span := h.obs.StartSpan(ctx, "handler.create_rule")
 	defer span.End()
-
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
 
 	r, err := h.sett.CreateRule(ctx, createRuleReqToEntity(req))
 	if err != nil {
@@ -71,10 +60,6 @@ func (h *Handler) CreateRule(ctx context.Context, req *gen.CreateRuleRequest) (*
 func (h *Handler) UpdateRule(ctx context.Context, req *gen.UpdateRulePostRequest) (gen.UpdateRuleRes, error) {
 	ctx, span := h.obs.StartSpan(ctx, "handler.update_rule")
 	defer span.End()
-
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
 
 	r, err := h.sett.UpdateRule(ctx, req.GetID(), updateRulePostReqToEntity(req))
 	if err != nil {
@@ -100,10 +85,6 @@ func (h *Handler) DeleteRule(ctx context.Context, req *gen.DeleteByIDRequest) (g
 	ctx, span := h.obs.StartSpan(ctx, "handler.delete_rule")
 	defer span.End()
 
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	if err := h.sett.DeleteRule(ctx, req.ID); err != nil {
 		if errors.Is(err, entity.ErrRuleNotFound) {
 			return &gen.ErrorMessage{Message: "rule not found"}, nil
@@ -119,4 +100,24 @@ func (h *Handler) DeleteRule(ctx context.Context, req *gen.DeleteByIDRequest) (g
 	}
 
 	return &gen.DeleteRuleNoContent{}, nil
+}
+
+func (h *Handler) TestRuleRegex(ctx context.Context, req *gen.TestRuleRegexRequest) (*gen.TestRuleRegexResponse, error) {
+	re, err := regexp.Compile(req.GetPattern())
+	if err != nil {
+		var ce gen.OptNilString
+		ce.SetTo(err.Error())
+		return &gen.TestRuleRegexResponse{
+			Matches:      false,
+			CompileError: ce,
+		}, nil
+	}
+
+	var ce gen.OptNilString
+	ce.SetToNull()
+
+	return &gen.TestRuleRegexResponse{
+		Matches:      re.MatchString(req.GetSample()),
+		CompileError: ce,
+	}, nil
 }

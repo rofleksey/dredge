@@ -33,11 +33,13 @@ func TestChatHistoryEntityToGen(t *testing.T) {
 		ChatterTwitchUserID: ptrInt64(9),
 		Message:             "hi",
 		MsgType:             "sent",
+		FirstMessage:        true,
 		CreatedAt:           time.Unix(1, 0).UTC(),
 		BadgeTags:           []string{"moderator"},
 	}
 	g := chatHistoryEntityToGen(m)
 	assert.Equal(t, gen.ChatHistoryEntrySourceSent, g.Source)
+	assert.True(t, g.FirstMessage)
 	assert.True(t, g.ChatterUserID.IsSet())
 	v, _ := g.ChatterUserID.Get()
 	assert.Equal(t, int64(9), v)
