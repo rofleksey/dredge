@@ -411,6 +411,7 @@ function renderTimelineChart(): void {
 
   const channels = [...new Set(segs.map((s) => s.channel_login))].sort((a, b) => a.localeCompare(b));
   const rows = segs.map((s) => ({
+    channel_id: s.channel_id,
     channel_login: s.channel_login,
     start: new Date(s.start),
     end: new Date(s.end),
@@ -449,6 +450,7 @@ function renderTimelineChart(): void {
         strokeWidth: 1,
         inset: 0.35,
         rx: 2,
+        title: (d: (typeof rows)[number]) => formatTimelineSegmentTooltip(d),
       }),
       Plot.axisX({ fontSize: 10, tickFormat: '%b %d %H:%M' }),
       Plot.axisY({ fontSize: 11, tickSize: 0, dx: -2 }),
@@ -537,6 +539,37 @@ function formatWhen(iso: string): string {
     minute: '2-digit',
     second: '2-digit',
   }).format(t);
+}
+
+function formatPresenceDurationMs(ms: number): string {
+  if (!Number.isFinite(ms) || ms < 0) {
+    return '—';
+  }
+  const sec = Math.round(ms / 1000);
+  if (sec < 60) {
+    return `${sec}s`;
+  }
+  const min = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (min < 60) {
+    return s > 0 ? `${min}m ${s}s` : `${min}m`;
+  }
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function formatTimelineSegmentTooltip(d: {
+  channel_id: number;
+  channel_login: string;
+  start: Date;
+  end: Date;
+}): string {
+  const durMs = d.end.getTime() - d.start.getTime();
+  const dur = formatPresenceDurationMs(durMs);
+  const from = formatWhen(d.start.toISOString());
+  const to = formatWhen(d.end.toISOString());
+  return `#${d.channel_login} · IRC chat presence · ${from} → ${to} · ${dur} · channel id ${d.channel_id}`;
 }
 
 const accountCreatedLabel = computed(() => {
