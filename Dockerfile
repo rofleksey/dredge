@@ -13,8 +13,15 @@ COPY . .
 COPY --from=frontend /app/dist /src/internal/webui/static
 RUN go build -o /out/dredge ./cmd/dredge
 
-FROM alpine:3.22
-WORKDIR /app
-COPY --from=build /out/dredge /app/dredge
+FROM alpine
+ENV ENVIRONMENT=production
+ENV CGO_ENABLED=0
+WORKDIR /opt
+RUN apk update && \
+    apk add --no-cache curl ca-certificates && \
+    update-ca-certificates
+COPY --from=build /out/dredge /opt/dredge
 EXPOSE 8080
-CMD ["/app/dredge"]
+HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+CMD ["./dredge"]
