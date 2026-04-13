@@ -26,6 +26,7 @@ export type { FollowedMonitoredChannel } from './models/FollowedMonitoredChannel
 export type { GetChannelLiveRequest } from './models/GetChannelLiveRequest';
 export type { GetTwitchUserActivityTimelineRequest } from './models/GetTwitchUserActivityTimelineRequest';
 export type { GetTwitchUserProfileRequest } from './models/GetTwitchUserProfileRequest';
+export type { IrcMonitorSettings } from './models/IrcMonitorSettings';
 export type { IrcMonitorStatus } from './models/IrcMonitorStatus';
 export type { ListChannelChattersRequest } from './models/ListChannelChattersRequest';
 export type { ListTwitchUserActivityRequest } from './models/ListTwitchUserActivityRequest';

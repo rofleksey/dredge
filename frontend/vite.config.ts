@@ -10,6 +10,8 @@ export default defineConfig({
     alias: {
       'form-data': fileURLToPath(new URL('./src/shims/form-data.ts', import.meta.url)),
     },
+    // Default order prefers `.js` over `.ts`, so stray `foo.js` + `foo.ts` in `src/` loads stale JS. Prefer TS first.
+    extensions: ['.mjs', '.mts', '.ts', '.tsx', '.vue', '.js', '.jsx', '.json'],
   },
   server: {
     proxy: {

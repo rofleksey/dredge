@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import {
   ApiError,
   CreateNotificationRequest,
@@ -10,11 +10,12 @@ import {
   TwitchAccount,
   UpdateTwitchAccountPostRequest,
 } from '../api/generated';
-import type { IrcMonitorStatus } from '../api/generated';
+import type { IrcMonitorSettings, IrcMonitorStatus } from '../api/generated';
 import type { SuspicionSettings } from '../api/generated';
 import type { Rule } from '../api/generated';
 import AppModal from '../components/AppModal.vue';
 import SubmitButton from '../components/SubmitButton.vue';
+import { isChannelJoinedOnIrc } from '../lib/ircMonitorJoined';
 import { notify } from '../lib/notify';
 import { useChannelsStore } from '../stores/channels';
 import { useTwitchAccountsStore } from '../stores/twitchAccounts';
@@ -70,6 +71,9 @@ const savingRule = ref(false);
 const savingNotif = ref(false);
 const savingBlacklist = ref(false);
 const savingSuspicion = ref(false);
+const savingIrcMonitor = ref(false);
+/** '' = anonymous IRC; otherwise linked account Twitch user id as string */
+const ircOAuthAccountId = ref('');
 
 const ircStatus = ref<IrcMonitorStatus | null>(null);
 let ircPollId: number | null = null;
@@ -117,13 +121,14 @@ onBeforeUnmount(() => {
 });
 
 async function refresh(): Promise<void> {
-  const [rulesList, rCount, taCount, notifList, bl, sus] = await Promise.all([
+  const [rulesList, rCount, taCount, notifList, bl, sus, ircMon] = await Promise.all([
     DefaultService.listRules(),
     DefaultService.countRules(),
     DefaultService.countTwitchAccounts(),
     DefaultService.listNotifications(),
     DefaultService.listChannelBlacklist(),
     DefaultService.getSuspicionSettings(),
+    DefaultService.getIrcMonitorSettings(),
   ]);
   await Promise.all([channelsStore.fetch(), twitchStore.fetch()]);
   rules.value = rulesList;
@@ -132,6 +137,14 @@ async function refresh(): Promise<void> {
   notifications.value = notifList;
   channelBlacklist.value = bl;
   Object.assign(suspicionDraft, sus);
+  applyIrcMonitorDraft(ircMon);
+}
+
+function applyIrcMonitorDraft(s: IrcMonitorSettings): void {
+  ircOAuthAccountId.value =
+    s.oauth_twitch_account_id !== null && s.oauth_twitch_account_id !== undefined
+      ? String(s.oauth_twitch_account_id)
+      : '';
 }
 
 function queryOne(v: unknown): string | undefined {
@@ -497,6 +510,35 @@ async function removeBlacklistEntry(login: string): Promise<void> {
   }
 }
 
+async function saveIrcMonitorSettings(): Promise<void> {
+  if (savingIrcMonitor.value) {
+    return;
+  }
+  savingIrcMonitor.value = true;
+  try {
+    const oauthTwitchAccountId =
+      ircOAuthAccountId.value === '' ? null : Number(ircOAuthAccountId.value);
+    const body: IrcMonitorSettings = { oauth_twitch_account_id: oauthTwitchAccountId };
+    const s = await DefaultService.updateIrcMonitorSettings({ requestBody: body });
+    applyIrcMonitorDraft(s);
+    notify({
+      id: 'irc-monitor-settings',
+      type: 'success',
+      title: 'IRC',
+      description: 'IRC monitor settings saved.',
+    });
+  } catch {
+    notify({
+      id: 'irc-monitor-settings',
+      type: 'error',
+      title: 'IRC',
+      description: 'Could not save IRC monitor settings.',
+    });
+  } finally {
+    savingIrcMonitor.value = false;
+  }
+}
+
 async function saveSuspicionSettings(): Promise<void> {
   if (savingSuspicion.value) {
     return;
@@ -537,17 +579,11 @@ const ircJoinedCount = computed(() => {
   if (!st?.connected || !st.channels?.length) {
     return 0;
   }
-  return st.channels.filter((c) => c.irc_ok).length;
+  return st.channels.filter((c) => isChannelJoinedOnIrc(st, c.login)).length;
 });
 
 function channelIrcJoined(login: string): boolean {
-  const st = ircStatus.value;
-  if (!st?.connected) {
-    return false;
-  }
-  const low = login.toLowerCase();
-  const row = st.channels.find((c) => c.login.toLowerCase() === low);
-  return row?.irc_ok ?? false;
+  return isChannelJoinedOnIrc(ircStatus.value, login);
 }
 const rulesHeading = computed(() => `Rules (${rulesTotal.value})`);
 const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.value})`);
@@ -592,7 +628,7 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
               :class="channelIrcJoined(c.username) ? 'irc-dot--on' : 'irc-dot--off'"
               :title="channelIrcJoined(c.username) ? 'Joined on IRC' : 'Not joined on IRC'"
             />
-            <span>{{ c.username }}</span>
+            <RouterLink class="chan-link" :to="{ name: 'user', params: { id: String(c.id) } }">{{ c.username }}</RouterLink>
             <button type="button" class="btn-danger" @click="setChannelMonitored(c.id, false)">Stop monitoring</button>
           </li>
         </ul>
@@ -639,6 +675,27 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
         <p class="row-actions">
           <button type="button" class="btn-secondary" @click="connectTwitchInBrowser">Connect with Twitch</button>
         </p>
+
+        <h3 class="subh">IRC monitor</h3>
+        <p class="hint muted small">
+          Default is anonymous read-only IRC. Pick a linked account only if you want the monitor to connect with that
+          account's OAuth token.
+        </p>
+        <form class="stack gap-setting" @submit.prevent="saveIrcMonitorSettings">
+          <label class="stack gap-setting">
+            <span>Identity for chat ingestion</span>
+            <select v-model="ircOAuthAccountId" :disabled="savingIrcMonitor">
+              <option value="">Anonymous (read-only)</option>
+              <option v-for="a in twitchStore.accounts" :key="a.id" :value="String(a.id)">
+                {{ a.username }} ({{ a.account_type }})
+              </option>
+            </select>
+          </label>
+          <p class="row-actions">
+            <SubmitButton :loading="savingIrcMonitor">Save IRC settings</SubmitButton>
+          </p>
+        </form>
+
         <ul class="twitch-account-list">
           <li v-for="a in twitchStore.accounts" :key="a.id" class="twitch-account-row">
             <div class="twitch-account-meta">
@@ -938,6 +995,16 @@ ul {
   &.twitch-account-list {
     list-style: none;
     padding-left: 0;
+  }
+}
+
+.chan-link {
+  color: var(--accent-bright);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 

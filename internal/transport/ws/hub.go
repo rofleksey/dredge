@@ -42,7 +42,8 @@ func NewHub(allowedOrigin string) *Hub {
 }
 
 // Upgrade authenticates the client and registers the connection for broadcast.
-func (h *Hub) Upgrade(w http.ResponseWriter, r *http.Request, userID int64) error {
+// Optional initial messages are queued to this client before pumpConn starts (same drop policy as BroadcastJSON).
+func (h *Hub) Upgrade(w http.ResponseWriter, r *http.Request, userID int64, initial ...any) error {
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return err
@@ -53,6 +54,14 @@ func (h *Hub) Upgrade(w http.ResponseWriter, r *http.Request, userID int64) erro
 	h.mu.Lock()
 	h.clients[cl] = struct{}{}
 	h.mu.Unlock()
+
+	for _, msg := range initial {
+		select {
+		case cl.send <- msg:
+		default:
+			// Same policy as BroadcastJSON: drop if the client is already backlogged.
+		}
+	}
 
 	go h.pumpConn(cl)
 

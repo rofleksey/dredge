@@ -17,6 +17,7 @@ import type { DeleteByIDRequest } from '../models/DeleteByIDRequest';
 import type { GetChannelLiveRequest } from '../models/GetChannelLiveRequest';
 import type { GetTwitchUserActivityTimelineRequest } from '../models/GetTwitchUserActivityTimelineRequest';
 import type { GetTwitchUserProfileRequest } from '../models/GetTwitchUserProfileRequest';
+import type { IrcMonitorSettings } from '../models/IrcMonitorSettings';
 import type { IrcMonitorStatus } from '../models/IrcMonitorStatus';
 import type { ListChannelChattersRequest } from '../models/ListChannelChattersRequest';
 import type { ListTwitchUserActivityRequest } from '../models/ListTwitchUserActivityRequest';
@@ -120,7 +121,7 @@ export class DefaultService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                400: `Invalid monitor settings (e.g. off-stream notifications require live-only IRC)`,
+                400: `Invalid monitor settings (e.g. off-stream notifications require disabling live-only IRC)`,
                 404: `Twitch user not found`,
             },
         });
@@ -176,6 +177,32 @@ export class DefaultService {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/settings/suspicion-settings',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns IrcMonitorSettings IRC monitor identity (anonymous vs linked OAuth account)
+     * @throws ApiError
+     */
+    public static getIrcMonitorSettings(): CancelablePromise<IrcMonitorSettings> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/settings/irc-monitor-settings',
+        });
+    }
+    /**
+     * @returns IrcMonitorSettings Updated settings
+     * @throws ApiError
+     */
+    public static updateIrcMonitorSettings({
+        requestBody,
+    }: {
+        requestBody: IrcMonitorSettings,
+    }): CancelablePromise<IrcMonitorSettings> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/settings/irc-monitor-settings',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -546,14 +573,13 @@ export class DefaultService {
     }
     /**
      * List known Twitch users (chatters and channels) for directory search
-     * @returns TwitchUser Users (marked first, then id desc)
+     * @returns TwitchUser Users (newest id first)
      * @throws ApiError
      */
     public static listTwitchDirectoryUsers({
         username,
         limit = 50,
         cursorId,
-        cursorMarked,
     }: {
         /**
          * Substring match on login (case-insensitive)
@@ -561,13 +587,9 @@ export class DefaultService {
         username?: string,
         limit?: number,
         /**
-         * Keyset cursor (with cursor_marked when paging)
+         * Keyset cursor (twitch user id from the last row of the previous page; sort is id desc)
          */
         cursorId?: number,
-        /**
-         * Marked flag from the last row of the previous page
-         */
-        cursorMarked?: boolean,
     }): CancelablePromise<Array<TwitchUser>> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -576,7 +598,6 @@ export class DefaultService {
                 'username': username,
                 'limit': limit,
                 'cursor_id': cursorId,
-                'cursor_marked': cursorMarked,
             },
         });
     }

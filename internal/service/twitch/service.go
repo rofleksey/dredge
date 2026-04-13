@@ -118,6 +118,16 @@ func (s *Service) GetIrcMonitorStatus(ctx context.Context) (connected bool, chan
 	return s.live.GetIrcMonitorStatus(ctx)
 }
 
+// LiveWebSocketWelcomePayloads returns messages sent to a browser immediately after the live WebSocket upgrade.
+func (s *Service) LiveWebSocketWelcomePayloads(ctx context.Context) ([]any, error) {
+	msg, err := s.live.LiveWebSocketWelcomePayloads(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return []any{msg}, nil
+}
+
 // GetTwitchUser returns a twitch_users row by id.
 func (s *Service) GetTwitchUser(ctx context.Context, id int64) (entity.TwitchUser, error) {
 	return s.repo.GetTwitchUserByID(ctx, id)

@@ -17,6 +17,10 @@ func adminCtx() context.Context {
 	return context.WithValue(context.WithValue(context.Background(), userIDCtxKey, int64(1)), roleCtxKey, "admin")
 }
 
+func viewerCtx() context.Context {
+	return context.WithValue(context.WithValue(context.Background(), userIDCtxKey, int64(2)), roleCtxKey, "viewer")
+}
+
 func TestHandler_ListChatHistory_ok(t *testing.T) {
 	h, ctrl, repo := testHandler(t)
 	defer ctrl.Finish()
@@ -66,6 +70,17 @@ func TestHandler_GetIrcMonitorStatus(t *testing.T) {
 	repo.EXPECT().ListMonitoredTwitchUsers(gomock.Any()).Return(nil, nil)
 
 	st, err := h.GetIrcMonitorStatus(adminCtx())
+	require.NoError(t, err)
+	assert.NotNil(t, st)
+}
+
+func TestHandler_GetIrcMonitorStatus_nonAdmin(t *testing.T) {
+	h, ctrl, repo := testHandler(t)
+	defer ctrl.Finish()
+
+	repo.EXPECT().ListMonitoredTwitchUsers(gomock.Any()).Return(nil, nil)
+
+	st, err := h.GetIrcMonitorStatus(viewerCtx())
 	require.NoError(t, err)
 	assert.NotNil(t, st)
 }

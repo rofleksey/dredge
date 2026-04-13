@@ -142,7 +142,7 @@ func (h *Handler) UpdateTwitchUser(ctx context.Context, req *gen.UpdateTwitchUse
 		}
 
 		if errors.Is(err, entity.ErrInvalidTwitchUserMonitorSettings) {
-			return &gen.UpdateTwitchUserBadRequest{Message: "notify_off_stream_messages requires irc_only_when_live"}, nil
+			return &gen.UpdateTwitchUserBadRequest{Message: "notify_off_stream_messages is only allowed when irc_only_when_live is false"}, nil
 		}
 
 		h.obs.LogError(ctx, span, "update twitch user failed", err, zap.Int64("id", req.ID))

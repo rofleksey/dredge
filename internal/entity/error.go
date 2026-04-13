@@ -15,6 +15,6 @@ var (
 	ErrStreamNotFound         = errors.New("stream not found")
 	// ErrNoLinkedTwitchAccount is returned when OAuth is required but no Twitch account is linked.
 	ErrNoLinkedTwitchAccount = errors.New("no linked twitch account")
-	// ErrInvalidTwitchUserMonitorSettings is returned when notify_off_stream_messages is enabled without irc_only_when_live.
-	ErrInvalidTwitchUserMonitorSettings = errors.New("notify_off_stream_messages requires irc_only_when_live")
+	// ErrInvalidTwitchUserMonitorSettings is returned when notify_off_stream_messages is enabled while irc_only_when_live is true.
+	ErrInvalidTwitchUserMonitorSettings = errors.New("notify_off_stream_messages is only allowed when irc_only_when_live is false")
 )

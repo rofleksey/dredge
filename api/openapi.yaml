@@ -97,7 +97,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/TwitchUser"
         "400":
-          description: Invalid monitor settings (e.g. off-stream notifications require live-only IRC)
+          description: Invalid monitor settings (e.g. off-stream notifications require disabling live-only IRC)
           content:
             application/json:
               schema:
@@ -170,6 +170,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SuspicionSettings"
+  /settings/irc-monitor-settings:
+    get:
+      operationId: getIrcMonitorSettings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: IRC monitor identity (anonymous vs linked OAuth account)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IrcMonitorSettings"
+    patch:
+      operationId: updateIrcMonitorSettings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IrcMonitorSettings"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IrcMonitorSettings"
   /settings/rules:
     get:
       operationId: listRules
@@ -636,18 +665,13 @@ paths:
             default: 50
         - name: cursor_id
           in: query
-          description: Keyset cursor (with cursor_marked when paging)
+          description: Keyset cursor (twitch user id from the last row of the previous page; sort is id desc)
           schema:
             type: integer
             format: int64
-        - name: cursor_marked
-          in: query
-          description: Marked flag from the last row of the previous page
-          schema:
-            type: boolean
       responses:
         "200":
-          description: Users (marked first, then id desc)
+          description: Users (newest id first)
           content:
             application/json:
               schema:
@@ -1216,10 +1240,10 @@ components:
           description: When true, automatic suspicion will not mark this user until cleared in settings
         irc_only_when_live:
           type: boolean
-          description: When true, join IRC only while the channel has an active Helix stream (unless notify_off_stream_messages)
+          description: When true, join IRC only while the channel has an active Helix stream
         notify_off_stream_messages:
           type: boolean
-          description: When irc_only_when_live is true, also join IRC while offline to capture chat and keyword alerts
+          description: When irc_only_when_live is false, enable notifications for chat while the channel is offline on Twitch
         notify_stream_start:
           type: boolean
           description: When true, send notifications when this channel goes live on Twitch
@@ -1338,6 +1362,16 @@ components:
         max_gql_follow_pages:
           type: integer
           description: Safety cap when paginating GQL follows per user (default 1 page)
+    IrcMonitorSettings:
+      type: object
+      required:
+        - oauth_twitch_account_id
+      properties:
+        oauth_twitch_account_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: Linked Twitch account id (Helix user id) for authenticated IRC; null uses anonymous read-only IRC (default)
     ChannelBlacklistChange:
       type: object
       required: [login, add]
@@ -1478,7 +1512,7 @@ components:
                 type: string
               irc_ok:
                 type: boolean
-                description: True after the monitor has received self-JOIN for this channel
+                description: True when the IRC client's NAMES-backed userlist for this channel is non-empty (session state)
     ChannelLive:
       type: object
       required: [broadcaster_id, broadcaster_login, display_name, profile_image_url, is_live]

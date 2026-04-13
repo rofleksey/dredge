@@ -2,6 +2,7 @@ package live
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	twitchirc "github.com/gempir/go-twitch-irc/v4"
@@ -9,6 +10,18 @@ import (
 	"github.com/rofleksey/dredge/internal/entity"
 	"go.uber.org/zap"
 )
+
+// isGoTwitchIRCUserlistMissing reports whether err is go-twitch-irc's error for a channel
+// that has no internal userlist entry (never joined, departed, or key mismatch). An actual
+// empty NAMES result is an empty slice with a nil error; we treat this error like empty NAMES
+// and sync an empty chatter snapshot.
+func isGoTwitchIRCUserlistMissing(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "could not find userlist for channel") && strings.Contains(msg, "in client")
+}
 
 // StartPresenceTicker runs until ctx is cancelled; periodically syncs IRC NAMES lists into channel_chatters.
 func (r *Runtime) StartPresenceTicker(ctx context.Context) {
@@ -43,16 +56,23 @@ func (r *Runtime) runPresenceSnapshot(ctx context.Context) {
 	}
 
 	for _, ch := range channels {
-		if err := r.snapshotChannelPresence(ctx, client, ch); err != nil {
-			r.obs.Logger.Debug("presence snapshot channel skipped", zap.String("channel", ch.Username), zap.Error(err))
+		login := NormalizeTwitchChannel(ch.Username)
+		if login == "" {
+			continue
+		}
+		if err := r.snapshotChannelPresence(ctx, client, ch, login); err != nil {
+			r.obs.Logger.Debug("presence snapshot channel skipped", zap.String("channel", login), zap.Error(err))
 		}
 	}
 }
 
-func (r *Runtime) snapshotChannelPresence(ctx context.Context, client *twitchirc.Client, channel entity.TwitchUser) error {
-	logins, err := client.Userlist(channel.Username)
+func (r *Runtime) snapshotChannelPresence(ctx context.Context, client *twitchirc.Client, channel entity.TwitchUser, ircLogin string) error {
+	logins, err := client.Userlist(ircLogin)
 	if err != nil {
-		return err
+		if !isGoTwitchIRCUserlistMissing(err) {
+			return err
+		}
+		logins = nil
 	}
 
 	prev, err := r.repo.ListChannelChatterIDs(ctx, channel.ID)

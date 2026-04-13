@@ -57,8 +57,8 @@ func (s *Service) PatchTwitchUser(ctx context.Context, id int64, patch entity.Tw
 		return entity.TwitchUser{}, err
 	}
 
-	// Turning off live-only implies off-stream IRC is off; apply before validating merged state.
-	if patch.IrcOnlyWhenLive != nil && !*patch.IrcOnlyWhenLive {
+	// Turning on live-only clears off-stream notifications; apply before validating merged state.
+	if patch.IrcOnlyWhenLive != nil && *patch.IrcOnlyWhenLive {
 		f := false
 		patch.NotifyOffStreamMessages = &f
 	}
@@ -73,7 +73,7 @@ func (s *Service) PatchTwitchUser(ctx context.Context, id int64, patch entity.Tw
 		effNotifyOff = *patch.NotifyOffStreamMessages
 	}
 
-	if effNotifyOff && !effIrcOnly {
+	if effNotifyOff && effIrcOnly {
 		return entity.TwitchUser{}, entity.ErrInvalidTwitchUserMonitorSettings
 	}
 
@@ -135,6 +135,36 @@ func (s *Service) UpdateSuspicionSettings(ctx context.Context, in entity.Suspici
 	}
 
 	return s.repo.GetSuspicionSettings(ctx)
+}
+
+func (s *Service) GetIrcMonitorSettings(ctx context.Context) (entity.IrcMonitorSettings, error) {
+	ctx, span := s.obs.StartSpan(ctx, "service.settings.get_irc_monitor_settings")
+	defer span.End()
+
+	out, err := s.repo.GetIrcMonitorSettings(ctx)
+	if err != nil {
+		s.obs.LogError(ctx, span, "get irc monitor settings failed", err)
+	}
+	return out, err
+}
+
+func (s *Service) UpdateIrcMonitorSettings(ctx context.Context, in entity.IrcMonitorSettings) (entity.IrcMonitorSettings, error) {
+	ctx, span := s.obs.StartSpan(ctx, "service.settings.update_irc_monitor_settings")
+	defer span.End()
+
+	if in.OauthTwitchAccountID != nil {
+		if _, err := s.repo.GetTwitchAccountByID(ctx, *in.OauthTwitchAccountID); err != nil {
+			s.obs.LogError(ctx, span, "irc monitor oauth account validation failed", err)
+			return entity.IrcMonitorSettings{}, err
+		}
+	}
+
+	if err := s.repo.UpdateIrcMonitorSettings(ctx, in); err != nil {
+		s.obs.LogError(ctx, span, "update irc monitor settings failed", err)
+		return entity.IrcMonitorSettings{}, err
+	}
+
+	return s.repo.GetIrcMonitorSettings(ctx)
 }
 
 func (s *Service) ListRules(ctx context.Context) ([]entity.Rule, error) {

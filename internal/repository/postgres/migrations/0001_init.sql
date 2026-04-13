@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS twitch_users (
     sus_type TEXT,
     sus_description TEXT,
     sus_auto_suppressed BOOLEAN NOT NULL DEFAULT false,
-    irc_only_when_live BOOLEAN NOT NULL DEFAULT true,
+    irc_only_when_live BOOLEAN NOT NULL DEFAULT false,
     notify_off_stream_messages BOOLEAN NOT NULL DEFAULT false,
     notify_stream_start BOOLEAN NOT NULL DEFAULT false
 );
@@ -136,4 +136,12 @@ CREATE TABLE IF NOT EXISTS suspicion_settings (
 );
 
 INSERT INTO suspicion_settings (id) VALUES (1)
+    ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS irc_monitor_settings (
+    id SMALLINT PRIMARY KEY CHECK (id = 1),
+    oauth_twitch_account_id BIGINT REFERENCES twitch_accounts (id) ON DELETE SET NULL
+);
+
+INSERT INTO irc_monitor_settings (id, oauth_twitch_account_id) VALUES (1, NULL)
     ON CONFLICT (id) DO NOTHING;

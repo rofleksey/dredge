@@ -71,7 +71,7 @@ func TestService_PatchTwitchUser(t *testing.T) {
 	require.True(t, u.Monitored)
 }
 
-func TestService_PatchTwitchUser_rejectsNotifyOffWithoutLiveOnly(t *testing.T) {
+func TestService_PatchTwitchUser_rejectsNotifyOffWhenLiveOnlyEnabled(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -82,7 +82,7 @@ func TestService_PatchTwitchUser_rejectsNotifyOffWithoutLiveOnly(t *testing.T) {
 
 	repo.EXPECT().GetTwitchUserByID(gomock.Any(), int64(2)).Return(entity.TwitchUser{
 		ID:                      2,
-		IrcOnlyWhenLive:         false,
+		IrcOnlyWhenLive:         true,
 		NotifyOffStreamMessages: false,
 	}, nil)
 
@@ -90,7 +90,35 @@ func TestService_PatchTwitchUser_rejectsNotifyOffWithoutLiveOnly(t *testing.T) {
 	require.ErrorIs(t, err, entity.ErrInvalidTwitchUserMonitorSettings)
 }
 
-func TestService_PatchTwitchUser_coercesNotifyOffWhenDisablingLiveOnly(t *testing.T) {
+func TestService_PatchTwitchUser_allowsNotifyOffWhenLiveOnlyDisabled(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := repomocks.NewMockStore(ctrl)
+	svc := New(repo, &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")})
+
+	on := true
+
+	repo.EXPECT().GetTwitchUserByID(gomock.Any(), int64(4)).Return(entity.TwitchUser{
+		ID:                      4,
+		IrcOnlyWhenLive:         false,
+		NotifyOffStreamMessages: false,
+	}, nil)
+
+	repo.EXPECT().PatchTwitchUser(gomock.Any(), int64(4), entity.TwitchUserPatch{
+		NotifyOffStreamMessages: &on,
+	}).Return(entity.TwitchUser{
+		ID:                      4,
+		IrcOnlyWhenLive:         false,
+		NotifyOffStreamMessages: true,
+	}, nil)
+
+	u, err := svc.PatchTwitchUser(context.Background(), 4, entity.TwitchUserPatch{NotifyOffStreamMessages: &on})
+	require.NoError(t, err)
+	require.True(t, u.NotifyOffStreamMessages)
+}
+
+func TestService_PatchTwitchUser_coercesNotifyOffWhenEnablingLiveOnly(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -99,25 +127,25 @@ func TestService_PatchTwitchUser_coercesNotifyOffWhenDisablingLiveOnly(t *testin
 
 	repo.EXPECT().GetTwitchUserByID(gomock.Any(), int64(3)).Return(entity.TwitchUser{
 		ID:                      3,
-		IrcOnlyWhenLive:         true,
+		IrcOnlyWhenLive:         false,
 		NotifyOffStreamMessages: true,
 	}, nil)
 
-	ircOff := false
+	ircOn := true
 	notifyOff := false
 
 	repo.EXPECT().PatchTwitchUser(gomock.Any(), int64(3), entity.TwitchUserPatch{
-		IrcOnlyWhenLive:         &ircOff,
+		IrcOnlyWhenLive:         &ircOn,
 		NotifyOffStreamMessages: &notifyOff,
 	}).Return(entity.TwitchUser{
 		ID:                      3,
-		IrcOnlyWhenLive:         false,
+		IrcOnlyWhenLive:         true,
 		NotifyOffStreamMessages: false,
 	}, nil)
 
-	u, err := svc.PatchTwitchUser(context.Background(), 3, entity.TwitchUserPatch{IrcOnlyWhenLive: &ircOff})
+	u, err := svc.PatchTwitchUser(context.Background(), 3, entity.TwitchUserPatch{IrcOnlyWhenLive: &ircOn})
 	require.NoError(t, err)
-	require.False(t, u.IrcOnlyWhenLive)
+	require.True(t, u.IrcOnlyWhenLive)
 	require.False(t, u.NotifyOffStreamMessages)
 }
 
@@ -248,4 +276,18 @@ func TestService_TwitchAccounts(t *testing.T) {
 
 	repo.EXPECT().DeleteTwitchAccount(gomock.Any(), int64(2)).Return(nil)
 	require.NoError(t, svc.DeleteTwitchAccount(context.Background(), 2))
+}
+
+func TestService_UpdateIrcMonitorSettings_rejectsUnknownAccount(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := repomocks.NewMockStore(ctrl)
+	svc := New(repo, &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")})
+
+	id := int64(99)
+	repo.EXPECT().GetTwitchAccountByID(gomock.Any(), id).Return(entity.TwitchAccount{}, entity.ErrTwitchAccountNotFound)
+
+	_, err := svc.UpdateIrcMonitorSettings(context.Background(), entity.IrcMonitorSettings{OauthTwitchAccountID: &id})
+	require.ErrorIs(t, err, entity.ErrTwitchAccountNotFound)
 }

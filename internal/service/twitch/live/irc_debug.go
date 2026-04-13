@@ -6,9 +6,8 @@ import (
 )
 
 func (r *Runtime) attachIRCMonitorDebug(client *twitchirc.Client) {
-	client.OnConnect(func() {
-		r.obs.Logger.Debug("irc monitor: on_connect")
-	})
+	// Do not call client.OnConnect here: the twitch-irc client keeps only one OnConnect callback,
+	// and attachIRCMonitorAppHandlers must own it to set ircMonitorTCP for GetIrcMonitorStatus.
 	client.OnWhisperMessage(func(m twitchirc.WhisperMessage) {
 		r.obs.Logger.Debug("irc monitor: whisper", zap.String("user", m.User.Name))
 	})

@@ -10,8 +10,9 @@ import ChatSystemLine from '../components/ChatSystemLine.vue';
 import TwitchUserLink from '../components/TwitchUserLink.vue';
 import { ApiError, ChatHistoryEntry, DefaultService } from '../api/generated';
 import type { ListChannelChattersRequest } from '../api/generated';
-import type { ChannelChatterEntry, ChannelLive, WatchUiHints } from '../api/generated';
+import type { ChannelChatterEntry, ChannelLive, IrcMonitorStatus, WatchUiHints } from '../api/generated';
 import type { ChatBadgeTag } from '../lib/chatBadges';
+import { isChannelJoinedOnIrc } from '../lib/ircMonitorJoined';
 import { notifyFromApiError } from '../lib/clientNotice';
 import { notify } from '../lib/notify';
 import { useChannelsStore } from '../stores/channels';
@@ -81,10 +82,6 @@ type ChatLine = {
   badgeTags: ChatBadgeTag[];
   createdAtIso?: string;
   chatterUserId?: number | null;
-  /** Presence system messages (join/part) */
-  system?: 'join' | 'part';
-  accountCreatedAt?: string;
-  presentSeconds?: number;
 };
 
 type ChatRow =
@@ -94,6 +91,50 @@ type ChatRow =
 function normCh(c: string): string {
   return c.replace(/^#/, '').toLowerCase();
 }
+
+/** Prefer last opened channel from local storage when it is still a monitored channel or a valid manual login. */
+function preferredWatchChannel(monitored: { username: string }[]): string {
+  const last = watchPrefs.getLastWatchChannel();
+  if (last) {
+    const fromList = monitored.find((c) => normCh(c.username) === last);
+    if (fromList) {
+      return fromList.username;
+    }
+    if (twitchLoginRe.test(last)) {
+      return last;
+    }
+  }
+  return monitored[0]?.username ?? '';
+}
+
+const ircStatusForWatchDot = ref<IrcMonitorStatus | null>(null);
+
+async function pullIrcStatusForWatchDot(): Promise<void> {
+  try {
+    ircStatusForWatchDot.value = await DefaultService.getIrcMonitorStatus();
+  } catch {
+    ircStatusForWatchDot.value = null;
+  }
+}
+
+const ircChatConnected = computed(() => isChannelJoinedOnIrc(ircStatusForWatchDot.value, selectedChannel.value));
+
+watch(
+  () => normCh(selectedChannel.value),
+  () => {
+    void pullIrcStatusForWatchDot();
+  },
+  { immediate: true },
+);
+
+useIntervalFn(
+  () => {
+    if (normCh(selectedChannel.value)) {
+      void pullIrcStatusForWatchDot();
+    }
+  },
+  4000,
+);
 
 function formatGapMinutes(fromMs: number, toMs: number): string {
   const mins = Math.round((toMs - fromMs) / 60000);
@@ -349,46 +390,6 @@ const displayLines = computed((): ChatLine[] => {
       continue;
     }
 
-    if (e.type === 'chatter_join') {
-      const fromIso = e.created_at ? Date.parse(e.created_at) : NaN;
-      const at = Number.isFinite(fromIso) ? fromIso : e.receivedAt;
-      live.push({
-        key: `ws-${e.receivedAt}-${i}-chatter_join`,
-        user: e.user,
-        message: 'joined chat',
-        keyword: false,
-        userMarked: false,
-        fromSent: false,
-        at,
-        badgeTags: [],
-        createdAtIso: e.created_at,
-        chatterUserId: e.user_twitch_id,
-        system: 'join',
-        accountCreatedAt: e.account_created_at,
-      });
-      continue;
-    }
-
-    if (e.type === 'chatter_part') {
-      const fromIso = e.created_at ? Date.parse(e.created_at) : NaN;
-      const at = Number.isFinite(fromIso) ? fromIso : e.receivedAt;
-      live.push({
-        key: `ws-${e.receivedAt}-${i}-chatter_part`,
-        user: e.user,
-        message: 'left chat',
-        keyword: false,
-        userMarked: false,
-        fromSent: false,
-        at,
-        badgeTags: [],
-        createdAtIso: e.created_at,
-        chatterUserId: e.user_twitch_id,
-        system: 'part',
-        presentSeconds: e.present_seconds,
-      });
-      continue;
-    }
-
     if (e.type === 'chat_message' || e.type === 'message_sent') {
       const fromIso = e.created_at ? Date.parse(e.created_at) : NaN;
       const at = Number.isFinite(fromIso) ? fromIso : e.receivedAt;
@@ -437,9 +438,6 @@ const displayRows = computed((): ChatRow[] => {
 onMounted(async () => {
   try {
     await Promise.all([channelsStore.fetch(), twitchStore.fetch()]);
-    if (channelsStore.monitoredChannels.length) {
-      selectedChannel.value = channelsStore.monitoredChannels[0].username;
-    }
     if (twitchStore.accounts.length) {
       sendAccountId.value = twitchStore.accounts[0].id;
     }
@@ -451,6 +449,10 @@ onMounted(async () => {
       description: 'Could not load channels or Twitch accounts.',
     });
   }
+  const pick = preferredWatchChannel(channelsStore.monitoredChannels);
+  if (pick) {
+    selectedChannel.value = pick;
+  }
   try {
     watchHints.value = await DefaultService.getWatchUiHints();
   } catch {
@@ -461,12 +463,23 @@ onMounted(async () => {
 watch(
   () => channelsStore.monitoredChannels,
   (list) => {
-    if (!selectedChannel.value && list.length) {
-      selectedChannel.value = list[0].username;
+    if (selectedChannel.value || !list.length) {
+      return;
+    }
+    const next = preferredWatchChannel(list);
+    if (next) {
+      selectedChannel.value = next;
     }
   },
   { deep: true },
 );
+
+watch(selectedChannel, (ch) => {
+  const n = normCh(ch);
+  if (n) {
+    watchPrefs.setLastWatchChannel(n);
+  }
+});
 
 watch(channelEntryModalOpen, (open) => {
   if (open) {
@@ -773,6 +786,16 @@ async function sendChat(): Promise<void> {
             <span class="chat-title-main">Chat</span>
             <span v-if="selectedChannel" class="chat-channel-tag">#{{ normCh(selectedChannel) }}</span>
             <span v-else class="chat-channel-empty muted">—</span>
+            <span
+              v-if="selectedChannel"
+              class="irc-link-dot"
+              role="img"
+              :class="{ 'irc-link-dot--on': ircChatConnected, 'irc-link-dot--off': !ircChatConnected }"
+              :title="ircChatConnected ? 'IRC monitor joined this channel' : 'IRC monitor not in this channel'"
+              :aria-label="
+                ircChatConnected ? 'IRC monitor joined this channel' : 'IRC monitor not in this channel'
+              "
+            />
           </div>
         </div>
         <ul ref="chatEl" class="lines">
@@ -782,32 +805,6 @@ async function sendChat(): Promise<void> {
               variant="gap"
               user=""
               :text="row.label"
-            />
-            <ChatSystemLine
-              v-else-if="row.line.system === 'join'"
-              variant="join"
-              :user="row.line.user"
-              text="joined chat"
-              :detail="
-                row.line.accountCreatedAt
-                  ? `Account since ${formatAccountDate(row.line.accountCreatedAt)}`
-                  : ''
-              "
-              :chatter-user-id="row.line.chatterUserId ?? undefined"
-              :highlight-channel="normCh(selectedChannel)"
-            />
-            <ChatSystemLine
-              v-else-if="row.line.system === 'part'"
-              variant="part"
-              :user="row.line.user"
-              text="left chat"
-              :detail="
-                row.line.presentSeconds != null
-                  ? `In chat for ${formatSecondsAsClock(row.line.presentSeconds)}`
-                  : ''
-              "
-              :chatter-user-id="row.line.chatterUserId ?? undefined"
-              :highlight-channel="normCh(selectedChannel)"
             />
             <ChatMessageLine
               v-else
@@ -1469,6 +1466,23 @@ async function sendChat(): Promise<void> {
   gap: 0.5rem;
   min-width: 0;
   flex: 1;
+}
+
+.irc-link-dot {
+  flex-shrink: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-left: auto;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+
+  &--on {
+    background: #2ecc71;
+  }
+
+  &--off {
+    background: #c0392b;
+  }
 }
 
 .chat-title-main {

@@ -98,6 +98,11 @@ func (h *Handler) DeleteTwitchAccount(ctx context.Context, req *gen.DeleteByIDRe
 		return nil, err
 	}
 
+	if err := h.twitch.RestartMonitor(ctx); err != nil {
+		h.obs.LogError(ctx, span, "restart monitor after twitch account delete failed", err, zap.Int64("id", req.ID))
+		return nil, err
+	}
+
 	return &gen.DeleteTwitchAccountNoContent{}, nil
 }
 

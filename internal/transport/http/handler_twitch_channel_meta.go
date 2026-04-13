@@ -82,10 +82,6 @@ func (h *Handler) ListChannelChatters(ctx context.Context, req *gen.ListChannelC
 }
 
 func (h *Handler) GetIrcMonitorStatus(ctx context.Context) (*gen.IrcMonitorStatus, error) {
-	if err := requireAdmin(ctx); err != nil {
-		return nil, err
-	}
-
 	connected, rows, err := h.twitch.GetIrcMonitorStatus(ctx)
 	if err != nil {
 		return nil, err

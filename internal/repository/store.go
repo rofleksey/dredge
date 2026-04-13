@@ -86,5 +86,7 @@ type Store interface {
 	RemoveChannelBlacklist(ctx context.Context, login string) error
 	GetSuspicionSettings(ctx context.Context) (entity.SuspicionSettings, error)
 	UpdateSuspicionSettings(ctx context.Context, s entity.SuspicionSettings) error
+	GetIrcMonitorSettings(ctx context.Context) (entity.IrcMonitorSettings, error)
+	UpdateIrcMonitorSettings(ctx context.Context, s entity.IrcMonitorSettings) error
 	ListLinkedTwitchAccountUserIDs(ctx context.Context) ([]int64, error)
 }

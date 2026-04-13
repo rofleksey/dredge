@@ -10,14 +10,14 @@ import (
 	"github.com/rofleksey/dredge/internal/transport/http/gen"
 )
 
-func TestHandler_UpdateTwitchUser_notifyOffRequiresLiveOnly(t *testing.T) {
+func TestHandler_UpdateTwitchUser_notifyOffRejectedWhenLiveOnly(t *testing.T) {
 	h, ctrl, repo := testHandler(t)
 	defer ctrl.Finish()
 
 	repo.EXPECT().GetTwitchUserByID(gomock.Any(), int64(1)).Return(entity.TwitchUser{
 		ID:                      1,
 		Username:                "chan",
-		IrcOnlyWhenLive:         false,
+		IrcOnlyWhenLive:         true,
 		NotifyOffStreamMessages: false,
 	}, nil)
 
@@ -31,5 +31,5 @@ func TestHandler_UpdateTwitchUser_notifyOffRequiresLiveOnly(t *testing.T) {
 	require.True(t, ok, "expected bad request, got %T", res)
 
 	msg := gen.ErrorMessage(*bad).Message
-	require.Contains(t, msg, "irc_only_when_live")
+	require.Contains(t, msg, "notify_off_stream_messages")
 }

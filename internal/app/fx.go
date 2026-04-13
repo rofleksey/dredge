@@ -88,9 +88,9 @@ func fxOptions() fx.Option {
 					gen.WithErrorHandler(httptransport.OgenErrorHandler()),
 				)
 			},
-			func(cfg config.Config, authSvc *auth.Service, srv *gen.Server, hub *ws.Hub, oauth *twitchsvc.OAuth, sett *settings.Service, obs *observability.Stack, origin config.AllowedWebOrigin) (*http.Server, error) {
+			func(cfg config.Config, authSvc *auth.Service, srv *gen.Server, hub *ws.Hub, tw *twitchsvc.Service, oauth *twitchsvc.OAuth, sett *settings.Service, obs *observability.Stack, origin config.AllowedWebOrigin) (*http.Server, error) {
 				mux := http.NewServeMux()
-				mux.Handle("/ws", httptransport.LiveWebsocketHandler(authSvc, hub, obs.Logger))
+				mux.Handle("/ws", httptransport.LiveWebsocketHandler(authSvc, hub, tw, obs.Logger))
 				mux.Handle(httptransport.TwitchOAuthCallbackPath, httptransport.NewTwitchOAuthCallback(oauth, sett, obs))
 				mux.Handle("/", webui.NewMux(srv))
 

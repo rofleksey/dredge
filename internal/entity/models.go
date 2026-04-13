@@ -16,12 +16,11 @@ type ChatMessageListFilter struct {
 	CursorID        *int64
 }
 
-// TwitchUserBrowseFilter drives directory search (keyset on marked DESC, id DESC).
+// TwitchUserBrowseFilter drives directory search (keyset on id DESC).
 type TwitchUserBrowseFilter struct {
-	Username     string
-	Limit        int
-	CursorID     *int64
-	CursorMarked *bool
+	Username string
+	Limit    int
+	CursorID *int64
 }
 
 // Account is an application login (admin or user role).
@@ -112,6 +111,12 @@ type SuspicionSettings struct {
 	AutoCheckLowFollows bool
 	LowFollowsThreshold int
 	MaxGQLFollowPages   int
+}
+
+// IrcMonitorSettings is the singleton row (id=1) for the chat monitor IRC identity.
+// OauthTwitchAccountID nil means anonymous read-only IRC (justinfan); otherwise use that linked account's OAuth token.
+type IrcMonitorSettings struct {
+	OauthTwitchAccountID *int64
 }
 
 // ChatHistoryMessage is a persisted Twitch chat line (IRC or sent via dredge).

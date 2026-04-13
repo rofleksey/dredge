@@ -8,9 +8,9 @@ func ircChannelJoinWanted(u entity.TwitchUser, helixLive bool) bool {
 		return false
 	}
 
-	alwaysIRC := !u.IrcOnlyWhenLive || u.NotifyOffStreamMessages
-	if alwaysIRC {
+	if !u.IrcOnlyWhenLive {
 		return true
 	}
+
 	return helixLive
 }

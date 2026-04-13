@@ -29,26 +29,6 @@ export type LiveEvent =
       created_at?: string;
       receivedAt: number;
       user_twitch_id?: number;
-    }
-  | {
-      type: 'chatter_join';
-      channel: string;
-      user: string;
-      user_twitch_id: number;
-      present_since: string;
-      account_created_at?: string;
-      created_at?: string;
-      receivedAt: number;
-    }
-  | {
-      type: 'chatter_part';
-      channel: string;
-      user: string;
-      user_twitch_id: number;
-      present_seconds: number;
-      present_since: string;
-      created_at?: string;
-      receivedAt: number;
     };
 
 function normChannel(c: string): string {
@@ -97,6 +77,7 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
     }
     const o = raw as Record<string, unknown>;
     const t = o.type;
+
     const ts = Date.now();
     if (t === 'chat_message') {
       const uid = o.user_twitch_id;
@@ -125,45 +106,6 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
         created_at: typeof o.created_at === 'string' ? o.created_at : undefined,
         receivedAt: ts,
         user_twitch_id: typeof uid === 'number' && Number.isFinite(uid) ? uid : undefined,
-      });
-      return;
-    }
-    if (t === 'chatter_join') {
-      const uid = o.user_twitch_id;
-      if (typeof uid !== 'number' || !Number.isFinite(uid)) {
-        return;
-      }
-      events.value.push({
-        type: 'chatter_join',
-        channel: String(o.channel ?? ''),
-        user: String(o.user ?? ''),
-        user_twitch_id: uid,
-        present_since: typeof o.present_since === 'string' ? o.present_since : '',
-        account_created_at: typeof o.account_created_at === 'string' ? o.account_created_at : undefined,
-        created_at: typeof o.created_at === 'string' ? o.created_at : undefined,
-        receivedAt: ts,
-      });
-      return;
-    }
-    if (t === 'chatter_part') {
-      const uid = o.user_twitch_id;
-      const ps = o.present_seconds;
-      if (typeof uid !== 'number' || !Number.isFinite(uid)) {
-        return;
-      }
-      let sec = 0;
-      if (typeof ps === 'number' && Number.isFinite(ps)) {
-        sec = Math.floor(ps);
-      }
-      events.value.push({
-        type: 'chatter_part',
-        channel: String(o.channel ?? ''),
-        user: String(o.user ?? ''),
-        user_twitch_id: uid,
-        present_seconds: sec,
-        present_since: typeof o.present_since === 'string' ? o.present_since : '',
-        created_at: typeof o.created_at === 'string' ? o.created_at : undefined,
-        receivedAt: ts,
       });
     }
   }

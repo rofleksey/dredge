@@ -248,12 +248,10 @@ func TestRepository_integration(t *testing.T) {
 	if len(browse) > 0 {
 		last := browse[len(browse)-1]
 		cur := last.ID
-		m := last.Marked
 		_, err = repo.ListTwitchUsersBrowse(ctx, entity.TwitchUserBrowseFilter{
-			Username:     "",
-			Limit:        10,
-			CursorID:     &cur,
-			CursorMarked: &m,
+			Username: "",
+			Limit:    10,
+			CursorID: &cur,
 		})
 		require.NoError(t, err)
 	}

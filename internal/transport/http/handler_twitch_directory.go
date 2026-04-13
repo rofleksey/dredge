@@ -35,11 +35,6 @@ func (h *Handler) ListTwitchDirectoryUsers(ctx context.Context, params gen.ListT
 		f.CursorID = &v
 	}
 
-	if params.CursorMarked.IsSet() {
-		v := params.CursorMarked.Value
-		f.CursorMarked = &v
-	}
-
 	list, err := h.twitch.ListTwitchUsersBrowse(ctx, f)
 	if err != nil {
 		h.obs.LogError(ctx, span, "list twitch directory users failed", err)

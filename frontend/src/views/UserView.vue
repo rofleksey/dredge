@@ -105,7 +105,7 @@ async function patchUserProfile(patch: Omit<UpdateTwitchUserPostRequest, 'id'>):
   savingUserSettings.value = true;
   try {
     const body: UpdateTwitchUserPostRequest = { id: profile.value.id, ...patch };
-    if (body.irc_only_when_live === false) {
+    if (body.irc_only_when_live === true) {
       body.notify_off_stream_messages = false;
     }
     const u = await DefaultService.updateTwitchUser({
@@ -833,15 +833,15 @@ function formatPresenceWeek(sec: number): string {
               <input
                 type="checkbox"
                 :checked="profile.notify_off_stream_messages"
-                :disabled="savingUserSettings || !profile.irc_only_when_live"
+                :disabled="savingUserSettings || profile.irc_only_when_live"
                 @change="
                   patchUserProfile({ notify_off_stream_messages: ($event.target as HTMLInputElement).checked })
                 "
               />
               <span>Notify about off-stream messages (join IRC while offline)</span>
             </label>
-            <p v-if="!profile.irc_only_when_live" class="muted small indent">
-              Turn on “only when online” to allow off-stream IRC for alerts.
+            <p v-if="profile.irc_only_when_live" class="muted small indent">
+              Turn off “only when online” to enable off-stream message notifications.
             </p>
           </li>
           <li>

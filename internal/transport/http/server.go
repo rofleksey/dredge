@@ -47,7 +47,12 @@ func requireAdmin(ctx context.Context) error {
 	return nil
 }
 
-func LiveWebsocketHandler(authSvc *auth.Service, hub *ws.Hub, log *zap.Logger) http.HandlerFunc {
+// LiveWebsocketWelcomer supplies optional JSON payloads queued to the client right after a successful WS upgrade.
+type LiveWebsocketWelcomer interface {
+	LiveWebSocketWelcomePayloads(ctx context.Context) ([]any, error)
+}
+
+func LiveWebsocketHandler(authSvc *auth.Service, hub *ws.Hub, welcomer LiveWebsocketWelcomer, log *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var token string
 
@@ -75,7 +80,22 @@ func LiveWebsocketHandler(authSvc *auth.Service, hub *ws.Hub, log *zap.Logger) h
 			return
 		}
 
-		if err := hub.Upgrade(w, r, userID); err != nil {
+		var initial []any
+
+		if welcomer != nil {
+			var err error
+
+			initial, err = welcomer.LiveWebSocketWelcomePayloads(r.Context())
+			if err != nil {
+				if log != nil {
+					log.Debug("websocket welcome payloads failed", zap.Error(err))
+				}
+
+				initial = nil
+			}
+		}
+
+		if err := hub.Upgrade(w, r, userID, initial...); err != nil {
 			if log != nil {
 				log.Debug("websocket upgrade failed", zap.Error(err), zap.String("origin", r.Header.Get("Origin")))
 			}

@@ -35,7 +35,6 @@ type Runtime struct {
 
 	ircMonitorMu  sync.Mutex
 	ircMonitorTCP bool
-	ircChannelOK  map[string]bool
 
 	joinStateMu       sync.Mutex
 	reconcilerJoined  map[string]bool

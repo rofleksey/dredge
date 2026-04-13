@@ -335,30 +335,13 @@ func (r *Repository) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchU
 	}
 
 	if f.CursorID != nil && *f.CursorID > 0 {
-		lastM := f.CursorMarked
-		if lastM == nil {
-			var m bool
-			if err := r.pool.QueryRow(ctx, `SELECT marked FROM twitch_users WHERE id = $1`, *f.CursorID).Scan(&m); err != nil {
-				r.obs.LogError(ctx, span, "browse cursor lookup failed", err)
-				return nil, err
-			}
-
-			lastM = &m
-		}
-
 		lastID := *f.CursorID
-		// Keyset after (marked DESC, id DESC).
-		b.WriteString(` AND (
-			(marked = true AND $` + strconv.Itoa(argN) + ` = true AND id < $` + strconv.Itoa(argN+1) + `)
-			OR (marked = false AND $` + strconv.Itoa(argN) + ` = true)
-			OR (marked = false AND $` + strconv.Itoa(argN) + ` = false AND id < $` + strconv.Itoa(argN+1) + `)
-		)`)
-
-		args = append(args, *lastM, lastID)
-		argN += 2
+		b.WriteString(` AND id < $` + strconv.Itoa(argN))
+		args = append(args, lastID)
+		argN++
 	}
 
-	b.WriteString(` ORDER BY marked DESC, id DESC LIMIT $`)
+	b.WriteString(` ORDER BY id DESC LIMIT $`)
 	b.WriteString(strconv.Itoa(argN))
 
 	args = append(args, limit)

@@ -19,6 +19,8 @@ const props = withDefaults(
 
 const auth = useAuthStore();
 
+const brandLogoSrc = `${import.meta.env.BASE_URL}logo.jpg`;
+
 const liveTitle = computed(() => {
   if (props.liveConnected) {
     return 'Live: connected';
@@ -38,7 +40,9 @@ function logout(): void {
 <template>
   <div class="shell">
     <header class="top">
-      <RouterLink class="brand" to="/">dredge</RouterLink>
+      <RouterLink class="brand" to="/" aria-label="Dredge home">
+        <img class="brand-logo" :src="brandLogoSrc" alt="" width="120" height="32" />
+      </RouterLink>
       <nav class="nav">
         <RouterLink to="/" active-class="active">Watch</RouterLink>
         <RouterLink to="/messages" active-class="active">Messages</RouterLink>
@@ -101,11 +105,20 @@ function logout(): void {
 }
 
 .brand {
-  font-weight: 700;
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  line-height: 0;
   color: var(--accent);
   text-decoration: none;
-  letter-spacing: 0.02em;
+}
+
+.brand-logo {
+  display: block;
+  height: 1.35rem;
+  width: auto;
+  max-width: 7rem;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .nav {

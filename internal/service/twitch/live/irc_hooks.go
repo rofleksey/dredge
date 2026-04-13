@@ -18,37 +18,14 @@ type IRCMonitorChannelStatus struct {
 }
 
 func (r *Runtime) attachIRCMonitorAppHandlers(client *twitchirc.Client) {
+	// go-twitch-irc Client stores a single OnConnect func; attachIRCMonitorDebug must not register
+	// another OnConnect after this or ircMonitorTCP will never flip true (Settings IRC status breaks).
 	client.OnConnect(func() {
 		r.ircMonitorMu.Lock()
 		r.ircMonitorTCP = true
-		r.ircChannelOK = make(map[string]bool)
 		r.ircMonitorMu.Unlock()
-	})
-
-	client.OnSelfJoinMessage(func(m twitchirc.UserJoinMessage) {
-		ch := NormalizeTwitchChannel(m.Channel)
-		if ch == "" {
-			return
-		}
-
-		r.ircMonitorMu.Lock()
-		if r.ircChannelOK != nil {
-			r.ircChannelOK[ch] = true
-		}
-		r.ircMonitorMu.Unlock()
-	})
-
-	client.OnSelfPartMessage(func(m twitchirc.UserPartMessage) {
-		ch := NormalizeTwitchChannel(m.Channel)
-		if ch == "" {
-			return
-		}
-
-		r.ircMonitorMu.Lock()
-		if r.ircChannelOK != nil {
-			r.ircChannelOK[ch] = false
-		}
-		r.ircMonitorMu.Unlock()
+		r.obs.Logger.Debug("irc monitor: on_connect")
+		r.broadcastIRCMonitorTCP(true)
 	})
 
 	client.OnUserJoinMessage(func(m twitchirc.UserJoinMessage) {
@@ -111,61 +88,25 @@ func (r *Runtime) handleIRCChatterPresence(ctx context.Context, channelLogin, us
 
 	_ = r.repo.InsertUserActivityEvent(persistCtx, uid, ev, &chID, nil)
 
-	ts := time.Now().UTC()
-	createdAt := ts.Format(time.RFC3339Nano)
-
 	if join {
-		presentSince, err := r.repo.UpsertChannelChatterPresence(persistCtx, chID, uid)
-		if err != nil {
+		_, upErr := r.repo.UpsertChannelChatterPresence(persistCtx, chID, uid)
+		if upErr != nil {
 			return
 		}
 
-		var accountCreated *time.Time
-
-		if ca, _, _, err := r.repo.GetHelixMeta(persistCtx, uid); err == nil {
-			accountCreated = ca
-		}
-
-		payload := map[string]any{
-			"type":           "chatter_join",
-			"channel":        channelLogin,
-			"user":           userLogin,
-			"user_twitch_id": uid,
-			"present_since":  presentSince.Format(time.RFC3339Nano),
-			"created_at":     createdAt,
-		}
-
-		if accountCreated != nil {
-			payload["account_created_at"] = accountCreated.Format(time.RFC3339Nano)
-		}
-
-		r.broadcaster.BroadcastJSON(payload)
-
 		return
 	}
 
-	presentSince, hadRow, err := r.repo.DeleteChannelChatterPresence(persistCtx, chID, uid)
-	if err != nil || !hadRow {
+	since, hadRow, delErr := r.repo.DeleteChannelChatterPresence(persistCtx, chID, uid)
+	if delErr != nil || !hadRow {
 		return
 	}
 
-	sec := int64(ts.Sub(presentSince).Seconds())
-	if sec < 0 {
-		sec = 0
-	}
-
-	r.broadcaster.BroadcastJSON(map[string]any{
-		"type":            "chatter_part",
-		"channel":         channelLogin,
-		"user":            userLogin,
-		"user_twitch_id":  uid,
-		"present_seconds": sec,
-		"present_since":   presentSince.Format(time.RFC3339Nano),
-		"created_at":      createdAt,
-	})
+	_ = since
 }
 
-// GetIrcMonitorStatus returns TCP connection and per-channel self-JOIN state (in-memory).
+// GetIrcMonitorStatus returns TCP connection and per-channel join state from Join/Depart calls
+// (see applyJoinDiffs); it does not infer joins from IRC userlists or JOIN/PART events.
 func (r *Runtime) GetIrcMonitorStatus(ctx context.Context) (connected bool, channels []IRCMonitorChannelStatus, err error) {
 	monitored, err := r.repo.ListMonitoredTwitchUsers(ctx)
 	if err != nil {
@@ -178,19 +119,48 @@ func (r *Runtime) GetIrcMonitorStatus(ctx context.Context) (connected bool, chan
 
 	r.ircMonitorMu.Lock()
 	tcp := r.ircMonitorTCP
-	chOK := r.ircChannelOK
 	r.ircMonitorMu.Unlock()
 
 	if !clientUp {
 		tcp = false
 	}
 
+	r.joinStateMu.Lock()
+
 	out := make([]IRCMonitorChannelStatus, 0, len(monitored))
+
 	for _, u := range monitored {
 		login := NormalizeTwitchChannel(u.Username)
-		ok := tcp && chOK != nil && chOK[login]
+		ok := tcp && clientUp && login != "" && r.reconcilerJoined[login]
 		out = append(out, IRCMonitorChannelStatus{Login: u.Username, IrcOK: ok})
 	}
+	r.joinStateMu.Unlock()
 
 	return tcp, out, nil
+}
+
+// LiveWebSocketWelcomePayloads returns one JSON message with IRC monitor TCP + per-channel join state for new browser clients.
+func (r *Runtime) LiveWebSocketWelcomePayloads(ctx context.Context) (any, error) {
+	tcp, rows, err := r.GetIrcMonitorStatus(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	joined := make([]string, 0, len(rows))
+	for _, row := range rows {
+		if !row.IrcOK {
+			continue
+		}
+
+		ch := NormalizeTwitchChannel(row.Login)
+		if ch != "" {
+			joined = append(joined, ch)
+		}
+	}
+
+	return map[string]any{
+		"type":            "irc_monitor_snapshot",
+		"tcp_connected":   tcp,
+		"joined_channels": joined,
+	}, nil
 }

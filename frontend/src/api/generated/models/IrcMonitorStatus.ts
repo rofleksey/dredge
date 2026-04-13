@@ -10,7 +10,7 @@ export type IrcMonitorStatus = {
     channels: Array<{
         login: string;
         /**
-         * True after the monitor has received self-JOIN for this channel
+         * True when the IRC client's NAMES-backed userlist for this channel is non-empty (session state)
          */
         irc_ok: boolean;
     }>;

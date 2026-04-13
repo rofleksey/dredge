@@ -27,7 +27,6 @@ async function load(append = false): Promise<void> {
         username: q.value.trim() || undefined,
         limit: 100,
         cursorId: append && last ? last.id : undefined,
-        cursorMarked: append && last ? last.marked : undefined,
       }),
       DefaultService.countTwitchDirectoryUsers({
         username: q.value.trim() || undefined,

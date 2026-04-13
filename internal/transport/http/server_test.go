@@ -76,7 +76,7 @@ func TestLiveWebsocketHandler_missingToken(t *testing.T) {
 	authSvc, err := auth.New(cfg, "12345678901234567890", time.Hour, obs)
 	require.NoError(t, err)
 
-	h := LiveWebsocketHandler(authSvc, ws.NewHub(""), nil)
+	h := LiveWebsocketHandler(authSvc, ws.NewHub(""), nil, nil)
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/ws", nil)
 

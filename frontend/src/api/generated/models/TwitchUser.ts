@@ -24,11 +24,11 @@ export type TwitchUser = {
      */
     sus_auto_suppressed: boolean;
     /**
-     * When true, join IRC only while the channel has an active Helix stream (unless notify_off_stream_messages)
+     * When true, join IRC only while the channel has an active Helix stream
      */
     irc_only_when_live: boolean;
     /**
-     * When irc_only_when_live is true, also join IRC while offline to capture chat and keyword alerts
+     * When irc_only_when_live is false, enable notifications for chat while the channel is offline on Twitch
      */
     notify_off_stream_messages: boolean;
     /**
