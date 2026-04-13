@@ -59,8 +59,8 @@ type Store interface {
 	InsertUserActivityEvent(ctx context.Context, chatterID int64, eventType string, channelTwitchUserID *int64, details map[string]any) error
 	ListUserActivityEvents(ctx context.Context, f entity.UserActivityListFilter) ([]entity.UserActivityEvent, error)
 	ListUserActivityEventsForTimeline(ctx context.Context, chatterID int64, from, to time.Time) ([]entity.UserActivityEvent, error)
-	UpsertHelixMeta(ctx context.Context, twitchUserID int64, accountCreatedAt *time.Time, fetchedAt time.Time) error
-	GetHelixMeta(ctx context.Context, twitchUserID int64) (accountCreatedAt *time.Time, helixFetchedAt *time.Time, err error)
+	UpsertHelixMeta(ctx context.Context, twitchUserID int64, accountCreatedAt *time.Time, profileImageURL *string, fetchedAt time.Time) error
+	GetHelixMeta(ctx context.Context, twitchUserID int64) (accountCreatedAt *time.Time, helixFetchedAt *time.Time, profileImageURL *string, err error)
 	UpsertChannelFollow(ctx context.Context, chatterID, channelID int64, followedAt *time.Time, checkedAt time.Time) error
 	ListFollowedMonitoredChannels(ctx context.Context, chatterID int64) ([]entity.FollowedMonitoredChannel, error)
 	ListDistinctChattersWithMessages(ctx context.Context, limit int) ([]int64, error)

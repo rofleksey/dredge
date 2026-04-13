@@ -120,17 +120,38 @@ func (h *Handler) UpdateTwitchUser(ctx context.Context, req *gen.UpdateTwitchUse
 		patch.SusAutoSuppressed = &v
 	}
 
+	if req.IrcOnlyWhenLive.IsSet() {
+		v := req.IrcOnlyWhenLive.Value
+		patch.IrcOnlyWhenLive = &v
+	}
+
+	if req.NotifyOffStreamMessages.IsSet() {
+		v := req.NotifyOffStreamMessages.Value
+		patch.NotifyOffStreamMessages = &v
+	}
+
+	if req.NotifyStreamStart.IsSet() {
+		v := req.NotifyStreamStart.Value
+		patch.NotifyStreamStart = &v
+	}
+
 	u, err := h.sett.PatchTwitchUser(ctx, req.ID, patch)
 	if err != nil {
 		if errors.Is(err, entity.ErrTwitchUserNotFound) {
-			return &gen.ErrorMessage{Message: "twitch user not found"}, nil
+			return &gen.UpdateTwitchUserNotFound{Message: "twitch user not found"}, nil
+		}
+
+		if errors.Is(err, entity.ErrInvalidTwitchUserMonitorSettings) {
+			return &gen.UpdateTwitchUserBadRequest{Message: "notify_off_stream_messages requires irc_only_when_live"}, nil
 		}
 
 		h.obs.LogError(ctx, span, "update twitch user failed", err, zap.Int64("id", req.ID))
 		return nil, err
 	}
 
-	if patch.Monitored != nil {
+	restartIRC := patch.Monitored != nil || patch.IrcOnlyWhenLive != nil ||
+		patch.NotifyOffStreamMessages != nil || patch.NotifyStreamStart != nil
+	if restartIRC {
 		if err := h.twitch.RestartMonitor(ctx); err != nil {
 			h.obs.LogError(ctx, span, "restart monitor failed", err, zap.Int64("id", req.ID))
 			return nil, err

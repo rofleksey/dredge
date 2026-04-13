@@ -120,6 +120,7 @@ export class DefaultService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
+                400: `Invalid monitor settings (e.g. off-stream notifications require live-only IRC)`,
                 404: `Twitch user not found`,
             },
         });

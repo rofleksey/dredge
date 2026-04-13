@@ -37,5 +37,12 @@ export type TwitchUserProfile = {
      * Current global blacklist (for client-side pinning and filtering)
      */
     channel_blacklist: Array<string>;
+    irc_only_when_live: boolean;
+    notify_off_stream_messages: boolean;
+    notify_stream_start: boolean;
+    /**
+     * Profile image URL from Helix enrichment when available
+     */
+    profile_image_url?: string | null;
 };
 

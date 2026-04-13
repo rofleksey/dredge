@@ -93,7 +93,7 @@ func (s *Service) StreamLeaderboard(ctx context.Context, stream entity.Stream, s
 		mc := msgCounts[id]
 		ps := presence[id]
 
-		acct, _, err := s.repo.GetHelixMeta(ctx, id)
+		acct, _, _, err := s.repo.GetHelixMeta(ctx, id)
 		if err != nil {
 			s.obs.LogError(ctx, span, "helix meta for leaderboard failed", err, zap.Int64("id", id))
 		}

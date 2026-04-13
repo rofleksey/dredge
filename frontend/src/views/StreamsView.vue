@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watchDebounced } from '@vueuse/core';
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { ApiError, DefaultService } from '../api/generated';
@@ -75,7 +76,7 @@ function notifyFromErr(e: unknown, id: string): void {
   notify({ id, type: 'error', title: 'Streams', description: msg });
 }
 
-async function applyFilter(): Promise<void> {
+async function applyFilterDebounced(): Promise<void> {
   try {
     await loadFirst();
   } catch (e) {
@@ -83,6 +84,14 @@ async function applyFilter(): Promise<void> {
     notifyFromErr(e, 'streams-load');
   }
 }
+
+watchDebounced(
+  channelFilter,
+  () => {
+    void applyFilterDebounced();
+  },
+  { debounce: 350 },
+);
 
 onMounted(() => {
   void loadFirst().catch((e) => {
@@ -111,7 +120,7 @@ function statusLabel(s: RecordedStream): string {
       <p class="muted">Recorded broadcasts for monitored channels</p>
     </header>
 
-    <form class="streams-filter" @submit.prevent="applyFilter">
+    <div class="streams-filter">
       <label class="field">
         <span class="label">Channel</span>
         <input
@@ -122,15 +131,14 @@ function statusLabel(s: RecordedStream): string {
           autocomplete="off"
         />
       </label>
-      <button type="submit" class="btn-apply">Apply</button>
-    </form>
+    </div>
 
     <p v-if="loading" class="muted">Loading…</p>
     <table v-else-if="streams.length" class="streams-table">
       <thead>
         <tr>
-          <th>Channel</th>
           <th>Title</th>
+          <th>Channel</th>
           <th>Category</th>
           <th>Started</th>
           <th>Status</th>
@@ -139,13 +147,13 @@ function statusLabel(s: RecordedStream): string {
       <tbody>
         <tr v-for="s in streams" :key="s.id">
           <td>
-            <RouterLink class="link" :to="{ name: 'stream', params: { id: String(s.id) } }">
-              #{{ s.channel_login }}
+            <RouterLink class="link title" :to="{ name: 'stream', params: { id: String(s.id) } }">
+              {{ s.title?.trim() || '—' }}
             </RouterLink>
           </td>
           <td>
-            <RouterLink class="link title" :to="{ name: 'stream', params: { id: String(s.id) } }">
-              {{ s.title?.trim() || '—' }}
+            <RouterLink class="link" :to="{ name: 'stream', params: { id: String(s.id) } }">
+              #{{ s.channel_login }}
             </RouterLink>
           </td>
           <td class="muted">{{ s.game_name?.trim() || '—' }}</td>
@@ -209,15 +217,6 @@ function statusLabel(s: RecordedStream): string {
     background: var(--bg-base);
     color: var(--text);
   }
-}
-
-.btn-apply {
-  padding: 0.35rem 0.75rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  color: var(--text);
-  cursor: pointer;
 }
 
 .streams-table {

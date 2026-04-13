@@ -188,14 +188,17 @@ func optNilStringFromPtr(s *string) gen.OptNilString {
 
 func entityTwitchUserToGen(u entity.TwitchUser) gen.TwitchUser {
 	out := gen.TwitchUser{
-		ID:                u.ID,
-		Username:          u.Username,
-		Monitored:         u.Monitored,
-		Marked:            u.Marked,
-		IsSus:             u.IsSus,
-		SusType:           optNilStringFromPtr(u.SusType),
-		SusDescription:    optNilStringFromPtr(u.SusDescription),
-		SusAutoSuppressed: u.SusAutoSuppressed,
+		ID:                      u.ID,
+		Username:                u.Username,
+		Monitored:               u.Monitored,
+		Marked:                  u.Marked,
+		IsSus:                   u.IsSus,
+		SusType:                 optNilStringFromPtr(u.SusType),
+		SusDescription:          optNilStringFromPtr(u.SusDescription),
+		SusAutoSuppressed:       u.SusAutoSuppressed,
+		IrcOnlyWhenLive:         u.IrcOnlyWhenLive,
+		NotifyOffStreamMessages: u.NotifyOffStreamMessages,
+		NotifyStreamStart:       u.NotifyStreamStart,
 	}
 
 	return out

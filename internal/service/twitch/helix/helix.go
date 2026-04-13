@@ -817,8 +817,15 @@ func (c *Client) HelixStreamsMetadataByBroadcasterIDs(ctx context.Context, ids [
 	return out, nil
 }
 
-// maxUserOAuthCacheTTL is how long we reuse a user (refresh-grant) access token before refreshing again.
-const maxUserOAuthCacheTTL = 30 * time.Minute
+// defaultUserOAuthCacheTTL is used when Client.UserOAuthTokenCacheTTL is zero.
+const defaultUserOAuthCacheTTL = 30 * time.Minute
+
+func (c *Client) userOAuthCacheTTL() time.Duration {
+	if c != nil && c.UserOAuthTokenCacheTTL > 0 {
+		return c.UserOAuthTokenCacheTTL
+	}
+	return defaultUserOAuthCacheTTL
+}
 
 // RefreshAccessToken exchanges a Twitch refresh token for new OAuth credentials.
 func (c *Client) RefreshAccessToken(ctx context.Context, refreshToken string) (string, string, error) {
@@ -881,7 +888,7 @@ func (c *Client) refreshUserAccessToken(ctx context.Context, span trace.Span, re
 }
 
 // CachedUserAccessTokenForAccount returns a user access token for Helix user endpoints, reusing a recent
-// refresh for up to maxUserOAuthCacheTTL (and never past the token's expires_in from Twitch).
+// refresh for up to the configured user OAuth cache TTL (and never past the token's expires_in from Twitch).
 func (c *Client) CachedUserAccessTokenForAccount(ctx context.Context, accountID int64, refreshToken string) (accessToken string, newRefreshToken string, err error) {
 	now := time.Now()
 
@@ -903,7 +910,7 @@ func (c *Client) CachedUserAccessTokenForAccount(ctx context.Context, accountID 
 		return "", "", err
 	}
 
-	ttl := maxUserOAuthCacheTTL
+	ttl := c.userOAuthCacheTTL()
 
 	if expSec > 0 {
 		capTTL := time.Duration(expSec)*time.Second - 90*time.Second

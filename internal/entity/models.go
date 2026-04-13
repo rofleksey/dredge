@@ -42,24 +42,30 @@ const (
 
 // TwitchUserPatch is a partial update for twitch_users (nil fields are left unchanged).
 type TwitchUserPatch struct {
-	Monitored         *bool
-	Marked            *bool
-	IsSus             *bool
-	SusType           *string
-	SusDescription    *string
-	SusAutoSuppressed *bool
+	Monitored               *bool
+	Marked                  *bool
+	IsSus                   *bool
+	SusType                 *string
+	SusDescription          *string
+	SusAutoSuppressed       *bool
+	IrcOnlyWhenLive         *bool
+	NotifyOffStreamMessages *bool
+	NotifyStreamStart       *bool
 }
 
 // TwitchUser is a Twitch identity (e.g. a channel); monitored selects IRC join and keyword handling.
 type TwitchUser struct {
-	ID                int64
-	Username          string
-	Monitored         bool
-	Marked            bool
-	IsSus             bool
-	SusType           *string
-	SusDescription    *string
-	SusAutoSuppressed bool
+	ID                      int64
+	Username                string
+	Monitored               bool
+	Marked                  bool
+	IsSus                   bool
+	SusType                 *string
+	SusDescription          *string
+	SusAutoSuppressed       bool
+	IrcOnlyWhenLive         bool
+	NotifyOffStreamMessages bool
+	NotifyStreamStart       bool
 }
 
 // Rule matches chat lines after user/channel allow/deny filters and regex.

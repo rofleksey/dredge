@@ -62,11 +62,63 @@ func TestService_PatchTwitchUser(t *testing.T) {
 	svc := New(repo, &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")})
 
 	m := true
+
+	repo.EXPECT().GetTwitchUserByID(gomock.Any(), int64(1)).Return(entity.TwitchUser{ID: 1, IrcOnlyWhenLive: true}, nil)
 	repo.EXPECT().PatchTwitchUser(gomock.Any(), int64(1), entity.TwitchUserPatch{Monitored: &m}).Return(entity.TwitchUser{ID: 1, Monitored: true}, nil)
 
 	u, err := svc.PatchTwitchUser(context.Background(), 1, entity.TwitchUserPatch{Monitored: &m})
 	require.NoError(t, err)
 	require.True(t, u.Monitored)
+}
+
+func TestService_PatchTwitchUser_rejectsNotifyOffWithoutLiveOnly(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := repomocks.NewMockStore(ctrl)
+	svc := New(repo, &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")})
+
+	on := true
+
+	repo.EXPECT().GetTwitchUserByID(gomock.Any(), int64(2)).Return(entity.TwitchUser{
+		ID:                      2,
+		IrcOnlyWhenLive:         false,
+		NotifyOffStreamMessages: false,
+	}, nil)
+
+	_, err := svc.PatchTwitchUser(context.Background(), 2, entity.TwitchUserPatch{NotifyOffStreamMessages: &on})
+	require.ErrorIs(t, err, entity.ErrInvalidTwitchUserMonitorSettings)
+}
+
+func TestService_PatchTwitchUser_coercesNotifyOffWhenDisablingLiveOnly(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := repomocks.NewMockStore(ctrl)
+	svc := New(repo, &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")})
+
+	repo.EXPECT().GetTwitchUserByID(gomock.Any(), int64(3)).Return(entity.TwitchUser{
+		ID:                      3,
+		IrcOnlyWhenLive:         true,
+		NotifyOffStreamMessages: true,
+	}, nil)
+
+	ircOff := false
+	notifyOff := false
+
+	repo.EXPECT().PatchTwitchUser(gomock.Any(), int64(3), entity.TwitchUserPatch{
+		IrcOnlyWhenLive:         &ircOff,
+		NotifyOffStreamMessages: &notifyOff,
+	}).Return(entity.TwitchUser{
+		ID:                      3,
+		IrcOnlyWhenLive:         false,
+		NotifyOffStreamMessages: false,
+	}, nil)
+
+	u, err := svc.PatchTwitchUser(context.Background(), 3, entity.TwitchUserPatch{IrcOnlyWhenLive: &ircOff})
+	require.NoError(t, err)
+	require.False(t, u.IrcOnlyWhenLive)
+	require.False(t, u.NotifyOffStreamMessages)
 }
 
 func TestService_ListRules(t *testing.T) {

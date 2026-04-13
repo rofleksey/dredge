@@ -12,7 +12,13 @@ import (
 	"github.com/rofleksey/dredge/internal/service/twitch/helix"
 )
 
-// Runtime owns the anonymous IRC monitor connection, presence polling, and notification dispatch.
+// streamLiveEdge tracks previous Helix live state for stream-start notifications.
+type streamLiveEdge struct {
+	initialized bool
+	wasLive     bool
+}
+
+// Runtime owns the IRC monitor connection, presence polling, and notification dispatch.
 type Runtime struct {
 	helix                     *helix.Client
 	repo                      repository.Store
@@ -21,6 +27,8 @@ type Runtime struct {
 	onEnqueue                 func(int64)
 	persistParent             func() context.Context
 	channelChattersSyncPeriod time.Duration
+	joinReconcileInterval     time.Duration
+	oauthTokenSyncInterval    time.Duration
 
 	monitorMu     sync.Mutex
 	monitorClient *twitchirc.Client
@@ -28,6 +36,15 @@ type Runtime struct {
 	ircMonitorMu  sync.Mutex
 	ircMonitorTCP bool
 	ircChannelOK  map[string]bool
+
+	joinStateMu       sync.Mutex
+	reconcilerJoined  map[string]bool
+	streamEdge        map[int64]streamLiveEdge
+	lastIRCOAuthToken string
+
+	monitorLoopsMu     sync.Mutex
+	monitorLoopsCancel context.CancelFunc
+	monitorLoopsWG     sync.WaitGroup
 
 	notifySem chan struct{}
 }
@@ -39,6 +56,16 @@ func NewRuntime(cfg Config) *Runtime {
 		period = 10 * time.Second
 	}
 
+	joinInt := cfg.JoinReconcileInterval
+	if joinInt <= 0 {
+		joinInt = 20 * time.Second
+	}
+
+	oauthInt := cfg.OAuthTokenSyncInterval
+	if oauthInt <= 0 {
+		oauthInt = 2 * time.Minute
+	}
+
 	return &Runtime{
 		helix:                     cfg.Helix,
 		repo:                      cfg.Repo,
@@ -47,6 +74,10 @@ func NewRuntime(cfg Config) *Runtime {
 		onEnqueue:                 cfg.OnEnqueueUser,
 		persistParent:             cfg.PersistContext,
 		channelChattersSyncPeriod: period,
+		joinReconcileInterval:     joinInt,
+		oauthTokenSyncInterval:    oauthInt,
+		reconcilerJoined:          make(map[string]bool),
+		streamEdge:                make(map[int64]streamLiveEdge),
 		notifySem:                 make(chan struct{}, 8),
 	}
 }

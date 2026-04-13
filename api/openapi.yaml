@@ -96,6 +96,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TwitchUser"
+        "400":
+          description: Invalid monitor settings (e.g. off-stream notifications require live-only IRC)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
         "404":
           description: Twitch user not found
           content:
@@ -1061,6 +1067,12 @@ components:
         sus_auto_suppressed:
           type: boolean
           description: Set true when clearing suspicion to block automatic re-marking; set false to allow auto detection again
+        irc_only_when_live:
+          type: boolean
+        notify_off_stream_messages:
+          type: boolean
+        notify_stream_start:
+          type: boolean
     UpdateRulePostRequest:
       type: object
       required: [id, regex, included_users, denied_users, included_channels, denied_channels]
@@ -1177,7 +1189,7 @@ components:
           type: string
     TwitchUser:
       type: object
-      required: [id, username, monitored, marked, is_sus, sus_auto_suppressed]
+      required: [id, username, monitored, marked, is_sus, sus_auto_suppressed, irc_only_when_live, notify_off_stream_messages, notify_stream_start]
       properties:
         id:
           type: integer
@@ -1202,9 +1214,18 @@ components:
         sus_auto_suppressed:
           type: boolean
           description: When true, automatic suspicion will not mark this user until cleared in settings
+        irc_only_when_live:
+          type: boolean
+          description: When true, join IRC only while the channel has an active Helix stream (unless notify_off_stream_messages)
+        notify_off_stream_messages:
+          type: boolean
+          description: When irc_only_when_live is true, also join IRC while offline to capture chat and keyword alerts
+        notify_stream_start:
+          type: boolean
+          description: When true, send notifications when this channel goes live on Twitch
     TwitchUserProfile:
       type: object
-      required: [id, username, monitored, marked, message_count, presence_seconds_this_week, is_sus, sus_auto_suppressed, followed_channels, channel_blacklist]
+      required: [id, username, monitored, marked, message_count, presence_seconds_this_week, is_sus, sus_auto_suppressed, followed_channels, channel_blacklist, irc_only_when_live, notify_off_stream_messages, notify_stream_start]
       properties:
         id:
           type: integer
@@ -1253,6 +1274,16 @@ components:
           description: Current global blacklist (for client-side pinning and filtering)
           items:
             type: string
+        irc_only_when_live:
+          type: boolean
+        notify_off_stream_messages:
+          type: boolean
+        notify_stream_start:
+          type: boolean
+        profile_image_url:
+          type: string
+          nullable: true
+          description: Profile image URL from Helix enrichment when available
     FollowedMonitoredChannel:
       type: object
       required: [channel_id, channel_login]

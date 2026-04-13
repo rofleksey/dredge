@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   ApiError,
@@ -10,6 +10,7 @@ import {
   TwitchAccount,
   UpdateTwitchAccountPostRequest,
 } from '../api/generated';
+import type { IrcMonitorStatus } from '../api/generated';
 import type { SuspicionSettings } from '../api/generated';
 import type { Rule } from '../api/generated';
 import AppModal from '../components/AppModal.vue';
@@ -69,6 +70,51 @@ const savingRule = ref(false);
 const savingNotif = ref(false);
 const savingBlacklist = ref(false);
 const savingSuspicion = ref(false);
+
+const ircStatus = ref<IrcMonitorStatus | null>(null);
+let ircPollId: number | null = null;
+
+async function fetchIrcStatus(): Promise<void> {
+  try {
+    ircStatus.value = await DefaultService.getIrcMonitorStatus();
+  } catch {
+    ircStatus.value = null;
+  }
+}
+
+function stopIrcPoll(): void {
+  if (ircPollId !== null) {
+    clearInterval(ircPollId);
+    ircPollId = null;
+  }
+}
+
+function startIrcPoll(): void {
+  stopIrcPoll();
+  if (tab.value !== 'channels') {
+    return;
+  }
+  void fetchIrcStatus();
+  ircPollId = window.setInterval(() => {
+    void fetchIrcStatus();
+  }, 4000);
+}
+
+watch(
+  () => tab.value,
+  (t) => {
+    if (t === 'channels') {
+      startIrcPoll();
+    } else {
+      stopIrcPoll();
+    }
+  },
+  { immediate: true },
+);
+
+onBeforeUnmount(() => {
+  stopIrcPoll();
+});
 
 async function refresh(): Promise<void> {
   const [rulesList, rCount, taCount, notifList, bl, sus] = await Promise.all([
@@ -480,11 +526,29 @@ async function saveSuspicionSettings(): Promise<void> {
 }
 
 /** Twitch IRC allows a limited number of concurrent channel joins per connection. */
-const maxMonitoredChannels = 100;
+const maxIrcJoinedChannels = 100;
 
-const channelsHeading = computed(
-  () => `Monitored channels (${monitoredChannels.value.length} / ${maxMonitoredChannels})`,
-);
+const channelsHeading = computed(() => `Monitored channels (${monitoredChannels.value.length})`);
+
+const monitoredCount = computed(() => monitoredChannels.value.length);
+
+const ircJoinedCount = computed(() => {
+  const st = ircStatus.value;
+  if (!st?.connected || !st.channels?.length) {
+    return 0;
+  }
+  return st.channels.filter((c) => c.irc_ok).length;
+});
+
+function channelIrcJoined(login: string): boolean {
+  const st = ircStatus.value;
+  if (!st?.connected) {
+    return false;
+  }
+  const low = login.toLowerCase();
+  const row = st.channels.find((c) => c.login.toLowerCase() === low);
+  return row?.irc_ok ?? false;
+}
 const rulesHeading = computed(() => `Rules (${rulesTotal.value})`);
 const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.value})`);
 </script>
@@ -507,12 +571,27 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
 
       <section v-show="tab === 'channels'" class="panel">
         <h2>{{ channelsHeading }}</h2>
-        <p class="hint channels-limit-hint">
-          Twitch IRC enforces a hard limit of {{ maxMonitoredChannels }} concurrent channel joins per connection. Stay at or
-          below this cap or some channels may not receive chat reliably.
+        <p class="hint">
+          Monitored: {{ monitoredCount }} · IRC joined:
+          {{ ircJoinedCount }}
+          <span v-if="!ircStatus?.connected" class="muted"> (IRC not connected)</span>
+        </p>
+        <p v-if="ircJoinedCount > maxIrcJoinedChannels" class="hint hint-warn">
+          IRC joined count is above {{ maxIrcJoinedChannels }}. Twitch limits concurrent joins per connection; some
+          channels may not receive chat reliably until you reduce joins (e.g. live-only monitoring per channel on the User
+          page).
+        </p>
+        <p v-else class="hint channels-limit-hint">
+          Twitch IRC enforces a hard limit of about {{ maxIrcJoinedChannels }} concurrent channel joins per connection. The
+          monitored list can be longer; the joined count is what matters for IRC.
         </p>
         <ul class="chan-list">
           <li v-for="c in monitoredChannels" :key="c.id">
+            <span
+              class="irc-dot"
+              :class="channelIrcJoined(c.username) ? 'irc-dot--on' : 'irc-dot--off'"
+              :title="channelIrcJoined(c.username) ? 'Joined on IRC' : 'Not joined on IRC'"
+            />
             <span>{{ c.username }}</span>
             <button type="button" class="btn-danger" @click="setChannelMonitored(c.id, false)">Stop monitoring</button>
           </li>
@@ -859,6 +938,27 @@ ul {
   &.twitch-account-list {
     list-style: none;
     padding-left: 0;
+  }
+}
+
+.hint-warn {
+  color: var(--accent-bright);
+  border-left: 3px solid var(--accent);
+  padding-left: 0.5rem;
+}
+
+.irc-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--on {
+    background: #2ecc71;
+  }
+
+  &--off {
+    background: #c0392b;
   }
 }
 

@@ -13,5 +13,8 @@ export type UpdateTwitchUserPostRequest = {
      * Set true when clearing suspicion to block automatic re-marking; set false to allow auto detection again
      */
     sus_auto_suppressed?: boolean;
+    irc_only_when_live?: boolean;
+    notify_off_stream_messages?: boolean;
+    notify_stream_start?: boolean;
 };
 

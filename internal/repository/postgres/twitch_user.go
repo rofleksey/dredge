@@ -24,6 +24,7 @@ func scanTwitchUser(scanner interface {
 	err := scanner.Scan(
 		&u.ID, &u.Username, &u.Monitored, &u.Marked,
 		&u.IsSus, &susType, &susDesc, &u.SusAutoSuppressed,
+		&u.IrcOnlyWhenLive, &u.NotifyOffStreamMessages, &u.NotifyStreamStart,
 	)
 	if err != nil {
 		return u, err
@@ -47,7 +48,8 @@ func (r *Repository) ListTwitchUsers(ctx context.Context) ([]entity.TwitchUser, 
 	defer span.End()
 
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed
+		SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
+			irc_only_when_live, notify_off_stream_messages, notify_stream_start
 		FROM twitch_users ORDER BY id`)
 	if err != nil {
 		r.obs.LogError(ctx, span, "list twitch users query failed", err)
@@ -80,7 +82,8 @@ func (r *Repository) ListMonitoredTwitchUsers(ctx context.Context) ([]entity.Twi
 	defer span.End()
 
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed
+		SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
+			irc_only_when_live, notify_off_stream_messages, notify_stream_start
 		FROM twitch_users WHERE monitored = true ORDER BY id
 	`)
 	if err != nil {
@@ -120,7 +123,8 @@ func (r *Repository) CreateTwitchUser(ctx context.Context, id int64, username st
 		ON CONFLICT (id) DO UPDATE SET
 			username = EXCLUDED.username,
 			monitored = true
-		RETURNING id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed
+		RETURNING id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
+			irc_only_when_live, notify_off_stream_messages, notify_stream_start
 	`, id, username))
 	if err != nil {
 		r.obs.LogError(ctx, span, "create twitch user failed", err,
@@ -136,7 +140,8 @@ func (r *Repository) SetTwitchUserMonitored(ctx context.Context, id int64, monit
 
 	u, err := scanTwitchUser(r.pool.QueryRow(ctx, `
 		UPDATE twitch_users SET monitored = $2 WHERE id = $1
-		RETURNING id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed
+		RETURNING id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
+			irc_only_when_live, notify_off_stream_messages, notify_stream_start
 	`, id, monitored))
 	if err != nil {
 		r.obs.LogError(ctx, span, "set twitch user monitored failed", err, zap.Int64("id", id))
@@ -156,12 +161,13 @@ func (r *Repository) PatchTwitchUser(ctx context.Context, id int64, patch entity
 	defer span.End()
 
 	if patch.Monitored == nil && patch.Marked == nil && patch.IsSus == nil &&
-		patch.SusType == nil && patch.SusDescription == nil && patch.SusAutoSuppressed == nil {
+		patch.SusType == nil && patch.SusDescription == nil && patch.SusAutoSuppressed == nil &&
+		patch.IrcOnlyWhenLive == nil && patch.NotifyOffStreamMessages == nil && patch.NotifyStreamStart == nil {
 		return r.GetTwitchUserByID(ctx, id)
 	}
 
-	setParts := make([]string, 0, 8)
-	args := make([]any, 0, 12)
+	setParts := make([]string, 0, 12)
+	args := make([]any, 0, 16)
 
 	argN := 1
 	if patch.Monitored != nil {
@@ -208,9 +214,28 @@ func (r *Repository) PatchTwitchUser(ctx context.Context, id int64, patch entity
 		argN++
 	}
 
+	if patch.IrcOnlyWhenLive != nil {
+		setParts = append(setParts, fmt.Sprintf("irc_only_when_live = $%d", argN))
+		args = append(args, *patch.IrcOnlyWhenLive)
+		argN++
+	}
+
+	if patch.NotifyOffStreamMessages != nil {
+		setParts = append(setParts, fmt.Sprintf("notify_off_stream_messages = $%d", argN))
+		args = append(args, *patch.NotifyOffStreamMessages)
+		argN++
+	}
+
+	if patch.NotifyStreamStart != nil {
+		setParts = append(setParts, fmt.Sprintf("notify_stream_start = $%d", argN))
+		args = append(args, *patch.NotifyStreamStart)
+		argN++
+	}
+
 	args = append(args, id)
 	q := fmt.Sprintf(
-		`UPDATE twitch_users SET %s WHERE id = $%d RETURNING id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed`,
+		`UPDATE twitch_users SET %s WHERE id = $%d RETURNING id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
+			irc_only_when_live, notify_off_stream_messages, notify_stream_start`,
 		strings.Join(setParts, ", "), argN,
 	)
 
@@ -295,7 +320,8 @@ func (r *Repository) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchU
 	}
 
 	var b strings.Builder
-	b.WriteString(`SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed FROM twitch_users WHERE 1=1`)
+	b.WriteString(`SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
+		irc_only_when_live, notify_off_stream_messages, notify_stream_start FROM twitch_users WHERE 1=1`)
 
 	args := make([]any, 0, 8)
 	argN := 1
@@ -398,7 +424,9 @@ func (r *Repository) GetTwitchUserByID(ctx context.Context, id int64) (entity.Tw
 	defer span.End()
 
 	u, err := scanTwitchUser(r.pool.QueryRow(ctx, `
-		SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed FROM twitch_users WHERE id = $1
+		SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
+			irc_only_when_live, notify_off_stream_messages, notify_stream_start
+		FROM twitch_users WHERE id = $1
 	`, id))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

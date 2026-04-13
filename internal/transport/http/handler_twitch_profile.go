@@ -17,7 +17,7 @@ func (h *Handler) GetTwitchUserProfile(ctx context.Context, req *gen.GetTwitchUs
 	ctx, span := h.obs.StartSpan(ctx, "handler.get_twitch_user_profile")
 	defer span.End()
 
-	u, n, presenceSec, accountCreated, monitoredFollows, gqlFollows, blacklist, err := h.twitch.GetTwitchUserProfile(ctx, req.GetID())
+	u, n, presenceSec, accountCreated, profileImageURL, monitoredFollows, gqlFollows, blacklist, err := h.twitch.GetTwitchUserProfile(ctx, req.GetID())
 	if err != nil {
 		if errors.Is(err, entity.ErrTwitchUserNotFound) {
 			return &gen.ErrorMessage{Message: "twitch user not found"}, nil
@@ -39,6 +39,17 @@ func (h *Handler) GetTwitchUserProfile(ctx context.Context, req *gen.GetTwitchUs
 		MessageCount:            n,
 		PresenceSecondsThisWeek: presenceSec,
 		ChannelBlacklist:        append([]string(nil), blacklist...),
+		IrcOnlyWhenLive:         u.IrcOnlyWhenLive,
+		NotifyOffStreamMessages: u.NotifyOffStreamMessages,
+		NotifyStreamStart:       u.NotifyStreamStart,
+	}
+
+	if profileImageURL != nil && *profileImageURL != "" {
+		prof.SetProfileImageURL(gen.NewOptNilString(*profileImageURL))
+	} else {
+		var z gen.OptNilString
+		z.SetToNull()
+		prof.SetProfileImageURL(z)
 	}
 
 	if accountCreated != nil {

@@ -28,8 +28,14 @@ func (s *Service) RunHelixEnrichment(ctx context.Context) {
 			s.obs.LogError(ctx, span, "helix users by id batch failed", err)
 		} else {
 			now := time.Now().UTC()
+
 			for _, r := range recs {
-				if err := s.repo.UpsertHelixMeta(ctx, r.ID, r.CreatedAt, now); err != nil {
+				var img *string
+				if r.ProfileImageURL != "" {
+					img = &r.ProfileImageURL
+				}
+
+				if err := s.repo.UpsertHelixMeta(ctx, r.ID, r.CreatedAt, img, now); err != nil {
 					s.obs.Logger.Warn("upsert helix meta failed", zap.Int64("id", r.ID), zap.Error(err))
 				}
 			}

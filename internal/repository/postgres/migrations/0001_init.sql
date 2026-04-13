@@ -17,7 +17,10 @@ CREATE TABLE IF NOT EXISTS twitch_users (
     is_sus BOOLEAN NOT NULL DEFAULT false,
     sus_type TEXT,
     sus_description TEXT,
-    sus_auto_suppressed BOOLEAN NOT NULL DEFAULT false
+    sus_auto_suppressed BOOLEAN NOT NULL DEFAULT false,
+    irc_only_when_live BOOLEAN NOT NULL DEFAULT true,
+    notify_off_stream_messages BOOLEAN NOT NULL DEFAULT false,
+    notify_stream_start BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS rules (
@@ -95,7 +98,8 @@ CREATE INDEX IF NOT EXISTS idx_user_activity_events_channel_created ON user_acti
 CREATE TABLE IF NOT EXISTS twitch_user_helix_meta (
     twitch_user_id BIGINT PRIMARY KEY REFERENCES twitch_users (id) ON DELETE CASCADE,
     account_created_at TIMESTAMPTZ,
-    helix_fetched_at TIMESTAMPTZ
+    helix_fetched_at TIMESTAMPTZ,
+    profile_image_url TEXT
 );
 
 CREATE TABLE IF NOT EXISTS twitch_user_channel_follows (

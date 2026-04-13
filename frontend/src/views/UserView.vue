@@ -4,14 +4,20 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import ChatMessageLine from '../components/ChatMessageLine.vue';
 import { ApiError, ChatHistoryEntry, DefaultService } from '../api/generated';
-import type { ActivityTimelineSegment, FollowedChannelEntry, TwitchUser, TwitchUserProfile } from '../api/generated';
+import type {
+  ActivityTimelineSegment,
+  FollowedChannelEntry,
+  TwitchUser,
+  TwitchUserProfile,
+  UpdateTwitchUserPostRequest,
+} from '../api/generated';
 import type { UserActivityEvent } from '../api/generated/models/UserActivityEvent';
 import type { ChatBadgeTag } from '../lib/chatBadges';
 import { notify } from '../lib/notify';
 
 defineOptions({ name: 'UserView' });
 
-type UserTab = 'overview' | 'following' | 'messages' | 'activity' | 'graphs';
+type UserTab = 'overview' | 'following' | 'messages' | 'activity' | 'graphs' | 'settings';
 
 const route = useRoute();
 const profile = ref<TwitchUserProfile | null>(null);
@@ -21,6 +27,7 @@ const loadingProfile = ref(true);
 const loadingMessages = ref(true);
 const loadingMore = ref(false);
 const togglingMarked = ref(false);
+const savingUserSettings = ref(false);
 const togglingSus = ref(false);
 const manualSusNote = ref('');
 const followingQuery = ref('');
@@ -85,7 +92,40 @@ function mergeProfileFromTwitchUser(u: TwitchUser): void {
     sus_type: u.sus_type,
     sus_description: u.sus_description,
     sus_auto_suppressed: u.sus_auto_suppressed,
+    irc_only_when_live: u.irc_only_when_live,
+    notify_off_stream_messages: u.notify_off_stream_messages,
+    notify_stream_start: u.notify_stream_start,
   };
+}
+
+async function patchUserProfile(patch: Omit<UpdateTwitchUserPostRequest, 'id'>): Promise<void> {
+  if (!profile.value || savingUserSettings.value) {
+    return;
+  }
+  savingUserSettings.value = true;
+  try {
+    const body: UpdateTwitchUserPostRequest = { id: profile.value.id, ...patch };
+    if (body.irc_only_when_live === false) {
+      body.notify_off_stream_messages = false;
+    }
+    const u = await DefaultService.updateTwitchUser({
+      requestBody: body,
+    });
+    mergeProfileFromTwitchUser(u);
+  } catch (e) {
+    const msg =
+      e instanceof ApiError && e.body && typeof e.body === 'object' && 'message' in e.body
+        ? String((e.body as { message: string }).message)
+        : 'Could not save settings.';
+    notify({
+      id: 'user-settings',
+      type: 'error',
+      title: 'User',
+      description: msg,
+    });
+  } finally {
+    savingUserSettings.value = false;
+  }
 }
 
 async function markSuspicious(): Promise<void> {
@@ -520,6 +560,14 @@ const accountCreatedLabel = computed(() => {
   return formatWhen(raw);
 });
 
+const profileAvatarUrl = computed((): string => {
+  const u = profile.value?.profile_image_url;
+  if (u == null || u === '') {
+    return '';
+  }
+  return u;
+});
+
 const sortedFollowedChannels = computed((): FollowedChannelEntry[] => {
   const p = profile.value;
   if (!p?.followed_channels?.length) {
@@ -566,13 +614,25 @@ function formatPresenceWeek(sec: number): string {
     </template>
     <template v-else-if="profile">
       <header class="page-head">
-        <h1 class="page-title">{{ profile.username }}</h1>
+        <div class="user-head-row">
+          <img
+            v-if="profileAvatarUrl"
+            class="profile-avatar"
+            :src="profileAvatarUrl"
+            alt=""
+            width="48"
+            height="48"
+            loading="lazy"
+          />
+          <h1 class="page-title">{{ profile.username }}</h1>
+        </div>
         <nav class="user-tabs" aria-label="User sections">
           <button type="button" :class="{ active: userTab === 'overview' }" @click="userTab = 'overview'">Overview</button>
           <button type="button" :class="{ active: userTab === 'following' }" @click="userTab = 'following'">Following</button>
           <button type="button" :class="{ active: userTab === 'messages' }" @click="userTab = 'messages'">Messages</button>
           <button type="button" :class="{ active: userTab === 'activity' }" @click="userTab = 'activity'">Activity</button>
           <button type="button" :class="{ active: userTab === 'graphs' }" @click="userTab = 'graphs'">Graphs</button>
+          <button type="button" :class="{ active: userTab === 'settings' }" @click="userTab = 'settings'">Settings</button>
         </nav>
       </header>
 
@@ -738,6 +798,66 @@ function formatPresenceWeek(sec: number): string {
         <p v-if="!loadingActivity && !activity.length" class="muted">No activity recorded yet.</p>
       </section>
 
+      <section v-show="userTab === 'settings'" class="panel">
+        <h2 class="section-title">Monitoring</h2>
+        <p class="muted hint">IRC and notification behavior for this channel (requires admin).</p>
+        <ul class="settings-options">
+          <li>
+            <label class="check-row">
+              <input
+                type="checkbox"
+                :checked="profile.monitored"
+                :disabled="savingUserSettings"
+                @change="patchUserProfile({ monitored: ($event.target as HTMLInputElement).checked })"
+              />
+              <span>Monitored channel</span>
+            </label>
+          </li>
+          <li>
+            <label class="check-row">
+              <input
+                type="checkbox"
+                :checked="profile.irc_only_when_live"
+                :disabled="savingUserSettings"
+                @change="
+                  patchUserProfile({
+                    irc_only_when_live: ($event.target as HTMLInputElement).checked,
+                  })
+                "
+              />
+              <span>Only monitor (IRC) when this channel is online on Twitch</span>
+            </label>
+          </li>
+          <li>
+            <label class="check-row">
+              <input
+                type="checkbox"
+                :checked="profile.notify_off_stream_messages"
+                :disabled="savingUserSettings || !profile.irc_only_when_live"
+                @change="
+                  patchUserProfile({ notify_off_stream_messages: ($event.target as HTMLInputElement).checked })
+                "
+              />
+              <span>Notify about off-stream messages (join IRC while offline)</span>
+            </label>
+            <p v-if="!profile.irc_only_when_live" class="muted small indent">
+              Turn on “only when online” to allow off-stream IRC for alerts.
+            </p>
+          </li>
+          <li>
+            <label class="check-row">
+              <input
+                type="checkbox"
+                :checked="profile.notify_stream_start"
+                :disabled="savingUserSettings"
+                @change="patchUserProfile({ notify_stream_start: ($event.target as HTMLInputElement).checked })"
+              />
+              <span>Notify when this channel starts streaming</span>
+            </label>
+          </li>
+        </ul>
+      </section>
+
       <section v-show="userTab === 'graphs'" class="panel graphs-panel">
         <h2 class="section-title">Activity timeline</h2>
         <p class="muted hint">
@@ -764,10 +884,51 @@ function formatPresenceWeek(sec: number): string {
   margin-bottom: 0.75rem;
 }
 
+.user-head-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
 .page-title {
-  margin: 0 0 0.5rem;
+  margin: 0;
   font-size: 1.15rem;
   font-weight: 600;
+}
+
+.settings-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 36rem;
+}
+
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  input {
+    margin-top: 0.15rem;
+  }
+}
+
+.indent {
+  margin: 0.25rem 0 0 1.5rem;
 }
 
 .user-tabs {

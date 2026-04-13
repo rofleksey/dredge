@@ -23,5 +23,17 @@ export type TwitchUser = {
      * When true, automatic suspicion will not mark this user until cleared in settings
      */
     sus_auto_suppressed: boolean;
+    /**
+     * When true, join IRC only while the channel has an active Helix stream (unless notify_off_stream_messages)
+     */
+    irc_only_when_live: boolean;
+    /**
+     * When irc_only_when_live is true, also join IRC while offline to capture chat and keyword alerts
+     */
+    notify_off_stream_messages: boolean;
+    /**
+     * When true, send notifications when this channel goes live on Twitch
+     */
+    notify_stream_start: boolean;
 };
 

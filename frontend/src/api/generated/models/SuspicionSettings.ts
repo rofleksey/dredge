@@ -15,7 +15,7 @@ export type SuspicionSettings = {
      */
     low_follows_threshold: number;
     /**
-     * Safety cap when paginating GQL follows per user
+     * Safety cap when paginating GQL follows per user (default 1 page)
      */
     max_gql_follow_pages: number;
 };

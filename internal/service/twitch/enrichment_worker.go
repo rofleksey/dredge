@@ -46,7 +46,13 @@ func (s *Service) enrichSingleUser(ctx context.Context, userID int64) {
 	now := time.Now().UTC()
 
 	r := recs[0]
-	if err := s.repo.UpsertHelixMeta(ctx, r.ID, r.CreatedAt, now); err != nil {
+
+	var img *string
+	if r.ProfileImageURL != "" {
+		img = &r.ProfileImageURL
+	}
+
+	if err := s.repo.UpsertHelixMeta(ctx, r.ID, r.CreatedAt, img, now); err != nil {
 		s.obs.Logger.Debug("enrich single user: upsert meta failed", zap.Int64("id", userID), zap.Error(err))
 	}
 

@@ -60,7 +60,7 @@ func (s *Service) evaluateSuspicionForUser(ctx context.Context, userID int64, gq
 		return err
 	}
 
-	accountCreated, _, err := s.repo.GetHelixMeta(ctx, userID)
+	accountCreated, _, _, err := s.repo.GetHelixMeta(ctx, userID)
 	if err != nil {
 		return err
 	}

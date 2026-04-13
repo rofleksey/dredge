@@ -16,6 +16,8 @@ type Client struct {
 	HTTPClient   *http.Client
 	ClientID     string
 	ClientSecret string
+	// UserOAuthTokenCacheTTL caps reuse of refreshed user access tokens (default 30m if zero).
+	UserOAuthTokenCacheTTL time.Duration
 
 	appTokenMu  sync.Mutex
 	appToken    string

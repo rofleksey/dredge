@@ -15,6 +15,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/rofleksey/dredge/internal/config"
+	"github.com/rofleksey/dredge/internal/entity"
 	"github.com/rofleksey/dredge/internal/observability"
 	"github.com/rofleksey/dredge/internal/repository/postgres"
 	twitchsvc "github.com/rofleksey/dredge/internal/service/twitch"
@@ -88,9 +89,13 @@ func onAppStart(
 	twitchSvc.StartEnrichmentWorker(rt.enrichWorkerCtx)
 
 	if err := twitchSvc.StartMonitor(ctx); err != nil {
-		startupSpan.RecordError(err)
-		sentry.CaptureException(err)
-		return err
+		if errors.Is(err, entity.ErrNoLinkedTwitchAccount) {
+			log.Warn("IRC monitor not started: link a Twitch account in Settings to enable chat ingestion")
+		} else {
+			startupSpan.RecordError(err)
+			sentry.CaptureException(err)
+			return err
+		}
 	}
 
 	go twitchSvc.StartPresenceTicker(rt.presenceCtx)

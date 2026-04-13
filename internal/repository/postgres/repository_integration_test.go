@@ -206,10 +206,11 @@ func TestRepository_integration(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, msgsF)
 
-	nilHelixCA, nilHelixHF, err := repo.GetHelixMeta(ctx, 999_999)
+	nilHelixCA, nilHelixHF, nilImg, err := repo.GetHelixMeta(ctx, 999_999)
 	require.NoError(t, err)
 	assert.Nil(t, nilHelixCA)
 	assert.Nil(t, nilHelixHF)
+	assert.Nil(t, nilImg)
 
 	inserted, err := repo.UpsertTwitchUserFromChat(ctx, 500, "freshuser")
 	require.NoError(t, err)
@@ -304,12 +305,13 @@ func TestRepository_integration(t *testing.T) {
 	assert.NotEmpty(t, actList)
 
 	created := time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC)
-	require.NoError(t, repo.UpsertHelixMeta(ctx, channelID, &created, now))
+	require.NoError(t, repo.UpsertHelixMeta(ctx, channelID, &created, nil, now))
 
-	ac, hf, err := repo.GetHelixMeta(ctx, channelID)
+	ac, hf, imgURL, err := repo.GetHelixMeta(ctx, channelID)
 	require.NoError(t, err)
 	require.NotNil(t, ac)
 	require.NotNil(t, hf)
+	assert.Nil(t, imgURL)
 
 	followed := now.Add(-24 * time.Hour)
 	require.NoError(t, repo.UpsertChannelFollow(ctx, chatterID, channelID, &followed, now))

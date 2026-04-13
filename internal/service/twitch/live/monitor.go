@@ -12,45 +12,42 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/rofleksey/dredge/internal/entity"
 	"github.com/rofleksey/dredge/internal/service/twitch/helix"
 )
 
 const sendMessageTimeout = 45 * time.Second
 
-// StartMonitor connects the anonymous IRC client and ingests chat for monitored channels.
-func (r *Runtime) StartMonitor(ctx context.Context) error {
-	ctx, span := r.obs.StartSpan(ctx, "service.twitch.start_monitor")
-	defer span.End()
+type streamStartNotify struct {
+	login string
+	title string
+}
 
-	r.obs.Logger.Debug("start twitch monitor")
-
-	channels, err := r.repo.ListMonitoredTwitchUsers(ctx)
+func (r *Runtime) firstLinkedOAuth(ctx context.Context) (username string, oauthIRC string, acc entity.TwitchAccount, err error) {
+	accs, err := r.repo.ListTwitchAccounts(ctx)
 	if err != nil {
-		r.obs.LogError(ctx, span, "list monitored twitch users failed", err)
-		return err
+		return "", "", entity.TwitchAccount{}, err
 	}
 
-	rules, err := r.repo.ListRules(ctx)
+	if len(accs) == 0 {
+		return "", "", entity.TwitchAccount{}, entity.ErrNoLinkedTwitchAccount
+	}
+
+	acc = accs[0]
+
+	at, newRT, err := r.helix.CachedUserAccessTokenForAccount(ctx, acc.ID, acc.RefreshToken)
 	if err != nil {
-		r.obs.LogError(ctx, span, "list rules failed", err)
-		return err
+		return "", "", acc, err
 	}
 
-	compiled, bad := compileRules(rules)
-	for _, e := range bad {
-		r.obs.LogError(ctx, span, "compile monitor rule regex failed", e)
+	if newRT != "" && newRT != acc.RefreshToken {
+		_ = r.repo.UpdateTwitchRefreshToken(ctx, acc.ID, newRT)
 	}
 
-	client := twitchirc.NewAnonymousClient()
-	client.Capabilities = []string{twitchirc.TagsCapability, twitchirc.CommandsCapability, twitchirc.MembershipCapability}
+	return acc.Username, "oauth:" + at, acc, nil
+}
 
-	r.attachIRCMonitorAppHandlers(client)
-	r.attachIRCMonitorDebug(client)
-
-	if err := r.repo.TruncateChannelChatters(ctx); err != nil {
-		r.obs.Logger.Warn("truncate channel chatters failed", zap.Error(err))
-	}
-
+func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled []compiledRule) {
 	client.OnPrivateMessage(func(msg twitchirc.PrivateMessage) {
 		ch := NormalizeTwitchChannel(msg.Channel)
 		if ch == "" {
@@ -127,18 +124,256 @@ func (r *Runtime) StartMonitor(ctx context.Context) error {
 
 		r.broadcaster.BroadcastJSON(wsPayload)
 	})
+}
 
-	for _, c := range channels {
-		client.Join(c.Username)
+// StartMonitor connects the OAuth IRC client and ingests chat for monitored channels (join set reconciled against Helix).
+func (r *Runtime) StartMonitor(ctx context.Context) error {
+	ctx, span := r.obs.StartSpan(ctx, "service.twitch.start_monitor")
+	defer span.End()
+
+	r.obs.Logger.Debug("start twitch monitor")
+
+	rules, err := r.repo.ListRules(ctx)
+	if err != nil {
+		r.obs.LogError(ctx, span, "list rules failed", err)
+		return err
+	}
+
+	compiled, bad := compileRules(rules)
+	for _, e := range bad {
+		r.obs.LogError(ctx, span, "compile monitor rule regex failed", e)
+	}
+
+	username, oauthIRC, _, err := r.firstLinkedOAuth(ctx)
+	if err != nil {
+		if errors.Is(err, entity.ErrNoLinkedTwitchAccount) {
+			r.obs.Logger.Warn("irc monitor not started: no linked twitch account")
+		} else {
+			r.obs.LogError(ctx, span, "irc oauth credentials failed", err)
+		}
+		return err
+	}
+
+	client := twitchirc.NewClient(username, oauthIRC)
+	client.Capabilities = []string{twitchirc.TagsCapability, twitchirc.CommandsCapability, twitchirc.MembershipCapability}
+
+	r.attachIRCMonitorAppHandlers(client)
+	r.attachIRCMonitorDebug(client)
+	r.wirePrivateMessageHandlers(client, compiled)
+
+	if err := r.repo.TruncateChannelChatters(ctx); err != nil {
+		r.obs.Logger.Warn("truncate channel chatters failed", zap.Error(err))
 	}
 
 	r.monitorMu.Lock()
 	r.monitorClient = client
 	r.monitorMu.Unlock()
 
+	r.joinStateMu.Lock()
+	r.reconcilerJoined = make(map[string]bool)
+	r.streamEdge = make(map[int64]streamLiveEdge)
+	r.lastIRCOAuthToken = oauthIRC
+	r.joinStateMu.Unlock()
+
+	loopCtx, cancel := context.WithCancel(context.Background())
+
+	r.monitorLoopsMu.Lock()
+	if r.monitorLoopsCancel != nil {
+		r.monitorLoopsCancel()
+		r.monitorLoopsWG.Wait()
+	}
+
+	r.monitorLoopsCancel = cancel
+	r.monitorLoopsMu.Unlock()
+
+	r.monitorLoopsWG.Add(2)
+
+	go func() {
+		defer r.monitorLoopsWG.Done()
+
+		r.runJoinReconcileLoop(loopCtx)
+	}()
+
+	go func() {
+		defer r.monitorLoopsWG.Done()
+
+		r.runOAuthTokenSyncLoop(loopCtx)
+	}()
+
 	go func() { _ = client.Connect() }()
 
 	return nil
+}
+
+func (r *Runtime) runOAuthTokenSyncLoop(ctx context.Context) {
+	t := time.NewTicker(r.oauthTokenSyncInterval)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			syncCtx, cancel := context.WithTimeout(r.persistContext(), 45*time.Second)
+			_, oauthIRC, _, err := r.firstLinkedOAuth(syncCtx)
+
+			cancel()
+
+			if err != nil {
+				r.obs.Logger.Debug("irc oauth token sync skipped", zap.Error(err))
+				continue
+			}
+
+			r.joinStateMu.Lock()
+
+			prev := r.lastIRCOAuthToken
+			if oauthIRC != prev {
+				r.lastIRCOAuthToken = oauthIRC
+			}
+			r.joinStateMu.Unlock()
+
+			if oauthIRC == prev {
+				continue
+			}
+
+			r.monitorMu.Lock()
+
+			cl := r.monitorClient
+			if cl != nil {
+				cl.SetIRCToken(oauthIRC)
+			}
+			r.monitorMu.Unlock()
+		}
+	}
+}
+
+func (r *Runtime) runJoinReconcileLoop(ctx context.Context) {
+	t := time.NewTicker(r.joinReconcileInterval)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			r.reconcileIRCJoinsOnce(ctx)
+		}
+	}
+}
+
+func (r *Runtime) reconcileIRCJoinsOnce(ctx context.Context) {
+	reconcileCtx, cancel := context.WithTimeout(r.persistContext(), 60*time.Second)
+	defer cancel()
+
+	monitored, err := r.repo.ListMonitoredTwitchUsers(reconcileCtx)
+	if err != nil {
+		r.obs.Logger.Debug("join reconcile: list monitored failed", zap.Error(err))
+		return
+	}
+
+	if len(monitored) == 0 {
+		r.applyJoinDiffs(reconcileCtx, map[string]bool{})
+		return
+	}
+
+	ids := make([]int64, 0, len(monitored))
+	for _, u := range monitored {
+		ids = append(ids, u.ID)
+	}
+
+	liveMap, err := r.helix.HelixStreamsLiveByBroadcasterIDs(reconcileCtx, ids)
+	if err != nil {
+		r.obs.Logger.Debug("join reconcile: helix streams failed", zap.Error(err))
+		return
+	}
+
+	metaByID, err := r.helix.HelixStreamsMetadataByBroadcasterIDs(reconcileCtx, ids)
+	if err != nil {
+		metaByID = nil
+	}
+
+	streamStarts := make([]streamStartNotify, 0)
+
+	r.joinStateMu.Lock()
+
+	for _, u := range monitored {
+		nowLive := liveMap[u.ID]
+
+		edge := r.streamEdge[u.ID]
+		if !edge.initialized {
+			r.streamEdge[u.ID] = streamLiveEdge{initialized: true, wasLive: nowLive}
+			continue
+		}
+
+		if u.NotifyStreamStart && !edge.wasLive && nowLive {
+			title := ""
+
+			if metaByID != nil {
+				if m, ok := metaByID[u.ID]; ok {
+					title = m.Title
+				}
+			}
+
+			streamStarts = append(streamStarts, streamStartNotify{login: u.Username, title: title})
+		}
+
+		r.streamEdge[u.ID] = streamLiveEdge{initialized: true, wasLive: nowLive}
+	}
+	r.joinStateMu.Unlock()
+
+	for _, ev := range streamStarts {
+		ev := ev
+		go r.dispatchStreamStartNotifications(context.Background(), ev.login, ev.title)
+	}
+
+	want := make(map[string]bool, len(monitored))
+	for _, u := range monitored {
+		ch := NormalizeTwitchChannel(u.Username)
+		if ch == "" {
+			continue
+		}
+
+		if ircChannelJoinWanted(u, liveMap[u.ID]) {
+			want[ch] = true
+		}
+	}
+
+	r.applyJoinDiffs(reconcileCtx, want)
+}
+
+func (r *Runtime) applyJoinDiffs(ctx context.Context, want map[string]bool) {
+	r.monitorMu.Lock()
+	client := r.monitorClient
+	r.monitorMu.Unlock()
+
+	if client == nil {
+		return
+	}
+
+	r.joinStateMu.Lock()
+
+	toLeave := make([]string, 0)
+
+	for ch := range r.reconcilerJoined {
+		if !want[ch] {
+			toLeave = append(toLeave, ch)
+		}
+	}
+
+	for _, ch := range toLeave {
+		client.Depart(ch)
+		delete(r.reconcilerJoined, ch)
+	}
+
+	for ch := range want {
+		if !r.reconcilerJoined[ch] {
+			client.Join(ch)
+			r.reconcilerJoined[ch] = true
+		}
+	}
+	r.joinStateMu.Unlock()
+
+	_ = ctx
 }
 
 // RestartMonitor stops the IRC client (if any) and starts it again with current DB state.
@@ -147,15 +382,29 @@ func (r *Runtime) RestartMonitor(ctx context.Context) error {
 	return r.StartMonitor(ctx)
 }
 
-// StopMonitor disconnects the anonymous IRC monitor client, if running.
+// StopMonitor disconnects the IRC monitor client, if running.
 func (r *Runtime) StopMonitor() {
-	r.monitorMu.Lock()
-	defer r.monitorMu.Unlock()
+	r.monitorLoopsMu.Lock()
+	if r.monitorLoopsCancel != nil {
+		r.monitorLoopsCancel()
+		r.monitorLoopsCancel = nil
+	}
+	r.monitorLoopsMu.Unlock()
 
+	r.monitorLoopsWG.Wait()
+
+	r.monitorMu.Lock()
 	if r.monitorClient != nil {
 		_ = r.monitorClient.Disconnect()
 		r.monitorClient = nil
 	}
+	r.monitorMu.Unlock()
+
+	r.joinStateMu.Lock()
+	r.reconcilerJoined = make(map[string]bool)
+	r.streamEdge = make(map[int64]streamLiveEdge)
+	r.lastIRCOAuthToken = ""
+	r.joinStateMu.Unlock()
 
 	r.ircMonitorMu.Lock()
 	r.ircMonitorTCP = false

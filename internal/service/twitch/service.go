@@ -19,8 +19,11 @@ import (
 func New(repo repository.Store, broadcaster Broadcaster, cfg config.Config, obs *observability.Stack) *Service {
 	tw := cfg.Twitch
 
+	hx := helix.NewClient(repo, obs, tw.ClientID, tw.ClientSecret)
+	hx.UserOAuthTokenCacheTTL = tw.UserOAuthTokenCacheTTL
+
 	s := &Service{
-		Client:                      helix.NewClient(repo, obs, tw.ClientID, tw.ClientSecret),
+		Client:                      hx,
 		gql:                         gql.NewClient(http.DefaultClient),
 		repo:                        repo,
 		obs:                         obs,
@@ -28,6 +31,17 @@ func New(repo repository.Store, broadcaster Broadcaster, cfg config.Config, obs 
 		viewerPollInterval:          tw.ViewerPollInterval,
 		channelChattersSyncInterval: tw.ChannelChattersSyncInterval,
 		streamSessionPollInterval:   tw.StreamSessionPollInterval,
+	}
+
+	joinReconcile := 20 * time.Second
+
+	oauthTokSync := tw.UserOAuthTokenCacheTTL / 10
+	if oauthTokSync < 30*time.Second {
+		oauthTokSync = 30 * time.Second
+	}
+
+	if oauthTokSync > 5*time.Minute {
+		oauthTokSync = 5 * time.Minute
 	}
 
 	s.live = live.NewRuntime(live.Config{
@@ -38,6 +52,8 @@ func New(repo repository.Store, broadcaster Broadcaster, cfg config.Config, obs 
 		OnEnqueueUser:             func(id int64) { s.EnqueueUserEnrichment(id) },
 		PersistContext:            func() context.Context { return s.persistContext() },
 		ChannelChattersSyncPeriod: s.channelChattersSyncInterval,
+		JoinReconcileInterval:     joinReconcile,
+		OAuthTokenSyncInterval:    oauthTokSync,
 	})
 
 	return s
@@ -189,12 +205,13 @@ func (s *Service) presenceSecondsThisWeek(ctx context.Context, chatterID int64) 
 	return sum, nil
 }
 
-// GetTwitchUserProfile returns profile fields, message count, IRC presence seconds this week (UTC Mon..now), helix created_at, monitored follows, GQL full follows list, and global blacklist for UI.
+// GetTwitchUserProfile returns profile fields, message count, IRC presence seconds this week (UTC Mon..now), helix created_at, profile image, monitored follows, GQL full follows list, and global blacklist for UI.
 func (s *Service) GetTwitchUserProfile(ctx context.Context, id int64) (
 	u entity.TwitchUser,
 	messageCount int64,
 	presenceSec int64,
 	accountCreated *time.Time,
+	profileImageURL *string,
 	monitoredFollows []entity.FollowedMonitoredChannel,
 	gqlFollows []entity.FollowedChannelRow,
 	channelBlacklist []string,
@@ -206,13 +223,13 @@ func (s *Service) GetTwitchUserProfile(ctx context.Context, id int64) (
 	u, err = s.repo.GetTwitchUserByID(ctx, id)
 	if err != nil {
 		s.obs.LogError(ctx, span, "get twitch user failed", err, zap.Int64("id", id))
-		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, err
+		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, nil, err
 	}
 
 	messageCount, err = s.repo.CountChatMessagesByChatter(ctx, id)
 	if err != nil {
 		s.obs.LogError(ctx, span, "count chatter messages failed", err, zap.Int64("id", id))
-		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, err
+		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, nil, err
 	}
 
 	presenceSec, err = s.presenceSecondsThisWeek(ctx, id)
@@ -222,31 +239,31 @@ func (s *Service) GetTwitchUserProfile(ctx context.Context, id int64) (
 		presenceSec = 0
 	}
 
-	accountCreated, _, err = s.repo.GetHelixMeta(ctx, id)
+	accountCreated, _, profileImageURL, err = s.repo.GetHelixMeta(ctx, id)
 	if err != nil {
 		s.obs.LogError(ctx, span, "get helix meta failed", err, zap.Int64("id", id))
-		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, err
+		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, nil, err
 	}
 
 	monitoredFollows, err = s.repo.ListFollowedMonitoredChannels(ctx, id)
 	if err != nil {
 		s.obs.LogError(ctx, span, "list follows failed", err, zap.Int64("id", id))
-		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, err
+		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, nil, err
 	}
 
 	gqlFollows, err = s.repo.ListUserFollowedChannels(ctx, id)
 	if err != nil {
 		s.obs.LogError(ctx, span, "list gql follows failed", err, zap.Int64("id", id))
-		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, err
+		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, nil, err
 	}
 
 	channelBlacklist, err = s.repo.ListChannelBlacklist(ctx)
 	if err != nil {
 		s.obs.LogError(ctx, span, "list blacklist failed", err, zap.Int64("id", id))
-		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, err
+		return entity.TwitchUser{}, 0, 0, nil, nil, nil, nil, nil, err
 	}
 
-	return u, messageCount, presenceSec, accountCreated, monitoredFollows, gqlFollows, channelBlacklist, nil
+	return u, messageCount, presenceSec, accountCreated, profileImageURL, monitoredFollows, gqlFollows, channelBlacklist, nil
 }
 
 // CountChatMessages delegates to repository (same filters as list, no cursor).

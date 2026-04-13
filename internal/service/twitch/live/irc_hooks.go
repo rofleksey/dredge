@@ -122,7 +122,7 @@ func (r *Runtime) handleIRCChatterPresence(ctx context.Context, channelLogin, us
 
 		var accountCreated *time.Time
 
-		if ca, _, err := r.repo.GetHelixMeta(persistCtx, uid); err == nil {
+		if ca, _, _, err := r.repo.GetHelixMeta(persistCtx, uid); err == nil {
 			accountCreated = ca
 		}
 

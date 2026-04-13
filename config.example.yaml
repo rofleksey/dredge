@@ -32,6 +32,8 @@ twitch:
   channel_chatters_sync_interval: 10s
   # How often the backend polls Helix to record stream sessions (default: same as viewer_poll_interval).
   stream_session_poll_interval: 10s
+  # How long linked-account OAuth access tokens are cached before refresh (Helix + IRC). Default 30m.
+  user_oauth_token_cache_ttl: 30m
 observability:
   service_name: "dredge-backend"
   log_level: "debug"

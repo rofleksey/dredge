@@ -399,8 +399,8 @@ func (r *Repository) ListUserActivityEventsForTimeline(ctx context.Context, chat
 	return out, rows.Err()
 }
 
-// UpsertHelixMeta sets account creation time from Helix.
-func (r *Repository) UpsertHelixMeta(ctx context.Context, twitchUserID int64, accountCreatedAt *time.Time, fetchedAt time.Time) error {
+// UpsertHelixMeta sets account creation time and optional profile image from Helix.
+func (r *Repository) UpsertHelixMeta(ctx context.Context, twitchUserID int64, accountCreatedAt *time.Time, profileImageURL *string, fetchedAt time.Time) error {
 	ctx, span := r.obs.StartSpan(ctx, "repo.upsert_helix_meta")
 	defer span.End()
 
@@ -409,13 +409,19 @@ func (r *Repository) UpsertHelixMeta(ctx context.Context, twitchUserID int64, ac
 		ca = sql.NullTime{Time: *accountCreatedAt, Valid: true}
 	}
 
+	var img sql.NullString
+	if profileImageURL != nil && *profileImageURL != "" {
+		img = sql.NullString{String: *profileImageURL, Valid: true}
+	}
+
 	_, err := r.pool.Exec(ctx, `
-		INSERT INTO twitch_user_helix_meta (twitch_user_id, account_created_at, helix_fetched_at)
-		VALUES ($1, $2, $3)
+		INSERT INTO twitch_user_helix_meta (twitch_user_id, account_created_at, helix_fetched_at, profile_image_url)
+		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (twitch_user_id) DO UPDATE SET
 			account_created_at = COALESCE(EXCLUDED.account_created_at, twitch_user_helix_meta.account_created_at),
-			helix_fetched_at = EXCLUDED.helix_fetched_at
-	`, twitchUserID, ca, fetchedAt)
+			helix_fetched_at = EXCLUDED.helix_fetched_at,
+			profile_image_url = COALESCE(EXCLUDED.profile_image_url, twitch_user_helix_meta.profile_image_url)
+	`, twitchUserID, ca, fetchedAt, img)
 	if err != nil {
 		r.obs.LogError(ctx, span, "upsert helix meta failed", err)
 	}
@@ -424,22 +430,24 @@ func (r *Repository) UpsertHelixMeta(ctx context.Context, twitchUserID int64, ac
 }
 
 // GetHelixMeta returns helix enrichment for a user if present.
-func (r *Repository) GetHelixMeta(ctx context.Context, twitchUserID int64) (accountCreatedAt *time.Time, helixFetchedAt *time.Time, err error) {
+func (r *Repository) GetHelixMeta(ctx context.Context, twitchUserID int64) (accountCreatedAt *time.Time, helixFetchedAt *time.Time, profileImageURL *string, err error) {
 	ctx, span := r.obs.StartSpan(ctx, "repo.get_helix_meta")
 	defer span.End()
 
 	var ca, hf sql.NullTime
 
+	var img sql.NullString
+
 	err = r.pool.QueryRow(ctx, `
-		SELECT account_created_at, helix_fetched_at FROM twitch_user_helix_meta WHERE twitch_user_id = $1
-	`, twitchUserID).Scan(&ca, &hf)
+		SELECT account_created_at, helix_fetched_at, profile_image_url FROM twitch_user_helix_meta WHERE twitch_user_id = $1
+	`, twitchUserID).Scan(&ca, &hf, &img)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 
 	if err != nil {
 		r.obs.LogError(ctx, span, "get helix meta failed", err)
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	if ca.Valid {
@@ -452,7 +460,12 @@ func (r *Repository) GetHelixMeta(ctx context.Context, twitchUserID int64) (acco
 		helixFetchedAt = &t
 	}
 
-	return accountCreatedAt, helixFetchedAt, nil
+	if img.Valid {
+		s := img.String
+		profileImageURL = &s
+	}
+
+	return accountCreatedAt, helixFetchedAt, profileImageURL, nil
 }
 
 // UpsertChannelFollow stores follow time for a chatter/channel pair.

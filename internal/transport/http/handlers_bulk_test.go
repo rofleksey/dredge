@@ -92,7 +92,7 @@ func TestHandler_GetTwitchUserProfile(t *testing.T) {
 	repo.EXPECT().GetTwitchUserByID(gomock.Any(), int64(9)).Return(entity.TwitchUser{ID: 9, Username: "u"}, nil)
 	repo.EXPECT().CountChatMessagesByChatter(gomock.Any(), int64(9)).Return(int64(1), nil)
 	repo.EXPECT().ListUserActivityEventsForTimeline(gomock.Any(), int64(9), gomock.Any(), gomock.Any()).Return(nil, nil)
-	repo.EXPECT().GetHelixMeta(gomock.Any(), int64(9)).Return(&now, &now, nil)
+	repo.EXPECT().GetHelixMeta(gomock.Any(), int64(9)).Return(&now, &now, nil, nil)
 	repo.EXPECT().ListFollowedMonitoredChannels(gomock.Any(), int64(9)).Return(nil, nil)
 	repo.EXPECT().ListUserFollowedChannels(gomock.Any(), int64(9)).Return(nil, nil)
 	repo.EXPECT().ListChannelBlacklist(gomock.Any()).Return(nil, nil)
