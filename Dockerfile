@@ -16,6 +16,5 @@ RUN go build -o /out/dredge ./cmd/dredge
 FROM alpine:3.22
 WORKDIR /app
 COPY --from=build /out/dredge /app/dredge
-COPY config.yaml /app/config.yaml
 EXPOSE 8080
 CMD ["/app/dredge"]
