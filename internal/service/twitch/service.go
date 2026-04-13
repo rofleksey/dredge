@@ -26,6 +26,7 @@ func New(repo repository.Store, broadcaster Broadcaster, cfg config.Config, obs 
 		Client:                      hx,
 		gql:                         gql.NewClient(http.DefaultClient),
 		repo:                        repo,
+		broadcaster:                 broadcaster,
 		obs:                         obs,
 		enrichQueue:                 make(chan int64, 10000),
 		viewerPollInterval:          tw.ViewerPollInterval,
@@ -100,6 +101,11 @@ func (s *Service) StartMonitor(ctx context.Context) error {
 
 func (s *Service) RestartMonitor(ctx context.Context) error {
 	return s.live.RestartMonitor(ctx)
+}
+
+// ReconcileIRCJoins updates IRC Join/Depart set from current settings without restarting the IRC connection.
+func (s *Service) ReconcileIRCJoins(ctx context.Context) {
+	s.live.ReconcileIRCJoins(ctx)
 }
 
 func (s *Service) StopMonitor() {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import * as echarts from 'echarts';
+import * as Plot from '@observablehq/plot';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ChatMessageLine from '../components/ChatMessageLine.vue';
@@ -13,9 +13,13 @@ import type {
 } from '../api/generated';
 import type { UserActivityEvent } from '../api/generated/models/UserActivityEvent';
 import type { ChatBadgeTag } from '../lib/chatBadges';
+import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
 import { notify } from '../lib/notify';
+import { useLiveSocketStore } from '../stores/liveSocket';
 
 defineOptions({ name: 'UserView' });
+
+const liveSocket = useLiveSocketStore();
 
 type UserTab = 'overview' | 'following' | 'messages' | 'activity' | 'graphs' | 'settings';
 
@@ -41,7 +45,6 @@ const loadingActivityMore = ref(false);
 const timelineSegments = ref<ActivityTimelineSegment[]>([]);
 const loadingTimeline = ref(false);
 const chartEl = ref<HTMLDivElement | null>(null);
-let chart: echarts.ECharts | null = null;
 
 const userId = computed(() => {
   const raw = route.params.id;
@@ -390,15 +393,16 @@ async function loadTimeline(): Promise<void> {
   }
 }
 
+function disposeTimelineFigure(): void {
+  chartEl.value?.replaceChildren();
+}
+
 function renderTimelineChart(): void {
   if (!chartEl.value) {
     return;
   }
 
-  if (chart) {
-    chart.dispose();
-    chart = null;
-  }
+  disposeTimelineFigure();
 
   const segs = timelineSegments.value;
   if (!segs.length) {
@@ -406,79 +410,59 @@ function renderTimelineChart(): void {
   }
 
   const channels = [...new Set(segs.map((s) => s.channel_login))].sort((a, b) => a.localeCompare(b));
-  const data: [number, number, number][] = segs.map((s) => {
-    const yi = channels.indexOf(s.channel_login);
-    const t0 = new Date(s.start).getTime();
-    const t1 = new Date(s.end).getTime();
-    return [yi, t0, t1];
-  });
+  const rows = segs.map((s) => ({
+    channel_login: s.channel_login,
+    start: new Date(s.start),
+    end: new Date(s.end),
+  }));
 
-  chart = echarts.init(chartEl.value, undefined, { renderer: 'canvas' });
+  const w = chartEl.value.clientWidth;
+  const h = chartEl.value.clientHeight;
+  if (w < 48 || h < 48) {
+    return;
+  }
 
-  chart.setOption({
-    tooltip: {
-      trigger: 'item',
-      formatter: (p: unknown) => {
-        const d = p as { value?: [number, number, number]; name?: string };
-        const v = d.value;
-        if (!v || v.length < 3) {
-          return '';
-        }
-        const ch = channels[v[0]] ?? '';
-        const a = new Date(v[1]).toLocaleString();
-        const b = new Date(v[2]).toLocaleString();
-        return `${ch}<br/>${a} — ${b}`;
-      },
+  const fill = 'rgba(145, 71, 255, 0.45)';
+  const stroke = 'rgba(145, 71, 255, 0.85)';
+
+  const figure = Plot.plot({
+    width: w,
+    height: h,
+    marginLeft: 128,
+    marginRight: 12,
+    marginTop: 6,
+    marginBottom: 40,
+    style: {
+      color: 'var(--text-muted)',
+      fontSize: '11px',
+      background: 'transparent',
     },
-    grid: { left: 140, right: 24, top: 16, bottom: 48 },
-    xAxis: {
-      type: 'time',
-      scale: true,
-      axisLabel: { fontSize: 10, color: '#aaa' },
-    },
-    yAxis: {
-      type: 'category',
-      data: channels,
-      axisLabel: { fontSize: 11, color: '#ccc' },
-      inverse: true,
-    },
-    dataZoom: [{ type: 'inside' }, { type: 'slider', height: 18 }],
-    series: [
-      {
-        type: 'custom',
-        renderItem(_params: unknown, api: any) {
-          const yIndex = api.value(0) as number;
-          const t0 = api.value(1) as number;
-          const t1 = api.value(2) as number;
-          const start = api.coord([t0, yIndex]);
-          const end = api.coord([t1, yIndex]);
-          const sy = api.size([0, 1])[1] ?? 12;
-          const h = Math.max(6, sy * 0.55);
-          return {
-            type: 'rect',
-            shape: {
-              x: start[0],
-              y: start[1] - h / 2,
-              width: Math.max(1, end[0] - start[0]),
-              height: h,
-            },
-            style: {
-              fill: 'rgba(145, 71, 255, 0.45)',
-              stroke: 'rgba(145, 71, 255, 0.85)',
-              lineWidth: 1,
-            },
-          };
-        },
-        dimensions: ['y', 't0', 't1'],
-        encode: { x: [1, 2], y: 0 },
-        data,
-      },
+    x: { type: 'utc', label: 'Time', grid: true },
+    y: { type: 'band', domain: channels, padding: 0.12, label: null },
+    marks: [
+      Plot.rect(rows, {
+        x1: 'start',
+        x2: 'end',
+        y1: 'channel_login',
+        fill,
+        stroke,
+        strokeWidth: 1,
+        inset: 0.35,
+        rx: 2,
+      }),
+      Plot.axisX({ fontSize: 10, tickFormat: '%b %d %H:%M' }),
+      Plot.axisY({ fontSize: 11, tickSize: 0, dx: -2 }),
+      Plot.gridX({ stroke: 'rgba(255, 255, 255, 0.06)' }),
     ],
   });
+
+  chartEl.value.appendChild(figure);
 }
 
 function onResize(): void {
-  chart?.resize();
+  if (userTab.value === 'graphs' && timelineSegments.value.length > 0 && !loadingTimeline.value) {
+    renderTimelineChart();
+  }
 }
 
 watch(userTab, async (t) => {
@@ -499,10 +483,7 @@ watch(
     followingQuery.value = '';
     activity.value = [];
     timelineSegments.value = [];
-    if (chart) {
-      chart.dispose();
-      chart = null;
-    }
+    disposeTimelineFigure();
     await loadProfile();
     await loadMessages();
   },
@@ -516,14 +497,20 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize);
-  if (chart) {
-    chart.dispose();
-    chart = null;
-  }
+  disposeTimelineFigure();
 });
 
 function rowBadges(m: ChatHistoryEntry): ChatBadgeTag[] {
   return [...(m.badge_tags ?? [])] as ChatBadgeTag[];
+}
+
+function rowChatterIsSus(m: ChatHistoryEntry): boolean {
+  return effectiveChatterIsSus(m.chatter_user_id ?? undefined, m.chatter_is_sus, liveSocket.suspicionByTwitchId);
+}
+
+function rowChatterSusTitle(m: ChatHistoryEntry): string {
+  const eff = rowChatterIsSus(m);
+  return effectiveSuspicionTitle(m.chatter_user_id ?? undefined, eff, liveSocket.suspicionByTwitchId) ?? '';
 }
 
 function activityLabel(e: UserActivityEvent): string {
@@ -768,7 +755,8 @@ function formatPresenceWeek(sec: number): string {
             :created-at="m.created_at"
             :chatter-user-id="m.chatter_user_id ?? undefined"
             :user-marked="m.chatter_marked"
-            :user-is-sus="m.chatter_is_sus"
+            :user-is-sus="rowChatterIsSus(m)"
+            :suspicious-title="rowChatterSusTitle(m)"
             show-channel
             :channel-login="m.channel"
           />

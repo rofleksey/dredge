@@ -440,6 +440,24 @@ func (r *Repository) IsTwitchUserMarked(ctx context.Context, id int64) (bool, er
 	return m, nil
 }
 
+// IsTwitchUserSuspicious returns is_sus for id (false if not found).
+func (r *Repository) IsTwitchUserSuspicious(ctx context.Context, id int64) (bool, error) {
+	ctx, span := r.obs.StartSpan(ctx, "repo.is_twitch_user_suspicious")
+	defer span.End()
+
+	var s bool
+
+	err := r.pool.QueryRow(ctx, `SELECT is_sus FROM twitch_users WHERE id = $1`, id).Scan(&s)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return s, nil
+}
+
 // CountChatMessagesByChatter counts persisted rows for a chatter.
 func (r *Repository) CountChatMessagesByChatter(ctx context.Context, chatterTwitchUserID int64) (int64, error) {
 	ctx, span := r.obs.StartSpan(ctx, "repo.count_chat_messages_by_chatter")

@@ -49,6 +49,7 @@ type Store interface {
 	GetTwitchUserByID(ctx context.Context, id int64) (entity.TwitchUser, error)
 	CountChatMessagesByChatter(ctx context.Context, chatterID int64) (int64, error)
 	IsTwitchUserMarked(ctx context.Context, id int64) (bool, error)
+	IsTwitchUserSuspicious(ctx context.Context, id int64) (bool, error)
 
 	ReplaceChannelChattersSnapshot(ctx context.Context, channelTwitchUserID int64, chatterIDs []int64) error
 	UpsertChannelChatterPresence(ctx context.Context, channelTwitchUserID, chatterTwitchUserID int64) (presentSince time.Time, err error)

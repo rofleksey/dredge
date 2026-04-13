@@ -149,13 +149,12 @@ func (h *Handler) UpdateTwitchUser(ctx context.Context, req *gen.UpdateTwitchUse
 		return nil, err
 	}
 
-	restartIRC := patch.Monitored != nil || patch.IrcOnlyWhenLive != nil ||
-		patch.NotifyOffStreamMessages != nil || patch.NotifyStreamStart != nil
-	if restartIRC {
-		if err := h.twitch.RestartMonitor(ctx); err != nil {
-			h.obs.LogError(ctx, span, "restart monitor failed", err, zap.Int64("id", req.ID))
-			return nil, err
-		}
+	if patch.Monitored != nil || patch.IrcOnlyWhenLive != nil {
+		h.twitch.ReconcileIRCJoins(ctx)
+	}
+
+	if twitchsvc.PatchTouchesSuspicionFields(patch) {
+		h.twitch.BroadcastTwitchUserSuspicion(u)
 	}
 
 	tu := entityTwitchUserToGen(u)

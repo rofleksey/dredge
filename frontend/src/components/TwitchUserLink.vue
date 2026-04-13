@@ -11,11 +11,17 @@ const props = withDefaults(
     highlightChannel?: string;
     /** Chat line (default) vs system join/part line weight. */
     variant?: 'chat' | 'system';
+    /** Flagged suspicious (chat lines): nickname color overrides hl-* */
+    suspicious?: boolean;
+    /** Native tooltip (e.g. suspicion reason) */
+    linkTitle?: string;
   }>(),
   {
     userTwitchId: undefined,
     highlightChannel: '',
     variant: 'chat',
+    suspicious: false,
+    linkTitle: '',
   },
 );
 
@@ -28,7 +34,8 @@ const extraClass = computed(() => highlightClass.value(props.login));
   <RouterLink
     v-if="userTwitchId != null && userTwitchId !== undefined"
     class="twitch-user-link"
-    :class="[`twitch-user-link--${variant}`, extraClass]"
+    :class="[`twitch-user-link--${variant}`, extraClass, { 'nick-sus': suspicious }]"
+    :title="linkTitle || undefined"
     :to="{ name: 'user', params: { id: String(userTwitchId) } }"
   >
     {{ login }}
@@ -36,7 +43,8 @@ const extraClass = computed(() => highlightClass.value(props.login));
   <span
     v-else
     class="twitch-user-link"
-    :class="[`twitch-user-link--${variant}`, extraClass]"
+    :class="[`twitch-user-link--${variant}`, extraClass, { 'nick-sus': suspicious }]"
+    :title="linkTitle || undefined"
     >{{ login }}</span
   >
 </template>
@@ -70,6 +78,10 @@ const extraClass = computed(() => highlightClass.value(props.login));
 
   &.hl-monitored {
     color: #64b5f6;
+  }
+
+  &.nick-sus {
+    color: #ff0000;
   }
 }
 

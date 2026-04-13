@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia';
-import { ref, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { getToken } from '../api/client';
 import type { ChatBadgeTag } from '../lib/chatBadges';
+import type { SuspicionOverlayRow } from '../lib/suspicionOverlay';
 import { useAuthStore } from './auth';
+
+export type { SuspicionOverlayRow };
 
 export type { ChatBadgeTag };
 
@@ -15,6 +18,7 @@ export type LiveEvent =
       message: string;
       keyword_match?: boolean;
       chatter_marked?: boolean;
+      chatter_is_sus?: boolean;
       badge_tags?: ChatBadgeTag[];
       created_at?: string;
       receivedAt: number;
@@ -67,9 +71,16 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
   const connected = ref(false);
   const lastError = ref<string | null>(null);
   const events = ref<LiveEvent[]>([]);
+  const suspicionByTwitchId = reactive<Record<number, SuspicionOverlayRow>>({});
 
   let ws: ReconnectingWebSocket | null = null;
   let hadSuccessfulOpen = false;
+
+  function clearSuspicionOverlay(): void {
+    for (const k of Object.keys(suspicionByTwitchId)) {
+      delete suspicionByTwitchId[Number(k)];
+    }
+  }
 
   function pushEvent(raw: unknown): void {
     if (!raw || typeof raw !== 'object') {
@@ -88,6 +99,7 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
         message: String(o.message ?? ''),
         keyword_match: Boolean(o.keyword_match),
         chatter_marked: Boolean(o.chatter_marked),
+        chatter_is_sus: Boolean(o.chatter_is_sus),
         badge_tags: parseBadgeTags(o.badge_tags),
         created_at: typeof o.created_at === 'string' ? o.created_at : undefined,
         receivedAt: ts,
@@ -107,6 +119,27 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
         receivedAt: ts,
         user_twitch_id: typeof uid === 'number' && Number.isFinite(uid) ? uid : undefined,
       });
+      return;
+    }
+    if (t === 'twitch_user_suspicion') {
+      const rawId = o.user_twitch_id;
+      const id =
+        typeof rawId === 'number' && Number.isFinite(rawId)
+          ? rawId
+          : typeof rawId === 'string'
+            ? Number.parseInt(rawId, 10)
+            : NaN;
+      if (!Number.isFinite(id)) {
+        return;
+      }
+      const row: SuspicionOverlayRow = { isSus: Boolean(o.is_sus) };
+      if (typeof o.sus_description === 'string' && o.sus_description.trim()) {
+        row.susDescription = o.sus_description.trim();
+      }
+      if (typeof o.sus_type === 'string' && o.sus_type.trim()) {
+        row.susType = o.sus_type.trim();
+      }
+      suspicionByTwitchId[id] = row;
     }
   }
 
@@ -182,6 +215,7 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
       } else {
         disconnect();
         events.value = [];
+        clearSuspicionOverlay();
         lastError.value = null;
       }
     },
@@ -192,9 +226,11 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
     connected,
     lastError,
     events,
+    suspicionByTwitchId,
     connect,
     disconnect,
     clearEvents,
     clearEventsForChannel,
+    clearSuspicionOverlay,
   };
 });

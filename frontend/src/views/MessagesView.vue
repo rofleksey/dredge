@@ -5,9 +5,13 @@ import SubmitButton from '../components/SubmitButton.vue';
 import ChatMessageLine from '../components/ChatMessageLine.vue';
 import { ApiError, ChatHistoryEntry, DefaultService } from '../api/generated';
 import type { ChatBadgeTag } from '../lib/chatBadges';
+import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
 import { notify } from '../lib/notify';
+import { useLiveSocketStore } from '../stores/liveSocket';
 
 defineOptions({ name: 'MessagesView' });
+
+const liveSocket = useLiveSocketStore();
 
 const loading = ref(false);
 const loadingMore = ref(false);
@@ -183,6 +187,15 @@ onMounted(() => {
 function rowBadges(m: ChatHistoryEntry): ChatBadgeTag[] {
   return [...(m.badge_tags ?? [])] as ChatBadgeTag[];
 }
+
+function rowChatterIsSus(m: ChatHistoryEntry): boolean {
+  return effectiveChatterIsSus(m.chatter_user_id ?? undefined, m.chatter_is_sus, liveSocket.suspicionByTwitchId);
+}
+
+function rowChatterSusTitle(m: ChatHistoryEntry): string {
+  const eff = rowChatterIsSus(m);
+  return effectiveSuspicionTitle(m.chatter_user_id ?? undefined, eff, liveSocket.suspicionByTwitchId) ?? '';
+}
 </script>
 
 <template>
@@ -212,6 +225,8 @@ function rowBadges(m: ChatHistoryEntry): ChatBadgeTag[] {
         :created-at="m.created_at"
         :chatter-user-id="m.chatter_user_id ?? undefined"
         :user-marked="m.chatter_marked"
+        :user-is-sus="rowChatterIsSus(m)"
+        :suspicious-title="rowChatterSusTitle(m)"
         show-channel
         :channel-login="m.channel"
       />

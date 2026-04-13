@@ -13,6 +13,7 @@ import type { ListChannelChattersRequest } from '../api/generated';
 import type { ChannelChatterEntry, ChannelLive, IrcMonitorStatus, WatchUiHints } from '../api/generated';
 import type { ChatBadgeTag } from '../lib/chatBadges';
 import { isChannelJoinedOnIrc } from '../lib/ircMonitorJoined';
+import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
 import { notifyFromApiError } from '../lib/clientNotice';
 import { notify } from '../lib/notify';
 import { useChannelsStore } from '../stores/channels';
@@ -77,6 +78,8 @@ type ChatLine = {
   message: string;
   keyword: boolean;
   userMarked: boolean;
+  userIsSus: boolean;
+  susTitle?: string;
   fromSent: boolean;
   at: number;
   badgeTags: ChatBadgeTag[];
@@ -363,21 +366,27 @@ const displayLines = computed((): ChatLine[] => {
     return [];
   }
 
+  const ov = liveSocket.suspicionByTwitchId;
+
   const hist: ChatLine[] = historyEntries.value.map((h) => {
     const t = Date.parse(h.created_at);
     const at = Number.isFinite(t) ? t : channelSwitchTime.value;
     const badgeTags = [...(h.badge_tags ?? [])] as ChatBadgeTag[];
+    const uid = h.chatter_user_id ?? undefined;
+    const userIsSus = effectiveChatterIsSus(uid, h.chatter_is_sus, ov);
     return {
       key: `db-${h.id}`,
       user: h.user,
       message: h.message,
       keyword: h.keyword_match,
       userMarked: h.chatter_marked,
+      userIsSus,
+      susTitle: effectiveSuspicionTitle(uid, userIsSus, ov),
       fromSent: h.source === ChatHistoryEntry.source.SENT,
       at,
       badgeTags,
       createdAtIso: h.created_at,
-      chatterUserId: h.chatter_user_id ?? undefined,
+      chatterUserId: uid,
     };
   });
 
@@ -394,17 +403,24 @@ const displayLines = computed((): ChatLine[] => {
       const fromIso = e.created_at ? Date.parse(e.created_at) : NaN;
       const at = Number.isFinite(fromIso) ? fromIso : e.receivedAt;
       const badgeTags = (e.badge_tags ?? []) as ChatBadgeTag[];
+      const uid = e.user_twitch_id;
+      const fromPayload = e.type === 'chat_message' && Boolean(e.chatter_is_sus);
+      const userIsSus =
+        e.type === 'chat_message' ? effectiveChatterIsSus(uid, fromPayload, ov) : false;
       live.push({
         key: `ws-${e.receivedAt}-${i}-${e.type}`,
         user: e.user,
         message: e.message,
         keyword: e.type === 'chat_message' && Boolean(e.keyword_match),
         userMarked: e.type === 'chat_message' && Boolean(e.chatter_marked),
+        userIsSus,
+        susTitle:
+          e.type === 'chat_message' ? effectiveSuspicionTitle(uid, userIsSus, ov) : undefined,
         fromSent: e.type === 'message_sent',
         at,
         badgeTags,
         createdAtIso: e.created_at,
-        chatterUserId: e.user_twitch_id,
+        chatterUserId: uid,
       });
     }
   }
@@ -812,6 +828,8 @@ async function sendChat(): Promise<void> {
               :message="row.line.message"
               :keyword="row.line.keyword"
               :user-marked="row.line.userMarked"
+              :user-is-sus="row.line.userIsSus"
+              :suspicious-title="row.line.susTitle"
               :from-sent="row.line.fromSent"
               :badge-tags="row.line.badgeTags"
               :show-timestamp="false"

@@ -11,9 +11,9 @@
     "generate:api": "npm run generate:openapi"
   },
   "dependencies": {
+    "@observablehq/plot": "^0.6.17",
     "@vueuse/core": "^14.2.1",
     "axios": "^1.15.0",
-    "echarts": "^5.6.0",
     "pinia": "^3.0.4",
     "reconnecting-websocket": "^4.4.0",
     "vue": "^3.5.32",

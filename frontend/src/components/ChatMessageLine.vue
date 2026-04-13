@@ -23,6 +23,8 @@ const props = withDefaults(
     userMarked?: boolean;
     /** Highlight chatter as suspicious */
     userIsSus?: boolean;
+    /** Tooltip when suspicious (e.g. reason from live updates) */
+    suspiciousTitle?: string;
   }>(),
   {
     createdAt: undefined,
@@ -32,6 +34,7 @@ const props = withDefaults(
     channelLogin: '',
     userMarked: false,
     userIsSus: false,
+    suspiciousTitle: '',
   },
 );
 
@@ -60,8 +63,7 @@ const timeLabel = computed(() => {
     :class="{
       kw: keyword,
       sent: fromSent && !keyword,
-      marked: userMarked && !keyword && !userIsSus,
-      suspicious: userIsSus && !keyword,
+      marked: userMarked && !keyword,
     }"
   >
     <span v-if="timeLabel" class="ts">{{ timeLabel }}</span>
@@ -71,6 +73,8 @@ const timeLabel = computed(() => {
       :login="user"
       :user-twitch-id="chatterUserId"
       :highlight-channel="highlightChannel"
+      :suspicious="userIsSus"
+      :link-title="suspiciousTitle"
       variant="chat"
     />
     <span class="txt">{{ message }}</span>
@@ -94,11 +98,6 @@ li {
   &.marked:not(.kw) {
     background: rgba(255, 193, 7, 0.1);
     border-left: 2px solid rgba(255, 193, 7, 0.55);
-  }
-
-  &.suspicious:not(.kw) {
-    background: rgba(220, 53, 69, 0.1);
-    border-left: 2px solid rgba(220, 53, 69, 0.55);
   }
 }
 

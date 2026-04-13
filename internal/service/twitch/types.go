@@ -23,6 +23,7 @@ type Service struct {
 	live *live.Runtime
 
 	repo        repository.Store
+	broadcaster Broadcaster
 	obs         *observability.Stack
 	enrichQueue chan int64
 

@@ -114,21 +114,27 @@ func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled 
 
 		var chatterMarked bool
 
+		var chatterIsSus bool
+
 		if chatterID != nil {
 			if m, err := r.repo.IsTwitchUserMarked(persistCtx, *chatterID); err == nil {
 				chatterMarked = m
 			}
+			if s, err := r.repo.IsTwitchUserSuspicious(persistCtx, *chatterID); err == nil {
+				chatterIsSus = s
+			}
 		}
 
 		wsPayload := map[string]any{
-			"type":           "chat_message",
-			"channel":        ch,
-			"user":           chatterLogin,
-			"message":        msg.Message,
-			"keyword_match":  keyword,
-			"chatter_marked": chatterMarked,
-			"badge_tags":     badgeTags,
-			"created_at":     ts.Format(time.RFC3339Nano),
+			"type":            "chat_message",
+			"channel":         ch,
+			"user":            chatterLogin,
+			"message":         msg.Message,
+			"keyword_match":   keyword,
+			"chatter_marked":  chatterMarked,
+			"chatter_is_sus":  chatterIsSus,
+			"badge_tags":      badgeTags,
+			"created_at":      ts.Format(time.RFC3339Nano),
 		}
 		if chatterID != nil {
 			wsPayload["user_twitch_id"] = *chatterID
@@ -505,6 +511,13 @@ func (r *Runtime) StopMonitor() {
 	}
 
 	r.broadcastIRCMonitorTCP(false)
+}
+
+// ReconcileIRCJoins refreshes IRC channel membership from the database and Helix live state
+// (Join/Depart diffs) without reconnecting the client. It is a no-op when the monitor client
+// is not running.
+func (r *Runtime) ReconcileIRCJoins(ctx context.Context) {
+	r.reconcileIRCJoinsOnce(ctx)
 }
 
 // SendMessage sends a chat line using a linked OAuth account (Helix Send Chat Message).

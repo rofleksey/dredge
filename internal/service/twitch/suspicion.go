@@ -124,9 +124,14 @@ func (s *Service) applySuspicionPatch(ctx context.Context, userID int64, isSus b
 		p.SusDescription = &empty
 	}
 
-	_, err := s.repo.PatchTwitchUser(ctx, userID, p)
+	out, err := s.repo.PatchTwitchUser(ctx, userID, p)
+	if err != nil {
+		return err
+	}
 
-	return err
+	s.BroadcastTwitchUserSuspicion(out)
+
+	return nil
 }
 
 // computeAutoSuspicion returns whether the user matches automatic suspicion (priority: blacklist > account age > low follow count).

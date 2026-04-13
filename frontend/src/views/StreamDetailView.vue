@@ -9,9 +9,13 @@ import type { RecordedStream } from '../api/generated';
 import type { StreamLeaderboardEntry } from '../api/generated';
 import { StreamLeaderboardSort } from '../api/generated/models/StreamLeaderboardSort';
 import type { UserActivityEvent } from '../api/generated/models/UserActivityEvent';
+import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
 import { notify } from '../lib/notify';
+import { useLiveSocketStore } from '../stores/liveSocket';
 
 defineOptions({ name: 'StreamDetailView' });
+
+const liveSocket = useLiveSocketStore();
 
 const route = useRoute();
 
@@ -195,6 +199,15 @@ function activityLabel(e: UserActivityEvent): string {
   }
 }
 
+function rowChatterIsSus(m: ChatHistoryEntry): boolean {
+  return effectiveChatterIsSus(m.chatter_user_id ?? undefined, m.chatter_is_sus, liveSocket.suspicionByTwitchId);
+}
+
+function rowChatterSusTitle(m: ChatHistoryEntry): string {
+  const eff = rowChatterIsSus(m);
+  return effectiveSuspicionTitle(m.chatter_user_id ?? undefined, eff, liveSocket.suspicionByTwitchId) ?? '';
+}
+
 async function refreshTab(): Promise<void> {
   if (tab.value === 'leaderboard') {
     await loadLeaderboard();
@@ -346,6 +359,8 @@ function loadMoreActivity(): void {
               :message="m.message"
               :keyword="m.keyword_match"
               :user-marked="m.chatter_marked"
+              :user-is-sus="rowChatterIsSus(m)"
+              :suspicious-title="rowChatterSusTitle(m)"
               :from-sent="m.source === 'sent'"
               :badge-tags="m.badge_tags"
               :show-timestamp="true"
