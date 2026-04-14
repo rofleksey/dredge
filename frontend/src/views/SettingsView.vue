@@ -38,6 +38,8 @@ const twitchAccountsTotal = ref(0);
 const notifications = ref<NotificationEntry[]>([]);
 const channelBlacklist = ref<string[]>([]);
 const newBlacklistLogin = ref('');
+const blacklistFilter = ref('');
+const blacklistSort = ref<'name-asc' | 'name-desc'>('name-asc');
 const suspicionDraft = reactive<SuspicionSettings>({
   auto_check_account_age: true,
   account_age_sus_days: 14,
@@ -622,6 +624,17 @@ function channelIrcJoined(login: string): boolean {
 }
 const rulesHeading = computed(() => `Rules (${rulesTotal.value})`);
 const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.value})`);
+const filteredChannelBlacklist = computed(() => {
+  const q = blacklistFilter.value.trim().toLowerCase();
+  const filtered = channelBlacklist.value.filter((login) => (q ? login.toLowerCase().includes(q) : true));
+  const sorted = [...filtered];
+  if (blacklistSort.value === 'name-desc') {
+    sorted.sort((a, b) => b.localeCompare(a));
+  } else {
+    sorted.sort((a, b) => a.localeCompare(b));
+  }
+  return sorted;
+});
 </script>
 
 <template>
@@ -684,13 +697,13 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
         <h2>{{ rulesHeading }}</h2>
         <ul class="rule-list">
           <li v-for="r in rules" :key="r.id" class="rule-row">
+            <button type="button" class="btn-danger btn-inline-x" @click="deleteRule(r.id)">x</button>
             <div>
               <code>{{ r.regex }}</code>
               <div class="rule-meta muted small">
                 users: {{ r.included_users }} / {{ r.denied_users }} · ch: {{ r.included_channels }} / {{ r.denied_channels }}
               </div>
             </div>
-            <button type="button" class="btn-danger" @click="deleteRule(r.id)">Delete</button>
           </li>
         </ul>
         <p class="row-actions">
@@ -773,24 +786,32 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
         <p class="hint">Blacklist applies to outgoing follows enrichment; automatic rules run after GQL sync.</p>
 
         <h3 class="subh">Channel blacklist</h3>
-        <p v-if="!channelBlacklist.length" class="muted small">No channels blacklisted.</p>
-        <ul v-else class="bl-list">
-          <li v-for="login in channelBlacklist" :key="login" class="bl-row">
-            <code>{{ login }}</code>
-            <button
-              type="button"
-              class="btn-danger tiny"
-              :disabled="savingBlacklist"
-              @click="removeBlacklistEntry(login)"
-            >
-              Remove
-            </button>
-          </li>
-        </ul>
         <form class="row bl-add" @submit.prevent="addBlacklistEntry">
           <input v-model="newBlacklistLogin" placeholder="channel login" autocomplete="off" />
           <SubmitButton :loading="savingBlacklist">Add</SubmitButton>
         </form>
+        <div class="row bl-controls">
+          <input v-model="blacklistFilter" type="text" placeholder="Filter blacklisted channels" autocomplete="off" />
+          <select v-model="blacklistSort" aria-label="Sort blacklisted channels">
+            <option value="name-asc">Sort: name A-Z</option>
+            <option value="name-desc">Sort: name Z-A</option>
+          </select>
+        </div>
+        <p v-if="!channelBlacklist.length" class="muted small">No channels blacklisted.</p>
+        <p v-else-if="!filteredChannelBlacklist.length" class="muted small">No channels match current filter.</p>
+        <ul v-else class="bl-list">
+          <li v-for="login in filteredChannelBlacklist" :key="login" class="bl-row">
+            <button
+              type="button"
+              class="btn-danger btn-inline-x"
+              :disabled="savingBlacklist"
+              @click="removeBlacklistEntry(login)"
+            >
+              x
+            </button>
+            <code>{{ login }}</code>
+          </li>
+        </ul>
 
         <h3 class="subh">Automatic rules</h3>
         <form class="stack sus-form" @submit.prevent="saveSuspicionSettings">
@@ -1104,7 +1125,7 @@ ul {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
@@ -1146,7 +1167,7 @@ ul {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.5rem;
   margin-bottom: 0.35rem;
 }
@@ -1154,6 +1175,10 @@ ul {
 .bl-add {
   margin-bottom: 0.5rem;
   max-width: 28rem;
+}
+
+.bl-controls {
+  margin-bottom: 0.65rem;
 }
 
 .sus-form {
@@ -1203,6 +1228,18 @@ ul {
     padding: 0.1rem 0.35rem;
     font-size: 0.7rem;
   }
+}
+
+.btn-inline-x {
+  width: 1.15rem;
+  height: 1.15rem;
+  min-width: 1.15rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  line-height: 1;
 }
 
 code {
