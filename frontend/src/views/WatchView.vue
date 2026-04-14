@@ -2,6 +2,7 @@
 import { useIntervalFn, useScroll } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { RouterLink } from 'vue-router';
 import AppModal from '../components/AppModal.vue';
 import SubmitButton from '../components/SubmitButton.vue';
 import TwitchPlayer from '../components/TwitchPlayer.vue';
@@ -843,16 +844,27 @@ async function sendChat(): Promise<void> {
             <TwitchPlayer :channel="selectedChannel" />
 
             <header v-if="channelLive" class="stream-strip compact">
-              <img
-                class="avatar"
-                :src="channelLive.profile_image_url"
-                :alt="''"
-                width="36"
-                height="36"
-              />
+              <RouterLink
+                class="stream-user-link stream-user-link--avatar"
+                :to="{ name: 'user', params: { id: String(channelLive.broadcaster_id) } }"
+                :aria-label="`Open user ${channelLive.display_name}`"
+              >
+                <img
+                  class="avatar"
+                  :src="channelLive.profile_image_url"
+                  :alt="''"
+                  width="36"
+                  height="36"
+                />
+              </RouterLink>
               <div class="stream-meta">
                 <div class="stream-title-row">
-                  <span class="dn">{{ channelLive.display_name }}</span>
+                  <RouterLink
+                    class="dn stream-user-link"
+                    :to="{ name: 'user', params: { id: String(channelLive.broadcaster_id) } }"
+                  >
+                    {{ channelLive.display_name }}
+                  </RouterLink>
                   <span v-if="channelLive.is_live" class="live-pill">LIVE</span>
                   <span v-else class="off-pill">Offline</span>
                 </div>
@@ -983,7 +995,7 @@ async function sendChat(): Promise<void> {
       </form>
     </AppModal>
 
-    <AppModal :open="viewerModalOpen" extra-wide title="Stream details" @close="viewerModalOpen = false">
+    <AppModal :open="viewerModalOpen" wide title="Stream details" @close="viewerModalOpen = false">
       <dl v-if="channelLive" class="viewer-dl">
         <div>
           <dt>Title</dt>
@@ -1313,6 +1325,23 @@ async function sendChat(): Promise<void> {
 .dn {
   font-weight: 700;
   font-size: 0.95rem;
+}
+
+.stream-user-link {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &--avatar {
+    line-height: 0;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
 .stream-strip.compact .dn {

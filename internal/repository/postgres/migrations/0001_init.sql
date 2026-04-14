@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS twitch_users (
     sus_type TEXT,
     sus_description TEXT,
     sus_auto_suppressed BOOLEAN NOT NULL DEFAULT false,
-    irc_only_when_live BOOLEAN NOT NULL DEFAULT false,
+    irc_only_when_live BOOLEAN NOT NULL DEFAULT true,
     notify_off_stream_messages BOOLEAN NOT NULL DEFAULT false,
     notify_stream_start BOOLEAN NOT NULL DEFAULT false
 );

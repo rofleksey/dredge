@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as Plot from '@observablehq/plot';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import ChatMessageLine from '../components/ChatMessageLine.vue';
 import { ApiError, ChatHistoryEntry, DefaultService } from '../api/generated';
 import type {
@@ -25,6 +25,7 @@ const liveSocket = useLiveSocketStore();
 type UserTab = 'overview' | 'following' | 'messages' | 'activity' | 'graphs' | 'settings';
 
 const route = useRoute();
+const router = useRouter();
 const profile = ref<TwitchUserProfile | null>(null);
 const notFound = ref(false);
 const messages = ref<ChatHistoryEntry[]>([]);
@@ -34,6 +35,7 @@ const loadingMore = ref(false);
 const togglingMarked = ref(false);
 const savingUserSettings = ref(false);
 const togglingSus = ref(false);
+const addingFollowedChannel = ref<number | null>(null);
 const manualSusNote = ref('');
 const followingQuery = ref('');
 
@@ -598,6 +600,40 @@ const sortedFollowedChannels = computed((): FollowedChannelEntry[] => {
   return rows;
 });
 
+const followedMonitoredChannelIDs = computed(() => {
+  const ids = profile.value?.followed_monitored_channels?.map((r) => r.channel_id) ?? [];
+  return new Set(ids);
+});
+
+function canAddFollowedChannel(row: FollowedChannelEntry): boolean {
+  return !followedMonitoredChannelIDs.value.has(row.channel_id);
+}
+
+async function addFollowedChannelToMonitoring(row: FollowedChannelEntry): Promise<void> {
+  if (addingFollowedChannel.value != null) {
+    return;
+  }
+  addingFollowedChannel.value = row.channel_id;
+  try {
+    await DefaultService.updateTwitchUser({
+      requestBody: {
+        id: row.channel_id,
+        monitored: true,
+      },
+    });
+    await router.push({ name: 'user', params: { id: String(row.channel_id) } });
+  } catch {
+    notify({
+      id: `user-following-add-${row.channel_id}`,
+      type: 'error',
+      title: 'Following',
+      description: `Could not mark #${row.channel_login} as monitored.`,
+    });
+  } finally {
+    addingFollowedChannel.value = null;
+  }
+}
+
 function formatPresenceWeek(sec: number): string {
   if (!Number.isFinite(sec) || sec <= 0) {
     return '—';
@@ -755,7 +791,18 @@ function formatPresenceWeek(sec: number): string {
                   <span v-if="row.on_blacklist" class="tag-bl">blacklist</span>
                 </td>
                 <td class="muted">{{ row.followed_at ? formatWhen(row.followed_at) : '—' }}</td>
-                <td />
+                <td class="follow-action">
+                  <button
+                    v-if="canAddFollowedChannel(row)"
+                    type="button"
+                    class="btn-add-follow"
+                    :disabled="addingFollowedChannel !== null"
+                    :title="`Monitor #${row.channel_login} and open its user page`"
+                    @click="addFollowedChannelToMonitoring(row)"
+                  >
+                    {{ addingFollowedChannel === row.channel_id ? '…' : '+' }}
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -1312,6 +1359,34 @@ function formatPresenceWeek(sec: number): string {
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: #ff6b7a;
+  }
+}
+
+.follow-action {
+  width: 2.5rem;
+}
+
+.btn-add-follow {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.25rem;
+  border: 1px dashed var(--border);
+  background: var(--bg-base);
+  color: var(--accent-bright);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--bg-hover);
   }
 }
 </style>
