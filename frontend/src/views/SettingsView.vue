@@ -48,6 +48,8 @@ const suspicionDraft = reactive<SuspicionSettings>({
 });
 
 const newChannel = reactive({ name: '' });
+const channelsFilter = ref('');
+const channelsSort = ref<'name-asc' | 'name-desc' | 'id-desc' | 'id-asc'>('name-asc');
 
 const ruleModalOpen = ref(false);
 const regexTestModalOpen = ref(false);
@@ -228,7 +230,7 @@ async function addChannel(): Promise<void> {
   }
   addingChannel.value = true;
   try {
-    await DefaultService.createTwitchUser({
+    const created = await DefaultService.createTwitchUser({
       requestBody: { name: newChannel.name.trim() },
     });
     newChannel.name = '';
@@ -238,7 +240,8 @@ async function addChannel(): Promise<void> {
       title: 'Channels',
       description: 'Channel added.',
     });
-    await refresh();
+    await channelsStore.fetch();
+    await router.push({ name: 'user', params: { id: String(created.id) } });
   } catch (e: unknown) {
     if (e instanceof ApiError && e.status === 400 && e.body && typeof e.body === 'object' && 'message' in e.body) {
       notify({
@@ -257,28 +260,6 @@ async function addChannel(): Promise<void> {
     }
   } finally {
     addingChannel.value = false;
-  }
-}
-
-async function setChannelMonitored(id: number, monitored: boolean): Promise<void> {
-  try {
-    await DefaultService.updateTwitchUser({
-      requestBody: { id, monitored },
-    });
-    notify({
-      id: 'settings-channel-monitored',
-      type: 'success',
-      title: 'Channels',
-      description: monitored ? 'Monitoring enabled.' : 'Monitoring paused (history kept).',
-    });
-    await refresh();
-  } catch {
-    notify({
-      id: 'settings-channel-monitored',
-      type: 'error',
-      title: 'Channels',
-      description: 'Could not update channel.',
-    });
   }
 }
 
@@ -612,6 +593,21 @@ const maxIrcJoinedChannels = 100;
 const channelsHeading = computed(() => `Monitored channels (${monitoredChannels.value.length})`);
 
 const monitoredCount = computed(() => monitoredChannels.value.length);
+const filteredMonitoredChannels = computed(() => {
+  const q = channelsFilter.value.trim().toLowerCase();
+  const channels = monitoredChannels.value.filter((c) => (q ? c.username.toLowerCase().includes(q) : true));
+  const sorted = [...channels];
+  if (channelsSort.value === 'name-asc') {
+    sorted.sort((a, b) => a.username.localeCompare(b.username));
+  } else if (channelsSort.value === 'name-desc') {
+    sorted.sort((a, b) => b.username.localeCompare(a.username));
+  } else if (channelsSort.value === 'id-desc') {
+    sorted.sort((a, b) => b.id - a.id);
+  } else {
+    sorted.sort((a, b) => a.id - b.id);
+  }
+  return sorted;
+});
 
 const ircJoinedCount = computed(() => {
   const st = ircStatus.value;
@@ -647,8 +643,7 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
       <section v-show="tab === 'channels'" class="panel">
         <h2>{{ channelsHeading }}</h2>
         <p class="hint">
-          Monitored: {{ monitoredCount }} · IRC joined:
-          {{ ircJoinedCount }}
+          Monitored: {{ monitoredCount }} · IRC joined: {{ ircJoinedCount }} / {{ maxIrcJoinedChannels }}
           <span v-if="!ircStatus?.connected" class="muted"> (IRC not connected)</span>
         </p>
         <p v-if="ircJoinedCount > maxIrcJoinedChannels" class="hint hint-warn">
@@ -660,21 +655,29 @@ const twitchHeading = computed(() => `Twitch accounts (${twitchAccountsTotal.val
           Twitch IRC enforces a hard limit of about {{ maxIrcJoinedChannels }} concurrent channel joins per connection. The
           monitored list can be longer; the joined count is what matters for IRC.
         </p>
+        <form class="row" @submit.prevent="addChannel">
+          <input v-model="newChannel.name" placeholder="channel name" required />
+          <SubmitButton :loading="addingChannel">Add channel</SubmitButton>
+        </form>
+        <div class="row channels-controls">
+          <input v-model="channelsFilter" type="text" placeholder="Filter channels" autocomplete="off" />
+          <select v-model="channelsSort" aria-label="Sort monitored channels">
+            <option value="name-asc">Sort: name A-Z</option>
+            <option value="name-desc">Sort: name Z-A</option>
+            <option value="id-desc">Sort: newest first</option>
+            <option value="id-asc">Sort: oldest first</option>
+          </select>
+        </div>
         <ul class="chan-list">
-          <li v-for="c in monitoredChannels" :key="c.id">
+          <li v-for="c in filteredMonitoredChannels" :key="c.id">
             <span
               class="irc-dot"
               :class="channelIrcJoined(c.username) ? 'irc-dot--on' : 'irc-dot--off'"
               :title="channelIrcJoined(c.username) ? 'Joined on IRC' : 'Not joined on IRC'"
             />
             <RouterLink class="chan-link" :to="{ name: 'user', params: { id: String(c.id) } }">{{ c.username }}</RouterLink>
-            <button type="button" class="btn-danger" @click="setChannelMonitored(c.id, false)">Stop monitoring</button>
           </li>
         </ul>
-        <form class="row" @submit.prevent="addChannel">
-          <input v-model="newChannel.name" placeholder="channel name" required />
-          <SubmitButton :loading="addingChannel">Add channel</SubmitButton>
-        </form>
       </section>
 
       <section v-show="tab === 'rules'" class="panel">
@@ -1216,7 +1219,9 @@ code {
     flex: 1 1 180px;
   }
 
-  input[type='text'] {
+  input[type='text'],
+  input:not([type]),
+  select {
     padding: 0.4rem 0.5rem;
     border-radius: 0.25rem;
     border: 1px solid var(--border);
@@ -1238,6 +1243,10 @@ code {
       cursor: not-allowed;
     }
   }
+}
+
+.channels-controls {
+  margin-bottom: 0.65rem;
 }
 
 .gap-setting {
