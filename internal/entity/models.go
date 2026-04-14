@@ -138,6 +138,7 @@ type SuspicionSettings struct {
 // OauthTwitchAccountID nil means anonymous read-only IRC (justinfan); otherwise use that linked account's OAuth token.
 type IrcMonitorSettings struct {
 	OauthTwitchAccountID *int64
+	EnrichmentCooldown   time.Duration
 }
 
 // ChatHistoryMessage is a persisted Twitch chat line (IRC or sent via dredge).

@@ -3,6 +3,7 @@ package settings
 import (
 	"context"
 	"regexp"
+	"time"
 
 	"github.com/rofleksey/dredge/internal/entity"
 	"github.com/rofleksey/dredge/internal/observability"
@@ -151,6 +152,10 @@ func (s *Service) GetIrcMonitorSettings(ctx context.Context) (entity.IrcMonitorS
 func (s *Service) UpdateIrcMonitorSettings(ctx context.Context, in entity.IrcMonitorSettings) (entity.IrcMonitorSettings, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.settings.update_irc_monitor_settings")
 	defer span.End()
+
+	if in.EnrichmentCooldown <= 0 {
+		in.EnrichmentCooldown = 24 * time.Hour
+	}
 
 	if in.OauthTwitchAccountID != nil {
 		if _, err := s.repo.GetTwitchAccountByID(ctx, *in.OauthTwitchAccountID); err != nil {

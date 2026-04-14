@@ -684,6 +684,21 @@ func (mr *MockStoreMockRecorder) ListLinkedTwitchAccountUserIDs(ctx any) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListLinkedTwitchAccountUserIDs", reflect.TypeOf((*MockStore)(nil).ListLinkedTwitchAccountUserIDs), ctx)
 }
 
+// ListMonitoredOrMarkedTwitchUserIDs mocks base method.
+func (m *MockStore) ListMonitoredOrMarkedTwitchUserIDs(ctx context.Context) ([]int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListMonitoredOrMarkedTwitchUserIDs", ctx)
+	ret0, _ := ret[0].([]int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListMonitoredOrMarkedTwitchUserIDs indicates an expected call of ListMonitoredOrMarkedTwitchUserIDs.
+func (mr *MockStoreMockRecorder) ListMonitoredOrMarkedTwitchUserIDs(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListMonitoredOrMarkedTwitchUserIDs", reflect.TypeOf((*MockStore)(nil).ListMonitoredOrMarkedTwitchUserIDs), ctx)
+}
+
 // ListMonitoredStreams mocks base method.
 func (m *MockStore) ListMonitoredStreams(ctx context.Context, f entity.StreamListFilter) ([]entity.Stream, error) {
 	m.ctrl.T.Helper()

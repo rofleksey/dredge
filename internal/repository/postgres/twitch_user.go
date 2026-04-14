@@ -112,6 +112,39 @@ func (r *Repository) ListMonitoredTwitchUsers(ctx context.Context) ([]entity.Twi
 	return out, err
 }
 
+func (r *Repository) ListMonitoredOrMarkedTwitchUserIDs(ctx context.Context) ([]int64, error) {
+	ctx, span := r.obs.StartSpan(ctx, "repo.list_monitored_or_marked_twitch_user_ids")
+	defer span.End()
+
+	rows, err := r.pool.Query(ctx, `
+		SELECT id FROM twitch_users
+		WHERE monitored = true OR marked = true
+		ORDER BY id
+	`)
+	if err != nil {
+		r.obs.LogError(ctx, span, "list monitored or marked twitch user ids query failed", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	out := make([]int64, 0)
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			r.obs.LogError(ctx, span, "scan monitored or marked twitch user id failed", err)
+			return nil, err
+		}
+		out = append(out, id)
+	}
+
+	if err := rows.Err(); err != nil {
+		r.obs.LogError(ctx, span, "rows iteration failed", err)
+		return nil, err
+	}
+
+	return out, nil
+}
+
 func (r *Repository) CreateTwitchUser(ctx context.Context, id int64, username string) (entity.TwitchUser, error) {
 	ctx, span := r.obs.StartSpan(ctx, "repo.create_twitch_user")
 	defer span.End()

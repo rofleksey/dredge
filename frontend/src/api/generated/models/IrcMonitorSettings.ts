@@ -7,5 +7,9 @@ export type IrcMonitorSettings = {
      * Linked Twitch account id (Helix user id) for authenticated IRC; null uses anonymous read-only IRC (default)
      */
     oauth_twitch_account_id: number | null;
+    /**
+     * Per-user enrichment cooldown used by worker queue checks; default 24h
+     */
+    enrichment_cooldown_hours: number;
 };
 

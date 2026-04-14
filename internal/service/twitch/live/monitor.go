@@ -92,12 +92,12 @@ func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled 
 		var chatterID *int64
 
 		if tid, err := strconv.ParseInt(msg.User.ID, 10, 64); err == nil && tid > 0 {
-			inserted, err := r.repo.UpsertTwitchUserFromChat(persistCtx, tid, chatterLogin)
+			_, err := r.repo.UpsertTwitchUserFromChat(persistCtx, tid, chatterLogin)
 			if err != nil {
 				r.obs.Logger.Warn("upsert chatter from irc failed", zap.Error(err), zap.String("channel", ch))
 			} else {
 				chatterID = &tid
-				if inserted && r.onEnqueue != nil {
+				if r.onEnqueue != nil {
 					r.onEnqueue(tid)
 				}
 			}

@@ -24,8 +24,6 @@ twitch:
   oauth_redirect_uri: "http://localhost:8080/oauth/twitch/callback"
   # Browser URL after Twitch redirects back (SPA with hash routing: …/#/settings).
   oauth_return_url: "http://localhost:5173/#/settings"
-  # Daily Helix enrichment (account created_at, follow times) — UTC, robfig/cron v3 syntax.
-  enrichment_cron: "0 3 * * *"
   # How often the watch UI should poll Helix for stream metadata (viewer count, live). Default 10s.
   viewer_poll_interval: 10s
   # How often IRC NAMES lists are merged into channel_chatters. Default 10s.

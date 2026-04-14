@@ -10,7 +10,6 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/robfig/cron/v3"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
@@ -27,11 +26,8 @@ type twitchRuntime struct {
 	stopStreamRecorder context.CancelFunc
 	enrichWorkerCtx    context.Context
 	stopEnrichWorker   context.CancelFunc
-	cronJobCtx         context.Context
-	stopCronJob        context.CancelFunc
 	persistCtx         context.Context
 	stopPersist        context.CancelFunc
-	enrichCron         *cron.Cron
 	metricsServer      *http.Server
 }
 
@@ -80,12 +76,12 @@ func onAppStart(
 	rt.presenceCtx, rt.stopPresence = context.WithCancel(context.Background())
 	rt.streamRecorderCtx, rt.stopStreamRecorder = context.WithCancel(context.Background())
 	rt.enrichWorkerCtx, rt.stopEnrichWorker = context.WithCancel(context.Background())
-	rt.cronJobCtx, rt.stopCronJob = context.WithCancel(context.Background())
 	rt.persistCtx, rt.stopPersist = context.WithCancel(context.Background())
 
 	twitchSvc.SetPersistContext(rt.persistCtx)
 
 	twitchSvc.StartEnrichmentWorker(rt.enrichWorkerCtx)
+	twitchSvc.EnqueueMonitoredAndMarkedUsersForEnrichment(ctx)
 
 	if err := twitchSvc.StartMonitor(ctx); err != nil {
 		startupSpan.RecordError(err)
@@ -95,26 +91,6 @@ func onAppStart(
 
 	go twitchSvc.StartPresenceTicker(rt.presenceCtx)
 	go twitchSvc.StartStreamSessionRecorder(rt.streamRecorderCtx)
-
-	cronSpec := cfg.Twitch.EnrichmentCron
-	if cronSpec == "" {
-		cronSpec = "0 3 * * *"
-	}
-
-	rt.enrichCron = cron.New(cron.WithLocation(time.UTC))
-	if _, err := rt.enrichCron.AddFunc(cronSpec, func() {
-		runCtx, cancel := context.WithTimeout(rt.cronJobCtx, 30*time.Minute)
-		defer cancel()
-
-		twitchSvc.RunHelixEnrichment(runCtx)
-	}); err != nil {
-		startupSpan.RecordError(err)
-		sentry.CaptureException(err)
-		return err
-	}
-
-	rt.enrichCron.Start()
-	log.Info("scheduled helix enrichment", zap.String("cron", cronSpec))
 
 	if addr := cfg.Server.MetricsAddress; addr != "" {
 		metricsMux := http.NewServeMux()
@@ -170,11 +146,6 @@ func onAppStop(
 	rt.stopPresence()
 	rt.stopStreamRecorder()
 	rt.stopEnrichWorker()
-	rt.stopCronJob()
-
-	if rt.enrichCron != nil {
-		<-rt.enrichCron.Stop().Done()
-	}
 
 	twitchSvc.StopMonitor()
 

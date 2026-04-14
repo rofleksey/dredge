@@ -40,8 +40,6 @@ type Config struct {
 		OAuthRedirectURI string `yaml:"oauth_redirect_uri" validate:"required,url"`
 		// OAuthReturnURL is where the user is sent after linking (SPA settings route with hash routing, e.g. http://localhost:5173/#/settings).
 		OAuthReturnURL string `yaml:"oauth_return_url" validate:"required,url"`
-		// EnrichmentCron is a robfig/cron spec (UTC) for daily Helix account/follow enrichment. Default 0 3 * * *.
-		EnrichmentCron string `yaml:"enrichment_cron"`
 		// ViewerPollInterval is how often the watch UI should refresh Helix stream metadata (viewer count, live state). Default 10s.
 		ViewerPollInterval time.Duration `yaml:"viewer_poll_interval"`
 		// ChannelChattersSyncInterval is how often IRC NAMES lists are merged into channel_chatters. Default 10s.

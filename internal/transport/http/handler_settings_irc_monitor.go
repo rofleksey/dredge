@@ -3,6 +3,7 @@ package httptransport
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/rofleksey/dredge/internal/entity"
 	"github.com/rofleksey/dredge/internal/transport/http/gen"
@@ -42,6 +43,7 @@ func ircMonitorEntityToGen(s entity.IrcMonitorSettings) *gen.IrcMonitorSettings 
 	} else {
 		g.OAuthTwitchAccountID.SetTo(*s.OauthTwitchAccountID)
 	}
+	g.EnrichmentCooldownHours = int(s.EnrichmentCooldown / time.Hour)
 	return g
 }
 
@@ -51,14 +53,27 @@ func ircMonitorGenToEntity(req *gen.IrcMonitorSettings) entity.IrcMonitorSetting
 	}
 
 	n := req.GetOAuthTwitchAccountID()
+	cooldown := time.Duration(req.EnrichmentCooldownHours) * time.Hour
+	if cooldown <= 0 {
+		cooldown = 24 * time.Hour
+	}
 	if n.IsNull() {
-		return entity.IrcMonitorSettings{OauthTwitchAccountID: nil}
+		return entity.IrcMonitorSettings{
+			OauthTwitchAccountID: nil,
+			EnrichmentCooldown:   cooldown,
+		}
 	}
 
 	v, ok := n.Get()
 	if !ok {
-		return entity.IrcMonitorSettings{OauthTwitchAccountID: nil}
+		return entity.IrcMonitorSettings{
+			OauthTwitchAccountID: nil,
+			EnrichmentCooldown:   cooldown,
+		}
 	}
 
-	return entity.IrcMonitorSettings{OauthTwitchAccountID: &v}
+	return entity.IrcMonitorSettings{
+		OauthTwitchAccountID: &v,
+		EnrichmentCooldown:   cooldown,
+	}
 }

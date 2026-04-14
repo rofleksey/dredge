@@ -1405,12 +1405,17 @@ components:
       type: object
       required:
         - oauth_twitch_account_id
+        - enrichment_cooldown_hours
       properties:
         oauth_twitch_account_id:
           type: integer
           format: int64
           nullable: true
           description: Linked Twitch account id (Helix user id) for authenticated IRC; null uses anonymous read-only IRC (default)
+        enrichment_cooldown_hours:
+          type: integer
+          minimum: 1
+          description: Per-user enrichment cooldown used by worker queue checks; default 24h
     ChannelBlacklistChange:
       type: object
       required: [login, add]

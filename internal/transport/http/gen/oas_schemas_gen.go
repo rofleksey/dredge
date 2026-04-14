@@ -1170,6 +1170,8 @@ type IrcMonitorSettings struct {
 	// Linked Twitch account id (Helix user id) for authenticated IRC; null uses anonymous read-only IRC
 	// (default).
 	OAuthTwitchAccountID NilInt64 `json:"oauth_twitch_account_id"`
+	// Per-user enrichment cooldown used by worker queue checks; default 24h.
+	EnrichmentCooldownHours int `json:"enrichment_cooldown_hours"`
 }
 
 // GetOAuthTwitchAccountID returns the value of OAuthTwitchAccountID.
@@ -1177,9 +1179,19 @@ func (s *IrcMonitorSettings) GetOAuthTwitchAccountID() NilInt64 {
 	return s.OAuthTwitchAccountID
 }
 
+// GetEnrichmentCooldownHours returns the value of EnrichmentCooldownHours.
+func (s *IrcMonitorSettings) GetEnrichmentCooldownHours() int {
+	return s.EnrichmentCooldownHours
+}
+
 // SetOAuthTwitchAccountID sets the value of OAuthTwitchAccountID.
 func (s *IrcMonitorSettings) SetOAuthTwitchAccountID(val NilInt64) {
 	s.OAuthTwitchAccountID = val
+}
+
+// SetEnrichmentCooldownHours sets the value of EnrichmentCooldownHours.
+func (s *IrcMonitorSettings) SetEnrichmentCooldownHours(val int) {
+	s.EnrichmentCooldownHours = val
 }
 
 // Ref: #/components/schemas/IrcMonitorStatus

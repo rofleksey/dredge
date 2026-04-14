@@ -80,6 +80,9 @@ func (r *Runtime) handleIRCChatterPresence(ctx context.Context, channelLogin, us
 		r.obs.Logger.Debug("irc join/part upsert chatter failed", zap.Error(err), zap.String("user", userLogin))
 		return
 	}
+	if r.onEnqueue != nil {
+		r.onEnqueue(uid)
+	}
 
 	ev := entity.UserActivityChatOffline
 	if join {

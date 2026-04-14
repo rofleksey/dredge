@@ -3110,10 +3110,15 @@ func (s *IrcMonitorSettings) encodeFields(e *jx.Encoder) {
 		e.FieldStart("oauth_twitch_account_id")
 		s.OAuthTwitchAccountID.Encode(e)
 	}
+	{
+		e.FieldStart("enrichment_cooldown_hours")
+		e.Int(s.EnrichmentCooldownHours)
+	}
 }
 
-var jsonFieldsNameOfIrcMonitorSettings = [1]string{
+var jsonFieldsNameOfIrcMonitorSettings = [2]string{
 	0: "oauth_twitch_account_id",
+	1: "enrichment_cooldown_hours",
 }
 
 // Decode decodes IrcMonitorSettings from json.
@@ -3135,6 +3140,18 @@ func (s *IrcMonitorSettings) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"oauth_twitch_account_id\"")
 			}
+		case "enrichment_cooldown_hours":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.EnrichmentCooldownHours = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"enrichment_cooldown_hours\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -3145,7 +3162,7 @@ func (s *IrcMonitorSettings) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

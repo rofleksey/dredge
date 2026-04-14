@@ -141,8 +141,9 @@ INSERT INTO suspicion_settings (id) VALUES (1)
 
 CREATE TABLE IF NOT EXISTS irc_monitor_settings (
     id SMALLINT PRIMARY KEY CHECK (id = 1),
-    oauth_twitch_account_id BIGINT REFERENCES twitch_accounts (id) ON DELETE SET NULL
+    oauth_twitch_account_id BIGINT REFERENCES twitch_accounts (id) ON DELETE SET NULL,
+    enrichment_cooldown_seconds BIGINT NOT NULL DEFAULT 86400
 );
 
-INSERT INTO irc_monitor_settings (id, oauth_twitch_account_id) VALUES (1, NULL)
+INSERT INTO irc_monitor_settings (id, oauth_twitch_account_id, enrichment_cooldown_seconds) VALUES (1, NULL, 86400)
     ON CONFLICT (id) DO NOTHING;

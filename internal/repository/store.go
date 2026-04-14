@@ -13,6 +13,7 @@ type Store interface {
 	CreateTwitchUser(ctx context.Context, id int64, username string) (entity.TwitchUser, error)
 	PatchTwitchUser(ctx context.Context, id int64, patch entity.TwitchUserPatch) (entity.TwitchUser, error)
 	ListMonitoredTwitchUsers(ctx context.Context) ([]entity.TwitchUser, error)
+	ListMonitoredOrMarkedTwitchUserIDs(ctx context.Context) ([]int64, error)
 
 	ListRules(ctx context.Context) ([]entity.Rule, error)
 	CountRules(ctx context.Context) (int64, error)

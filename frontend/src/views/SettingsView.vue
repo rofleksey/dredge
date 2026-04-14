@@ -84,6 +84,7 @@ const savingSuspicion = ref(false);
 const savingIrcMonitor = ref(false);
 /** '' = anonymous IRC; otherwise linked account Twitch user id as string */
 const ircOAuthAccountId = ref('');
+const enrichmentCooldownHours = ref(24);
 
 const ircStatus = ref<IrcMonitorStatus | null>(null);
 let ircPollId: number | null = null;
@@ -155,6 +156,10 @@ function applyIrcMonitorDraft(s: IrcMonitorSettings): void {
     s.oauth_twitch_account_id !== null && s.oauth_twitch_account_id !== undefined
       ? String(s.oauth_twitch_account_id)
       : '';
+  enrichmentCooldownHours.value =
+    typeof s.enrichment_cooldown_hours === 'number' && s.enrichment_cooldown_hours > 0
+      ? s.enrichment_cooldown_hours
+      : 24;
 }
 
 function queryOne(v: unknown): string | undefined {
@@ -540,7 +545,10 @@ async function saveIrcMonitorSettings(): Promise<void> {
   try {
     const oauthTwitchAccountId =
       ircOAuthAccountId.value === '' ? null : Number(ircOAuthAccountId.value);
-    const body: IrcMonitorSettings = { oauth_twitch_account_id: oauthTwitchAccountId };
+    const body: IrcMonitorSettings = {
+      oauth_twitch_account_id: oauthTwitchAccountId,
+      enrichment_cooldown_hours: Math.max(1, Math.floor(enrichmentCooldownHours.value || 24)),
+    };
     const s = await DefaultService.updateIrcMonitorSettings({ requestBody: body });
     applyIrcMonitorDraft(s);
     notify({
@@ -746,6 +754,10 @@ const filteredChannelBlacklist = computed(() => {
                 {{ a.username }} ({{ a.account_type }})
               </option>
             </select>
+          </label>
+          <label class="stack gap-setting">
+            <span>Enrichment cooldown (hours)</span>
+            <input v-model.number="enrichmentCooldownHours" type="number" min="1" max="168" required />
           </label>
           <p class="row-actions">
             <SubmitButton :loading="savingIrcMonitor">Save IRC settings</SubmitButton>
