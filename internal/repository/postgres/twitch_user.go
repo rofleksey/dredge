@@ -306,7 +306,7 @@ func (r *Repository) TwitchUserIDByUsername(ctx context.Context, username string
 }
 
 // ListTwitchUsersBrowse returns twitch_users for the public directory UI.
-func (r *Repository) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchUser, error) {
+func (r *Repository) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchDirectoryEntry, error) {
 	ctx, span := r.obs.StartSpan(ctx, "repo.list_twitch_users_browse")
 	defer span.End()
 
@@ -320,30 +320,59 @@ func (r *Repository) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchU
 	}
 
 	var b strings.Builder
-	b.WriteString(`SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
-		irc_only_when_live, notify_off_stream_messages, notify_stream_start FROM twitch_users WHERE 1=1`)
-
 	args := make([]any, 0, 8)
 	argN := 1
 
-	if q := normalizeStoredUsername(f.Username); q != "" {
-		b.WriteString(` AND username ILIKE $`)
-		b.WriteString(strconv.Itoa(argN))
+	if f.MonitoredOnly {
+		b.WriteString(`SELECT u.id, u.username, u.monitored, u.marked, u.is_sus, u.sus_type, u.sus_description, u.sus_auto_suppressed,
+			u.irc_only_when_live, u.notify_off_stream_messages, u.notify_stream_start,
+			m.profile_image_url,
+			s.title, s.game_name, s.started_at, s.viewer_count, s.helix_synced_at,
+			COALESCE(cc.cnt, 0)::bigint
+		FROM twitch_users u
+		LEFT JOIN twitch_user_helix_meta m ON m.twitch_user_id = u.id
+		LEFT JOIN LATERAL (
+			SELECT title, game_name, started_at, viewer_count, helix_synced_at
+			FROM streams
+			WHERE channel_twitch_user_id = u.id AND ended_at IS NULL
+			ORDER BY started_at DESC
+			LIMIT 1
+		) s ON true
+		LEFT JOIN LATERAL (
+			SELECT COUNT(*)::bigint AS cnt FROM channel_chatters WHERE channel_twitch_user_id = u.id
+		) cc ON true
+		WHERE u.monitored = true`)
+	} else {
+		b.WriteString(`SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,
+			irc_only_when_live, notify_off_stream_messages, notify_stream_start FROM twitch_users WHERE 1=1`)
+	}
 
+	if q := normalizeStoredUsername(f.Username); q != "" {
+		prefix := "u."
+		if !f.MonitoredOnly {
+			prefix = ""
+		}
+		b.WriteString(` AND ` + prefix + `username ILIKE $` + strconv.Itoa(argN))
 		args = append(args, "%"+q+"%")
 		argN++
 	}
 
 	if f.CursorID != nil && *f.CursorID > 0 {
 		lastID := *f.CursorID
-		b.WriteString(` AND id < $` + strconv.Itoa(argN))
+		prefix := "u."
+		if !f.MonitoredOnly {
+			prefix = ""
+		}
+		b.WriteString(` AND ` + prefix + `id < $` + strconv.Itoa(argN))
 		args = append(args, lastID)
 		argN++
 	}
 
-	b.WriteString(` ORDER BY id DESC LIMIT $`)
-	b.WriteString(strconv.Itoa(argN))
-
+	orderCol := "id"
+	if f.MonitoredOnly {
+		orderCol = "u.id"
+	}
+	b.WriteString(` ORDER BY ` + orderCol + ` DESC LIMIT $` + strconv.Itoa(argN))
 	args = append(args, limit)
 
 	rows, err := r.pool.Query(ctx, b.String(), args...)
@@ -353,16 +382,83 @@ func (r *Repository) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchU
 	}
 	defer rows.Close()
 
-	out := make([]entity.TwitchUser, 0, limit)
+	out := make([]entity.TwitchDirectoryEntry, 0, limit)
 
 	for rows.Next() {
-		u, err := scanTwitchUser(rows)
-		if err != nil {
-			r.obs.LogError(ctx, span, "scan twitch user browse failed", err)
+		if !f.MonitoredOnly {
+			u, err := scanTwitchUser(rows)
+			if err != nil {
+				r.obs.LogError(ctx, span, "scan twitch user browse failed", err)
+				return nil, err
+			}
+
+			out = append(out, entity.TwitchDirectoryEntry{User: u})
+			continue
+		}
+
+		var (
+			u entity.TwitchUser
+			susType, susDesc sql.NullString
+			profImg          sql.NullString
+			title, game      sql.NullString
+			started          sql.NullTime
+			viewers          sql.NullInt64
+			synced           sql.NullTime
+			chatCnt          int64
+		)
+
+		if err := rows.Scan(
+			&u.ID, &u.Username, &u.Monitored, &u.Marked,
+			&u.IsSus, &susType, &susDesc, &u.SusAutoSuppressed,
+			&u.IrcOnlyWhenLive, &u.NotifyOffStreamMessages, &u.NotifyStreamStart,
+			&profImg, &title, &game, &started, &viewers, &synced, &chatCnt,
+		); err != nil {
+			r.obs.LogError(ctx, span, "scan twitch directory row failed", err)
 			return nil, err
 		}
 
-		out = append(out, u)
+		if susType.Valid {
+			s := susType.String
+			u.SusType = &s
+		}
+		if susDesc.Valid {
+			s := susDesc.String
+			u.SusDescription = &s
+		}
+
+		ent := entity.TwitchDirectoryEntry{User: u}
+		if profImg.Valid && profImg.String != "" {
+			s := profImg.String
+			ent.ProfileImageURL = &s
+		}
+
+		live := entity.TwitchDirectoryChannelLive{
+			IsLive:              started.Valid,
+			ChannelChatterCount: &chatCnt,
+		}
+		if title.Valid && title.String != "" {
+			t := title.String
+			live.Title = &t
+		}
+		if game.Valid && game.String != "" {
+			g := game.String
+			live.GameName = &g
+		}
+		if started.Valid {
+			t := started.Time.UTC()
+			live.StartedAt = &t
+		}
+		if viewers.Valid {
+			v := viewers.Int64
+			live.ViewerCount = &v
+		}
+		if synced.Valid {
+			t := synced.Time.UTC()
+			live.HelixSyncedAt = &t
+		}
+
+		ent.ChannelLive = &live
+		out = append(out, ent)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -384,11 +480,16 @@ func (r *Repository) CountTwitchUsersBrowse(ctx context.Context, f entity.Twitch
 	args := make([]any, 0, 4)
 	argN := 1
 
+	if f.MonitoredOnly {
+		b.WriteString(` AND monitored = true`)
+	}
+
 	if q := normalizeStoredUsername(f.Username); q != "" {
 		b.WriteString(` AND username ILIKE $`)
 		b.WriteString(strconv.Itoa(argN))
 
 		args = append(args, "%"+q+"%")
+		argN++
 	}
 
 	var n int64

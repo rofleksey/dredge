@@ -687,6 +687,12 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: monitored_only
+          in: query
+          description: When true, only monitored channels are returned with channel_live filled from the server's batched Helix /streams poll.
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: Users (newest id first)
@@ -706,6 +712,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: monitored_only
+          in: query
+          description: When true, count only monitored channels (same filter as list).
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: Count
@@ -1240,6 +1252,15 @@ components:
         username:
           type: string
           description: Canonical Twitch login (lowercase)
+        profile_image_url:
+          type: string
+          nullable: true
+          description: Profile image from Helix meta when available (e.g. monitored_only directory rows).
+        channel_live:
+          nullable: true
+          description: Live stream snapshot from backend Helix polling when requested via monitored_only list.
+          allOf:
+            - $ref: "#/components/schemas/ChannelLive"
         monitored:
           type: boolean
           description: When true, this channel is joined for IRC monitoring and keyword alerts
@@ -1503,16 +1524,20 @@ components:
           nullable: true
     WatchUiHints:
       type: object
-      required: [viewer_poll_interval_seconds, channel_chatters_sync_interval_seconds]
+      required: [viewer_poll_interval_seconds, channel_chatters_sync_interval_seconds, monitored_live_poll_interval_seconds]
       properties:
         viewer_poll_interval_seconds:
           type: integer
           format: int64
-          description: How often the watch UI should refresh Helix stream metadata (viewer count, live state)
+          description: How often the watch UI may poll for a manually entered (non-directory) channel via getChannelLive
         channel_chatters_sync_interval_seconds:
           type: integer
           format: int64
           description: How often the server refreshes IRC NAMES into channel_chatters
+        monitored_live_poll_interval_seconds:
+          type: integer
+          format: int64
+          description: How often the backend polls Helix (batched /streams) for monitored channels; use this interval when refreshing GET /twitch/users?monitored_only=true
     IrcMonitorStatus:
       type: object
       required: [connected, channels]

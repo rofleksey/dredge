@@ -16,8 +16,8 @@ func TestHandler_ListTwitchDirectoryUsers(t *testing.T) {
 	h, ctrl, repo := testHandler(t)
 	defer ctrl.Finish()
 
-	repo.EXPECT().ListTwitchUsersBrowse(gomock.Any(), gomock.Any()).Return([]entity.TwitchUser{
-		{ID: 1, Username: "a", Monitored: true, Marked: false},
+	repo.EXPECT().ListTwitchUsersBrowse(gomock.Any(), gomock.Any()).Return([]entity.TwitchDirectoryEntry{
+		{User: entity.TwitchUser{ID: 1, Username: "a", Monitored: true, Marked: false}},
 	}, nil)
 
 	out, err := h.ListTwitchDirectoryUsers(context.Background(), gen.ListTwitchDirectoryUsersParams{})

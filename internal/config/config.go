@@ -46,7 +46,7 @@ type Config struct {
 		ViewerPollInterval time.Duration `yaml:"viewer_poll_interval"`
 		// ChannelChattersSyncInterval is how often IRC NAMES lists are merged into channel_chatters. Default 10s.
 		ChannelChattersSyncInterval time.Duration `yaml:"channel_chatters_sync_interval"`
-		// StreamSessionPollInterval is how often Helix is polled to open/close persisted stream sessions for monitored channels. Default: same as viewer_poll_interval.
+		// StreamSessionPollInterval is how often Helix is polled (batched /streams) to open/close persisted stream sessions for monitored channels and refresh live metadata for the API. Default 60s.
 		StreamSessionPollInterval time.Duration `yaml:"stream_session_poll_interval"`
 		// UserOAuthTokenCacheTTL is how long a linked-account OAuth access token is reused before refresh (Helix + IRC). Default 30m.
 		UserOAuthTokenCacheTTL time.Duration `yaml:"user_oauth_token_cache_ttl"`
@@ -90,7 +90,7 @@ func Load(path string) (Config, error) {
 	}
 
 	if cfg.Twitch.StreamSessionPollInterval <= 0 {
-		cfg.Twitch.StreamSessionPollInterval = cfg.Twitch.ViewerPollInterval
+		cfg.Twitch.StreamSessionPollInterval = 60 * time.Second
 	}
 
 	if cfg.Twitch.UserOAuthTokenCacheTTL <= 0 {

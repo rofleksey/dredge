@@ -115,6 +115,7 @@ func (h *Handler) GetChannelLive(ctx context.Context, req *gen.GetChannelLiveReq
 		if errors.Is(err, twitchsvc.ErrInvalidChannelName) || errors.Is(err, twitchsvc.ErrUnknownTwitchChannel) {
 			return &gen.ErrorMessage{Message: "unknown channel"}, nil
 		}
+
 		return nil, err
 	}
 

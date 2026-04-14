@@ -543,6 +543,23 @@ func (c *Client) sendCountTwitchDirectoryUsers(ctx context.Context, params Count
 			return res, errors.Wrap(err, "encode query")
 		}
 	}
+	{
+		// Encode "monitored_only" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "monitored_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.MonitoredOnly.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
 	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
@@ -3957,6 +3974,23 @@ func (c *Client) sendListTwitchDirectoryUsers(ctx context.Context, params ListTw
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.CursorID.Get(); ok {
 				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "monitored_only" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "monitored_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.MonitoredOnly.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
 			}
 			return nil
 		}); err != nil {

@@ -35,6 +35,10 @@ func (h *Handler) ListTwitchDirectoryUsers(ctx context.Context, params gen.ListT
 		f.CursorID = &v
 	}
 
+	if params.MonitoredOnly.IsSet() {
+		f.MonitoredOnly = params.MonitoredOnly.Value
+	}
+
 	list, err := h.twitch.ListTwitchUsersBrowse(ctx, f)
 	if err != nil {
 		h.obs.LogError(ctx, span, "list twitch directory users failed", err)
@@ -42,8 +46,8 @@ func (h *Handler) ListTwitchDirectoryUsers(ctx context.Context, params gen.ListT
 	}
 
 	out := make([]gen.TwitchUser, 0, len(list))
-	for _, u := range list {
-		out = append(out, entityTwitchUserToGen(u))
+	for _, ent := range list {
+		out = append(out, directoryEntryToGen(ent))
 	}
 
 	return out, nil

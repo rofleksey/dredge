@@ -123,3 +123,34 @@ func roundTripRewriteHost(srv *httptest.Server) http.RoundTripper {
 		return http.DefaultTransport.RoundTrip(req)
 	})
 }
+
+func TestGetChannelLive_usersUpstreamError(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.Contains(r.URL.Path, "oauth2/token"):
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "at", "expires_in": 3600})
+		case strings.HasPrefix(r.URL.Path, "/helix/users"):
+			w.WriteHeader(http.StatusBadGateway)
+			_, _ = w.Write([]byte(`{"message":"upstream"}`))
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := repomocks.NewMockStore(ctrl)
+	obs := &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")}
+	c := NewClient(repo, obs, "cid", "csec")
+	c.HTTPClient = srv.Client()
+	c.HTTPClient.Transport = roundTripRewriteHost(srv)
+
+	_, err := c.GetChannelLive(context.Background(), "somechan")
+	require.Error(t, err)
+	require.ErrorIs(t, err, ErrHelixUpstream)
+}

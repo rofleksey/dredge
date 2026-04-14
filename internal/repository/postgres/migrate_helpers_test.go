@@ -21,8 +21,9 @@ func TestListMigrationFiles(t *testing.T) {
 
 	names, err := listMigrationFiles()
 	require.NoError(t, err)
-	require.Len(t, names, 1)
+	require.Len(t, names, 2)
 	assert.Equal(t, "0001_init.sql", names[0])
+	assert.Equal(t, "0002_streams_viewer_count.sql", names[1])
 
 	for _, n := range names {
 		assert.True(t, strings.HasSuffix(n, ".sql"), n)

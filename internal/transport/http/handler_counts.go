@@ -48,6 +48,10 @@ func (h *Handler) CountTwitchDirectoryUsers(ctx context.Context, params gen.Coun
 		f.Username = params.Username.Value
 	}
 
+	if params.MonitoredOnly.IsSet() {
+		f.MonitoredOnly = params.MonitoredOnly.Value
+	}
+
 	n, err := h.twitch.CountTwitchUsersBrowse(ctx, f)
 	if err != nil {
 		return nil, err

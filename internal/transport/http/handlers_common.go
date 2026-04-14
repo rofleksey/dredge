@@ -205,6 +205,76 @@ func entityTwitchUserToGen(u entity.TwitchUser) gen.TwitchUser {
 	return out
 }
 
+func directoryEntryToGen(e entity.TwitchDirectoryEntry) gen.TwitchUser {
+	out := entityTwitchUserToGen(e.User)
+
+	if e.ProfileImageURL != nil && *e.ProfileImageURL != "" {
+		out.SetProfileImageURL(gen.NewOptNilString(*e.ProfileImageURL))
+	}
+
+	if e.ChannelLive == nil {
+		return out
+	}
+
+	l := e.ChannelLive
+	prof := ""
+	if e.ProfileImageURL != nil {
+		prof = *e.ProfileImageURL
+	}
+
+	cl := gen.ChannelLive{
+		BroadcasterID:    e.User.ID,
+		BroadcasterLogin: e.User.Username,
+		DisplayName:      e.User.Username,
+		ProfileImageURL:  prof,
+		IsLive:           l.IsLive,
+	}
+
+	if l.Title != nil && *l.Title != "" {
+		cl.SetTitle(gen.NewOptNilString(*l.Title))
+	} else {
+		var t gen.OptNilString
+		t.SetToNull()
+		cl.SetTitle(t)
+	}
+
+	if l.GameName != nil && *l.GameName != "" {
+		cl.SetGameName(gen.NewOptNilString(*l.GameName))
+	} else {
+		var g gen.OptNilString
+		g.SetToNull()
+		cl.SetGameName(g)
+	}
+
+	if l.IsLive && l.ViewerCount != nil {
+		cl.SetViewerCount(gen.NewOptNilInt64(*l.ViewerCount))
+	} else {
+		var v gen.OptNilInt64
+		v.SetToNull()
+		cl.SetViewerCount(v)
+	}
+
+	if l.ChannelChatterCount != nil {
+		cl.SetChannelChatterCount(gen.NewOptNilInt64(*l.ChannelChatterCount))
+	} else {
+		var cc gen.OptNilInt64
+		cc.SetToNull()
+		cl.SetChannelChatterCount(cc)
+	}
+
+	if l.StartedAt != nil {
+		cl.SetStartedAt(gen.NewOptNilDateTime(*l.StartedAt))
+	} else {
+		var s gen.OptNilDateTime
+		s.SetToNull()
+		cl.SetStartedAt(s)
+	}
+
+	out.SetChannelLive(gen.NewOptNilChannelLive(cl))
+
+	return out
+}
+
 func twitchAccountToAPI(a entity.TwitchAccount) gen.TwitchAccount {
 	at := gen.TwitchAccountAccountTypeMain
 	if a.AccountType == "bot" {

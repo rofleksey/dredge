@@ -775,10 +775,10 @@ func (mr *MockStoreMockRecorder) ListTwitchUsers(ctx any) *gomock.Call {
 }
 
 // ListTwitchUsersBrowse mocks base method.
-func (m *MockStore) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchUser, error) {
+func (m *MockStore) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchDirectoryEntry, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListTwitchUsersBrowse", ctx, f)
-	ret0, _ := ret[0].([]entity.TwitchUser)
+	ret0, _ := ret[0].([]entity.TwitchDirectoryEntry)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1097,18 +1097,18 @@ func (mr *MockStoreMockRecorder) UpsertHelixMeta(ctx, twitchUserID, accountCreat
 }
 
 // UpsertStreamFromHelix mocks base method.
-func (m *MockStore) UpsertStreamFromHelix(ctx context.Context, channelTwitchUserID int64, helixStreamID string, startedAt time.Time, title, gameName string) (int64, error) {
+func (m *MockStore) UpsertStreamFromHelix(ctx context.Context, channelTwitchUserID int64, helixStreamID string, startedAt time.Time, title, gameName string, viewerCount *int64) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpsertStreamFromHelix", ctx, channelTwitchUserID, helixStreamID, startedAt, title, gameName)
+	ret := m.ctrl.Call(m, "UpsertStreamFromHelix", ctx, channelTwitchUserID, helixStreamID, startedAt, title, gameName, viewerCount)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpsertStreamFromHelix indicates an expected call of UpsertStreamFromHelix.
-func (mr *MockStoreMockRecorder) UpsertStreamFromHelix(ctx, channelTwitchUserID, helixStreamID, startedAt, title, gameName any) *gomock.Call {
+func (mr *MockStoreMockRecorder) UpsertStreamFromHelix(ctx, channelTwitchUserID, helixStreamID, startedAt, title, gameName, viewerCount any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertStreamFromHelix", reflect.TypeOf((*MockStore)(nil).UpsertStreamFromHelix), ctx, channelTwitchUserID, helixStreamID, startedAt, title, gameName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertStreamFromHelix", reflect.TypeOf((*MockStore)(nil).UpsertStreamFromHelix), ctx, channelTwitchUserID, helixStreamID, startedAt, title, gameName, viewerCount)
 }
 
 // UpsertTwitchUserFromChat mocks base method.

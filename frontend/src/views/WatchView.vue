@@ -10,7 +10,13 @@ import ChatSystemLine from '../components/ChatSystemLine.vue';
 import TwitchUserLink from '../components/TwitchUserLink.vue';
 import { ApiError, ChatHistoryEntry, DefaultService } from '../api/generated';
 import type { ListChannelChattersRequest } from '../api/generated';
-import type { ChannelChatterEntry, ChannelLive, IrcMonitorStatus, WatchUiHints } from '../api/generated';
+import type {
+  ChannelChatterEntry,
+  ChannelLive,
+  IrcMonitorStatus,
+  TwitchUser,
+  WatchUiHints,
+} from '../api/generated';
 import type { ChatBadgeTag } from '../lib/chatBadges';
 import { isChannelJoinedOnIrc } from '../lib/ircMonitorJoined';
 import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
@@ -106,6 +112,24 @@ function parseChannelLivePayload(data: unknown): ChannelLive | null {
     return null;
   }
   return data as ChannelLive;
+}
+
+function directoryRowToChannelLive(row: TwitchUser): ChannelLive {
+  const parsed = row.channel_live ? parseChannelLivePayload(row.channel_live) : null;
+  if (parsed) {
+    return parsed;
+  }
+  return {
+    broadcaster_id: row.id,
+    broadcaster_login: normCh(row.username),
+    display_name: row.username,
+    profile_image_url: row.profile_image_url ?? '',
+    is_live: false,
+  };
+}
+
+function isMonitoredLogin(login: string): boolean {
+  return channelsStore.monitoredChannels.some((c) => normCh(c.username) === login);
 }
 
 /** Prefer last opened channel from local storage when it is still a monitored channel or a valid manual login. */
@@ -230,6 +254,9 @@ function formatViewerDisplay(live: Pick<ChannelLive, 'viewer_count' | 'channel_c
 const viewerPollMs = computed(() =>
   Math.max(1000, (watchHints.value?.viewer_poll_interval_seconds ?? 10) * 1000),
 );
+const monitoredLivePollMs = computed(() =>
+  Math.max(1000, (watchHints.value?.monitored_live_poll_interval_seconds ?? 60) * 1000),
+);
 const chattersSyncMs = computed(() =>
   Math.max(1000, (watchHints.value?.channel_chatters_sync_interval_seconds ?? 10) * 1000),
 );
@@ -321,16 +348,12 @@ async function refreshMonitoredSidebar(silent = false): Promise<void> {
     loadingMonitoredSidebar.value = true;
   }
   try {
-    const results = await Promise.all(
-      list.map((c) =>
-        DefaultService.getChannelLive({ requestBody: { login: normCh(c.username) } }).catch(() => null),
-      ),
-    );
-    monitoredSidebar.value = list.map((c, i) => {
-      const live = results[i];
-      const parsed = parseChannelLivePayload(live);
-      if (parsed) {
-        return parsed;
+    const rows = await DefaultService.listTwitchDirectoryUsers({ monitoredOnly: true, limit: 200 });
+    const byLogin = new Map(rows.map((r) => [normCh(r.username), r] as const));
+    monitoredSidebar.value = list.map((c) => {
+      const row = byLogin.get(normCh(c.username));
+      if (row) {
+        return directoryRowToChannelLive(row);
       }
       return {
         broadcaster_id: c.id,
@@ -360,6 +383,13 @@ async function pollChannelLive(): Promise<void> {
   if (!login) {
     return;
   }
+  if (isMonitoredLogin(login)) {
+    const fromSidebar = monitoredSidebar.value.find((x) => normCh(x.broadcaster_login) === login);
+    if (fromSidebar) {
+      channelLive.value = fromSidebar;
+    }
+    return;
+  }
   try {
     const live = await DefaultService.getChannelLive({ requestBody: { login } });
     const parsed = parseChannelLivePayload(live);
@@ -373,10 +403,31 @@ async function pollChannelLive(): Promise<void> {
   }
 }
 
+watch(
+  monitoredSidebar,
+  (rows) => {
+    const login = normCh(selectedChannel.value);
+    if (!login || !isMonitoredLogin(login)) {
+      return;
+    }
+    const hit = rows.find((x) => normCh(x.broadcaster_login) === login);
+    if (hit) {
+      channelLive.value = hit;
+    }
+  },
+  { deep: true },
+);
+
+useIntervalFn(
+  () => {
+    void refreshMonitoredSidebar(true);
+  },
+  monitoredLivePollMs,
+);
+
 useIntervalFn(
   () => {
     void pollChannelLive();
-    void refreshMonitoredSidebar(true);
   },
   viewerPollMs,
 );
@@ -567,6 +618,12 @@ watch(
     const login = normCh(ch);
     loadingChannelMeta.value = true;
     try {
+      if (isMonitoredLogin(login)) {
+        await refreshMonitoredSidebar(true);
+        const fromSidebar = monitoredSidebar.value.find((x) => normCh(x.broadcaster_login) === login);
+        channelLive.value = fromSidebar ?? null;
+        return;
+      }
       const live = await DefaultService.getChannelLive({ requestBody: { login } });
       channelLive.value = parseChannelLivePayload(live);
     } catch {

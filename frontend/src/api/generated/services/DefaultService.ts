@@ -598,6 +598,7 @@ export class DefaultService {
         username,
         limit = 50,
         cursorId,
+        monitoredOnly = false,
     }: {
         /**
          * Substring match on login (case-insensitive)
@@ -608,6 +609,10 @@ export class DefaultService {
          * Keyset cursor (twitch user id from the last row of the previous page; sort is id desc)
          */
         cursorId?: number,
+        /**
+         * When true, only monitored channels are returned with channel_live filled from the server's batched Helix /streams poll.
+         */
+        monitoredOnly?: boolean,
     }): CancelablePromise<Array<TwitchUser>> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -616,6 +621,7 @@ export class DefaultService {
                 'username': username,
                 'limit': limit,
                 'cursor_id': cursorId,
+                'monitored_only': monitoredOnly,
             },
         });
     }
@@ -625,14 +631,20 @@ export class DefaultService {
      */
     public static countTwitchDirectoryUsers({
         username,
+        monitoredOnly = false,
     }: {
         username?: string,
+        /**
+         * When true, count only monitored channels (same filter as list).
+         */
+        monitoredOnly?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/twitch/users/count',
             query: {
                 'username': username,
+                'monitored_only': monitoredOnly,
             },
         });
     }

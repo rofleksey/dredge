@@ -44,7 +44,7 @@ type Store interface {
 	ListChatHistory(ctx context.Context, channel string, limit int) ([]entity.ChatHistoryMessage, error)
 	ListChatMessages(ctx context.Context, f entity.ChatMessageListFilter) ([]entity.ChatHistoryMessage, error)
 	CountChatMessages(ctx context.Context, f entity.ChatMessageListFilter) (int64, error)
-	ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchUser, error)
+	ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchDirectoryEntry, error)
 	CountTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) (int64, error)
 	GetTwitchUserByID(ctx context.Context, id int64) (entity.TwitchUser, error)
 	CountChatMessagesByChatter(ctx context.Context, chatterID int64) (int64, error)
@@ -70,7 +70,7 @@ type Store interface {
 	TwitchUserIDByUsername(ctx context.Context, username string) (int64, error)
 
 	ActiveStreamIDForChannel(ctx context.Context, channelTwitchUserID int64) (*int64, error)
-	UpsertStreamFromHelix(ctx context.Context, channelTwitchUserID int64, helixStreamID string, startedAt time.Time, title, gameName string) (int64, error)
+	UpsertStreamFromHelix(ctx context.Context, channelTwitchUserID int64, helixStreamID string, startedAt time.Time, title, gameName string, viewerCount *int64) (int64, error)
 	CloseOpenStreamsForChannel(ctx context.Context, channelTwitchUserID int64) error
 	GetStreamByID(ctx context.Context, id int64) (entity.Stream, error)
 	GetMonitoredStreamByID(ctx context.Context, id int64) (entity.Stream, error)

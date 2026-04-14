@@ -96,7 +96,7 @@ func TestService_ListTwitchUsersBrowse(t *testing.T) {
 	svc := New(repo, nil, testTwitchCfg("id", "secret"), obs)
 
 	f := entity.TwitchUserBrowseFilter{Limit: 20}
-	repo.EXPECT().ListTwitchUsersBrowse(gomock.Any(), f).Return([]entity.TwitchUser{{ID: 1}}, nil)
+	repo.EXPECT().ListTwitchUsersBrowse(gomock.Any(), f).Return([]entity.TwitchDirectoryEntry{{User: entity.TwitchUser{ID: 1}}}, nil)
 
 	out, err := svc.ListTwitchUsersBrowse(context.Background(), f)
 	require.NoError(t, err)

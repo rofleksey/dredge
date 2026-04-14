@@ -19,4 +19,5 @@ func TestHandler_GetWatchUiHints_defaults(t *testing.T) {
 	require.NotNil(t, res)
 	assert.Equal(t, int64(10), res.ViewerPollIntervalSeconds)
 	assert.Equal(t, int64(10), res.ChannelChattersSyncIntervalSeconds)
+	assert.Equal(t, int64(60), res.MonitoredLivePollIntervalSeconds)
 }

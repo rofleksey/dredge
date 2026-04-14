@@ -1831,6 +1831,69 @@ func (o OptInt64) Or(d int64) int64 {
 	return d
 }
 
+// NewOptNilChannelLive returns new OptNilChannelLive with value set to v.
+func NewOptNilChannelLive(v ChannelLive) OptNilChannelLive {
+	return OptNilChannelLive{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChannelLive is optional nullable ChannelLive.
+type OptNilChannelLive struct {
+	Value ChannelLive
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChannelLive was set.
+func (o OptNilChannelLive) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChannelLive) Reset() {
+	var v ChannelLive
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChannelLive) SetTo(v ChannelLive) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChannelLive) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChannelLive) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChannelLive
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChannelLive) Get() (v ChannelLive, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChannelLive) Or(d ChannelLive) ChannelLive {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilDateTime returns new OptNilDateTime with value set to v.
 func NewOptNilDateTime(v time.Time) OptNilDateTime {
 	return OptNilDateTime{
@@ -2954,6 +3017,10 @@ type TwitchUser struct {
 	ID int64 `json:"id"`
 	// Canonical Twitch login (lowercase).
 	Username string `json:"username"`
+	// Profile image from Helix meta when available (e.g. monitored_only directory rows).
+	ProfileImageURL OptNilString `json:"profile_image_url"`
+	// Live stream snapshot from backend Helix polling when requested via monitored_only list.
+	ChannelLive OptNilChannelLive `json:"channel_live"`
 	// When true, this channel is joined for IRC monitoring and keyword alerts.
 	Monitored      bool         `json:"monitored"`
 	Marked         bool         `json:"marked"`
@@ -2979,6 +3046,16 @@ func (s *TwitchUser) GetID() int64 {
 // GetUsername returns the value of Username.
 func (s *TwitchUser) GetUsername() string {
 	return s.Username
+}
+
+// GetProfileImageURL returns the value of ProfileImageURL.
+func (s *TwitchUser) GetProfileImageURL() OptNilString {
+	return s.ProfileImageURL
+}
+
+// GetChannelLive returns the value of ChannelLive.
+func (s *TwitchUser) GetChannelLive() OptNilChannelLive {
+	return s.ChannelLive
 }
 
 // GetMonitored returns the value of Monitored.
@@ -3034,6 +3111,16 @@ func (s *TwitchUser) SetID(val int64) {
 // SetUsername sets the value of Username.
 func (s *TwitchUser) SetUsername(val string) {
 	s.Username = val
+}
+
+// SetProfileImageURL sets the value of ProfileImageURL.
+func (s *TwitchUser) SetProfileImageURL(val OptNilString) {
+	s.ProfileImageURL = val
+}
+
+// SetChannelLive sets the value of ChannelLive.
+func (s *TwitchUser) SetChannelLive(val OptNilChannelLive) {
+	s.ChannelLive = val
 }
 
 // SetMonitored sets the value of Monitored.
@@ -3789,10 +3876,13 @@ func (s *UserActivityEventEventType) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/WatchUiHints
 type WatchUiHints struct {
-	// How often the watch UI should refresh Helix stream metadata (viewer count, live state).
+	// How often the watch UI may poll for a manually entered (non-directory) channel via getChannelLive.
 	ViewerPollIntervalSeconds int64 `json:"viewer_poll_interval_seconds"`
 	// How often the server refreshes IRC NAMES into channel_chatters.
 	ChannelChattersSyncIntervalSeconds int64 `json:"channel_chatters_sync_interval_seconds"`
+	// How often the backend polls Helix (batched /streams) for monitored channels; use this interval
+	// when refreshing GET /twitch/users?monitored_only=true.
+	MonitoredLivePollIntervalSeconds int64 `json:"monitored_live_poll_interval_seconds"`
 }
 
 // GetViewerPollIntervalSeconds returns the value of ViewerPollIntervalSeconds.
@@ -3805,6 +3895,11 @@ func (s *WatchUiHints) GetChannelChattersSyncIntervalSeconds() int64 {
 	return s.ChannelChattersSyncIntervalSeconds
 }
 
+// GetMonitoredLivePollIntervalSeconds returns the value of MonitoredLivePollIntervalSeconds.
+func (s *WatchUiHints) GetMonitoredLivePollIntervalSeconds() int64 {
+	return s.MonitoredLivePollIntervalSeconds
+}
+
 // SetViewerPollIntervalSeconds sets the value of ViewerPollIntervalSeconds.
 func (s *WatchUiHints) SetViewerPollIntervalSeconds(val int64) {
 	s.ViewerPollIntervalSeconds = val
@@ -3813,4 +3908,9 @@ func (s *WatchUiHints) SetViewerPollIntervalSeconds(val int64) {
 // SetChannelChattersSyncIntervalSeconds sets the value of ChannelChattersSyncIntervalSeconds.
 func (s *WatchUiHints) SetChannelChattersSyncIntervalSeconds(val int64) {
 	s.ChannelChattersSyncIntervalSeconds = val
+}
+
+// SetMonitoredLivePollIntervalSeconds sets the value of MonitoredLivePollIntervalSeconds.
+func (s *WatchUiHints) SetMonitoredLivePollIntervalSeconds(val int64) {
+	s.MonitoredLivePollIntervalSeconds = val
 }

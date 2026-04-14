@@ -8,6 +8,7 @@ import (
 )
 
 // StartStreamSessionRecorder polls Helix on an interval and persists open/closed stream rows for monitored channels.
+// Live metadata is refreshed via batched GET /helix/streams (see helix.Client.HelixStreamsMetadataByBroadcasterIDs, up to 100 user_ids per request).
 func (s *Service) StartStreamSessionRecorder(ctx context.Context) {
 	d := s.streamSessionPollInterval
 	if d <= 0 {
@@ -64,7 +65,8 @@ func (s *Service) syncStreamSessions(ctx context.Context) error {
 			st = time.Now().UTC()
 		}
 
-		if _, err := s.repo.UpsertStreamFromHelix(ctx, snap.UserID, snap.HelixStreamID, st, snap.Title, snap.GameName); err != nil {
+		vc := snap.ViewerCount
+		if _, err := s.repo.UpsertStreamFromHelix(ctx, snap.UserID, snap.HelixStreamID, st, snap.Title, snap.GameName, &vc); err != nil {
 			s.obs.Logger.Warn("upsert stream from helix failed",
 				zap.Error(err), zap.Int64("channel_user_id", snap.UserID), zap.String("helix_stream_id", snap.HelixStreamID))
 		}

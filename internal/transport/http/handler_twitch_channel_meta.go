@@ -11,11 +11,12 @@ import (
 )
 
 func (h *Handler) GetWatchUiHints(ctx context.Context) (*gen.WatchUiHints, error) {
-	v, c := h.twitch.WatchUiHints()
+	v, c, m := h.twitch.WatchUiHints()
 
 	return &gen.WatchUiHints{
-		ViewerPollIntervalSeconds:          int64(v),
-		ChannelChattersSyncIntervalSeconds: int64(c),
+		ViewerPollIntervalSeconds:            int64(v),
+		ChannelChattersSyncIntervalSeconds:   int64(c),
+		MonitoredLivePollIntervalSeconds:     int64(m),
 	}, nil
 }
 

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ChannelLive } from './ChannelLive';
 export type TwitchUser = {
     /**
      * Twitch numeric user id
@@ -11,6 +12,14 @@ export type TwitchUser = {
      * Canonical Twitch login (lowercase)
      */
     username: string;
+    /**
+     * Profile image from Helix meta when available (e.g. monitored_only directory rows).
+     */
+    profile_image_url?: string | null;
+    /**
+     * Live stream snapshot from backend Helix polling when requested via monitored_only list.
+     */
+    channel_live?: ChannelLive | null;
     /**
      * When true, this channel is joined for IRC monitoring and keyword alerts
      */

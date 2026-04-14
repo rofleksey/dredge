@@ -518,6 +518,10 @@ func (s *Server) handleCountTwitchDirectoryUsersRequest(args [0]string, argsEsca
 					Name: "username",
 					In:   "query",
 				}: params.Username,
+				{
+					Name: "monitored_only",
+					In:   "query",
+				}: params.MonitoredOnly,
 			},
 			Raw: r,
 		}
@@ -5491,6 +5495,10 @@ func (s *Server) handleListTwitchDirectoryUsersRequest(args [0]string, argsEscap
 					Name: "cursor_id",
 					In:   "query",
 				}: params.CursorID,
+				{
+					Name: "monitored_only",
+					In:   "query",
+				}: params.MonitoredOnly,
 			},
 			Raw: r,
 		}

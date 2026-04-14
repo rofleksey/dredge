@@ -247,13 +247,21 @@ func TestRepository_integration(t *testing.T) {
 
 	if len(browse) > 0 {
 		last := browse[len(browse)-1]
-		cur := last.ID
+		cur := last.User.ID
 		_, err = repo.ListTwitchUsersBrowse(ctx, entity.TwitchUserBrowseFilter{
 			Username: "",
 			Limit:    10,
 			CursorID: &cur,
 		})
 		require.NoError(t, err)
+	}
+
+	monBrowse, err := repo.ListTwitchUsersBrowse(ctx, entity.TwitchUserBrowseFilter{MonitoredOnly: true, Limit: 50})
+	require.NoError(t, err)
+	assert.NotEmpty(t, monBrowse)
+	for _, row := range monBrowse {
+		assert.True(t, row.User.Monitored)
+		require.NotNil(t, row.ChannelLive)
 	}
 
 	nBrowse, err := repo.CountTwitchUsersBrowse(ctx, entity.TwitchUserBrowseFilter{Username: "ch"})

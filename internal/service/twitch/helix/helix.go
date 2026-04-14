@@ -539,7 +539,7 @@ func (c *Client) GetChannelLive(ctx context.Context, login string) (ChannelLiveI
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return ChannelLiveInfo{}, ErrUnknownTwitchChannel
+		return ChannelLiveInfo{}, fmt.Errorf("helix users: status %d: %w", resp.StatusCode, ErrHelixUpstream)
 	}
 
 	var usersOut struct {
@@ -550,7 +550,10 @@ func (c *Client) GetChannelLive(ctx context.Context, login string) (ChannelLiveI
 			ProfileImageURL string `json:"profile_image_url"`
 		} `json:"data"`
 	}
-	if err := json.Unmarshal(body, &usersOut); err != nil || len(usersOut.Data) == 0 {
+	if err := json.Unmarshal(body, &usersOut); err != nil {
+		return ChannelLiveInfo{}, fmt.Errorf("helix users: decode: %w", ErrHelixUpstream)
+	}
+	if len(usersOut.Data) == 0 {
 		return ChannelLiveInfo{}, ErrUnknownTwitchChannel
 	}
 
@@ -714,6 +717,7 @@ type HelixStreamSnapshot struct {
 	StartedAt     time.Time
 	Title         string
 	GameName      string
+	ViewerCount   int64
 }
 
 // HelixStreamsMetadataByBroadcasterIDs returns live stream metadata keyed by broadcaster user id.
@@ -779,11 +783,12 @@ func (c *Client) HelixStreamsMetadataByBroadcasterIDs(ctx context.Context, ids [
 
 		var parsed struct {
 			Data []struct {
-				ID        string `json:"id"`
-				UserID    string `json:"user_id"`
-				StartedAt string `json:"started_at"`
-				Title     string `json:"title"`
-				GameName  string `json:"game_name"`
+				ID          string `json:"id"`
+				UserID      string `json:"user_id"`
+				StartedAt   string `json:"started_at"`
+				Title       string `json:"title"`
+				GameName    string `json:"game_name"`
+				ViewerCount int    `json:"viewer_count"`
 			} `json:"data"`
 		}
 		if err := json.Unmarshal(body, &parsed); err != nil {
@@ -810,6 +815,7 @@ func (c *Client) HelixStreamsMetadataByBroadcasterIDs(ctx context.Context, ids [
 				StartedAt:     st,
 				Title:         row.Title,
 				GameName:      row.GameName,
+				ViewerCount:   int64(row.ViewerCount),
 			}
 		}
 	}

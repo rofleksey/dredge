@@ -44,7 +44,7 @@ func (r *Repository) ActiveStreamIDForChannel(ctx context.Context, channelTwitch
 }
 
 // UpsertStreamFromHelix closes any other open session on the channel, then inserts or updates by helix_stream_id.
-func (r *Repository) UpsertStreamFromHelix(ctx context.Context, channelTwitchUserID int64, helixStreamID string, startedAt time.Time, title, gameName string) (int64, error) {
+func (r *Repository) UpsertStreamFromHelix(ctx context.Context, channelTwitchUserID int64, helixStreamID string, startedAt time.Time, title, gameName string, viewerCount *int64) (int64, error) {
 	ctx, span := r.obs.StartSpan(ctx, "repo.upsert_stream_from_helix")
 	defer span.End()
 
@@ -69,9 +69,9 @@ func (r *Repository) UpsertStreamFromHelix(ctx context.Context, channelTwitchUse
 
 	if err == nil {
 		_, err = tx.Exec(ctx, `
-			UPDATE streams SET title = $2, game_name = $3
+			UPDATE streams SET title = $2, game_name = $3, viewer_count = $4, helix_synced_at = NOW()
 			WHERE id = $1
-		`, existingID, nullIfEmpty(title), nullIfEmpty(gameName))
+		`, existingID, nullIfEmpty(title), nullIfEmpty(gameName), viewerCount)
 		if err != nil {
 			r.obs.LogError(ctx, span, "update stream meta failed", err)
 			return 0, err
@@ -96,10 +96,10 @@ func (r *Repository) UpsertStreamFromHelix(ctx context.Context, channelTwitchUse
 	var newID int64
 
 	err = tx.QueryRow(ctx, `
-		INSERT INTO streams (channel_twitch_user_id, helix_stream_id, started_at, ended_at, title, game_name)
-		VALUES ($1, $2, $3, NULL, $4, $5)
+		INSERT INTO streams (channel_twitch_user_id, helix_stream_id, started_at, ended_at, title, game_name, viewer_count, helix_synced_at)
+		VALUES ($1, $2, $3, NULL, $4, $5, $6, NOW())
 		RETURNING id
-	`, channelTwitchUserID, helixStreamID, startedAt, nullIfEmpty(title), nullIfEmpty(gameName)).Scan(&newID)
+	`, channelTwitchUserID, helixStreamID, startedAt, nullIfEmpty(title), nullIfEmpty(gameName), viewerCount).Scan(&newID)
 	if err != nil {
 		r.obs.LogError(ctx, span, "insert stream failed", err)
 		return 0, err

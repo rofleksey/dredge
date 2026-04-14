@@ -4675,6 +4675,55 @@ func (s *OptInt64) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes ChannelLive as json.
+func (o OptNilChannelLive) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes ChannelLive from json.
+func (o *OptNilChannelLive) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilChannelLive to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v ChannelLive
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilChannelLive) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilChannelLive) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes time.Time as json.
 func (o OptNilDateTime) Encode(e *jx.Encoder, format func(*jx.Encoder, time.Time)) {
 	if !o.Set {
@@ -6642,6 +6691,18 @@ func (s *TwitchUser) encodeFields(e *jx.Encoder) {
 		e.Str(s.Username)
 	}
 	{
+		if s.ProfileImageURL.Set {
+			e.FieldStart("profile_image_url")
+			s.ProfileImageURL.Encode(e)
+		}
+	}
+	{
+		if s.ChannelLive.Set {
+			e.FieldStart("channel_live")
+			s.ChannelLive.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("monitored")
 		e.Bool(s.Monitored)
 	}
@@ -6683,18 +6744,20 @@ func (s *TwitchUser) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfTwitchUser = [11]string{
+var jsonFieldsNameOfTwitchUser = [13]string{
 	0:  "id",
 	1:  "username",
-	2:  "monitored",
-	3:  "marked",
-	4:  "is_sus",
-	5:  "sus_type",
-	6:  "sus_description",
-	7:  "sus_auto_suppressed",
-	8:  "irc_only_when_live",
-	9:  "notify_off_stream_messages",
-	10: "notify_stream_start",
+	2:  "profile_image_url",
+	3:  "channel_live",
+	4:  "monitored",
+	5:  "marked",
+	6:  "is_sus",
+	7:  "sus_type",
+	8:  "sus_description",
+	9:  "sus_auto_suppressed",
+	10: "irc_only_when_live",
+	11: "notify_off_stream_messages",
+	12: "notify_stream_start",
 }
 
 // Decode decodes TwitchUser from json.
@@ -6730,8 +6793,28 @@ func (s *TwitchUser) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"username\"")
 			}
+		case "profile_image_url":
+			if err := func() error {
+				s.ProfileImageURL.Reset()
+				if err := s.ProfileImageURL.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"profile_image_url\"")
+			}
+		case "channel_live":
+			if err := func() error {
+				s.ChannelLive.Reset()
+				if err := s.ChannelLive.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"channel_live\"")
+			}
 		case "monitored":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.Monitored = bool(v)
@@ -6743,7 +6826,7 @@ func (s *TwitchUser) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"monitored\"")
 			}
 		case "marked":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Bool()
 				s.Marked = bool(v)
@@ -6755,7 +6838,7 @@ func (s *TwitchUser) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"marked\"")
 			}
 		case "is_sus":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.IsSus = bool(v)
@@ -6787,7 +6870,7 @@ func (s *TwitchUser) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sus_description\"")
 			}
 		case "sus_auto_suppressed":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Bool()
 				s.SusAutoSuppressed = bool(v)
@@ -6799,7 +6882,7 @@ func (s *TwitchUser) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sus_auto_suppressed\"")
 			}
 		case "irc_only_when_live":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Bool()
 				s.IrcOnlyWhenLive = bool(v)
@@ -6811,7 +6894,7 @@ func (s *TwitchUser) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"irc_only_when_live\"")
 			}
 		case "notify_off_stream_messages":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := d.Bool()
 				s.NotifyOffStreamMessages = bool(v)
@@ -6823,7 +6906,7 @@ func (s *TwitchUser) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"notify_off_stream_messages\"")
 			}
 		case "notify_stream_start":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.NotifyStreamStart = bool(v)
@@ -6844,8 +6927,8 @@ func (s *TwitchUser) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b10011111,
-		0b00000111,
+		0b01110011,
+		0b00011110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8510,11 +8593,16 @@ func (s *WatchUiHints) encodeFields(e *jx.Encoder) {
 		e.FieldStart("channel_chatters_sync_interval_seconds")
 		e.Int64(s.ChannelChattersSyncIntervalSeconds)
 	}
+	{
+		e.FieldStart("monitored_live_poll_interval_seconds")
+		e.Int64(s.MonitoredLivePollIntervalSeconds)
+	}
 }
 
-var jsonFieldsNameOfWatchUiHints = [2]string{
+var jsonFieldsNameOfWatchUiHints = [3]string{
 	0: "viewer_poll_interval_seconds",
 	1: "channel_chatters_sync_interval_seconds",
+	2: "monitored_live_poll_interval_seconds",
 }
 
 // Decode decodes WatchUiHints from json.
@@ -8550,6 +8638,18 @@ func (s *WatchUiHints) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"channel_chatters_sync_interval_seconds\"")
 			}
+		case "monitored_live_poll_interval_seconds":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.MonitoredLivePollIntervalSeconds = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"monitored_live_poll_interval_seconds\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -8560,7 +8660,7 @@ func (s *WatchUiHints) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

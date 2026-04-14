@@ -61,9 +61,10 @@ func New(repo repository.Store, broadcaster Broadcaster, cfg config.Config, obs 
 }
 
 // WatchUiHints exposes poll intervals for the SPA (seconds, minimum 1).
-func (s *Service) WatchUiHints() (viewerPollSec int, channelChattersSyncSec int) {
+func (s *Service) WatchUiHints() (viewerPollSec int, channelChattersSyncSec int, monitoredLivePollSec int) {
 	v := int(s.viewerPollInterval / time.Second)
 	c := int(s.channelChattersSyncInterval / time.Second)
+	m := int(s.streamSessionPollInterval / time.Second)
 
 	if v < 1 {
 		v = 10
@@ -73,7 +74,11 @@ func (s *Service) WatchUiHints() (viewerPollSec int, channelChattersSyncSec int)
 		c = 10
 	}
 
-	return v, c
+	if m < 1 {
+		m = 60
+	}
+
+	return v, c, m
 }
 
 // SetPersistContext sets the parent context for IRC-driven DB work; cancel it on app shutdown.
@@ -178,7 +183,7 @@ func (s *Service) ListChatMessages(ctx context.Context, f entity.ChatMessageList
 }
 
 // ListTwitchUsersBrowse lists known Twitch identities for the directory UI.
-func (s *Service) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchUser, error) {
+func (s *Service) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchDirectoryEntry, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.list_twitch_users_browse")
 	defer span.End()
 

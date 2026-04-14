@@ -21,6 +21,27 @@ type TwitchUserBrowseFilter struct {
 	Username string
 	Limit    int
 	CursorID *int64
+	// MonitoredOnly, when true, returns only monitored channels and joins Helix-synced live stream + chatter snapshot fields.
+	MonitoredOnly bool
+}
+
+// TwitchDirectoryEntry is one twitch_users row for GET /twitch/users with optional live enrichment.
+type TwitchDirectoryEntry struct {
+	User            TwitchUser
+	ProfileImageURL *string
+	// ChannelLive is nil when MonitoredOnly is false. When MonitoredOnly is true, non-nil with IsLive and stream fields from the latest backend Helix poll.
+	ChannelLive *TwitchDirectoryChannelLive
+}
+
+// TwitchDirectoryChannelLive mirrors API ChannelLive fields sourced from DB (open stream row + chatter count).
+type TwitchDirectoryChannelLive struct {
+	IsLive              bool
+	Title               *string
+	GameName            *string
+	ViewerCount         *int64
+	ChannelChatterCount *int64
+	StartedAt           *time.Time
+	HelixSyncedAt       *time.Time
 }
 
 // Account is an application login (admin or user role).

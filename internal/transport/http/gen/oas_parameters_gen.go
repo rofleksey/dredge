@@ -18,6 +18,8 @@ import (
 // CountTwitchDirectoryUsersParams is parameters of countTwitchDirectoryUsers operation.
 type CountTwitchDirectoryUsersParams struct {
 	Username OptString `json:",omitempty,omitzero"`
+	// When true, count only monitored channels (same filter as list).
+	MonitoredOnly OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackCountTwitchDirectoryUsersParams(packed middleware.Parameters) (params CountTwitchDirectoryUsersParams) {
@@ -28,6 +30,15 @@ func unpackCountTwitchDirectoryUsersParams(packed middleware.Parameters) (params
 		}
 		if v, ok := packed[key]; ok {
 			params.Username = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "monitored_only",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MonitoredOnly = v.(OptBool)
 		}
 	}
 	return params
@@ -72,6 +83,52 @@ func decodeCountTwitchDirectoryUsersParams(args [0]string, argsEscaped bool, r *
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "username",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: monitored_only.
+	{
+		val := bool(false)
+		params.MonitoredOnly.SetTo(val)
+	}
+	// Decode query: monitored_only.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "monitored_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMonitoredOnlyVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMonitoredOnlyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MonitoredOnly.SetTo(paramsDotMonitoredOnlyVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "monitored_only",
 			In:   "query",
 			Err:  err,
 		}
@@ -1692,6 +1749,9 @@ type ListTwitchDirectoryUsersParams struct {
 	Limit    OptInt    `json:",omitempty,omitzero"`
 	// Keyset cursor (twitch user id from the last row of the previous page; sort is id desc).
 	CursorID OptInt64 `json:",omitempty,omitzero"`
+	// When true, only monitored channels are returned with channel_live filled from the server's batched
+	// Helix /streams poll.
+	MonitoredOnly OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackListTwitchDirectoryUsersParams(packed middleware.Parameters) (params ListTwitchDirectoryUsersParams) {
@@ -1720,6 +1780,15 @@ func unpackListTwitchDirectoryUsersParams(packed middleware.Parameters) (params 
 		}
 		if v, ok := packed[key]; ok {
 			params.CursorID = v.(OptInt64)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "monitored_only",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MonitoredOnly = v.(OptBool)
 		}
 	}
 	return params
@@ -1876,6 +1945,52 @@ func decodeListTwitchDirectoryUsersParams(args [0]string, argsEscaped bool, r *h
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "cursor_id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: monitored_only.
+	{
+		val := bool(false)
+		params.MonitoredOnly.SetTo(val)
+	}
+	// Decode query: monitored_only.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "monitored_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMonitoredOnlyVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMonitoredOnlyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MonitoredOnly.SetTo(paramsDotMonitoredOnlyVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "monitored_only",
 			In:   "query",
 			Err:  err,
 		}
