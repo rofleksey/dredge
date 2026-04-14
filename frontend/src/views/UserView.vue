@@ -13,6 +13,7 @@ import type {
 } from '../api/generated';
 import type { UserActivityEvent } from '../api/generated/models/UserActivityEvent';
 import type { ChatBadgeTag } from '../lib/chatBadges';
+import { formatDateTime } from '../lib/dateTime';
 import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
 import { notify } from '../lib/notify';
 import { useLiveSocketStore } from '../stores/liveSocket';
@@ -528,17 +529,7 @@ function activityLabel(e: UserActivityEvent): string {
 }
 
 function formatWhen(iso: string): string {
-  const t = Date.parse(iso);
-  if (!Number.isFinite(t)) {
-    return iso;
-  }
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).format(t);
+  return formatDateTime(iso);
 }
 
 function formatPresenceDurationMs(ms: number): string {

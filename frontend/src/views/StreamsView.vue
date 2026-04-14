@@ -4,6 +4,7 @@ import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { ApiError, DefaultService } from '../api/generated';
 import type { RecordedStream } from '../api/generated';
+import { formatDateTime } from '../lib/dateTime';
 import { notify } from '../lib/notify';
 
 defineOptions({ name: 'StreamsView' });
@@ -101,11 +102,7 @@ onMounted(() => {
 });
 
 function formatWhen(iso: string): string {
-  const t = Date.parse(iso);
-  if (!Number.isFinite(t)) {
-    return iso;
-  }
-  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(t);
+  return formatDateTime(iso);
 }
 
 function statusLabel(s: RecordedStream): string {

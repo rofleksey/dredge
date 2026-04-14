@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import type { ChatBadgeTag } from '../lib/chatBadges';
 import { badgeEmojis } from '../lib/chatBadges';
+import { formatDateTime } from '../lib/dateTime';
 import TwitchUserLink from './TwitchUserLink.vue';
 
 const props = withDefaults(
@@ -47,17 +48,7 @@ const timeLabel = computed(() => {
   if (!props.showTimestamp || !props.createdAt) {
     return '';
   }
-  const t = Date.parse(props.createdAt);
-  if (!Number.isFinite(t)) {
-    return '';
-  }
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).format(t);
+  return formatDateTime(props.createdAt);
 });
 </script>
 

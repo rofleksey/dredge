@@ -9,6 +9,7 @@ import type { RecordedStream } from '../api/generated';
 import type { StreamLeaderboardEntry } from '../api/generated';
 import { StreamLeaderboardSort } from '../api/generated/models/StreamLeaderboardSort';
 import type { UserActivityEvent } from '../api/generated/models/UserActivityEvent';
+import { formatDateTime } from '../lib/dateTime';
 import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
 import { notify } from '../lib/notify';
 import { useLiveSocketStore } from '../stores/liveSocket';
@@ -180,11 +181,7 @@ function formatClock(sec: number): string {
 }
 
 function formatWhen(iso: string): string {
-  const t = Date.parse(iso);
-  if (!Number.isFinite(t)) {
-    return iso;
-  }
-  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(t);
+  return formatDateTime(iso);
 }
 
 function activityLabel(e: UserActivityEvent): string {

@@ -19,6 +19,7 @@ import type {
 } from '../api/generated';
 import type { ChatBadgeTag } from '../lib/chatBadges';
 import { isChannelJoinedOnIrc } from '../lib/ircMonitorJoined';
+import { formatDateTime } from '../lib/dateTime';
 import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
 import { notifyFromApiError } from '../lib/clientNotice';
 import { notify } from '../lib/notify';
@@ -217,11 +218,7 @@ function formatAccountDate(iso?: string | null): string {
   if (!iso) {
     return '';
   }
-  const t = Date.parse(iso);
-  if (!Number.isFinite(t)) {
-    return '';
-  }
-  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(t);
+  return formatDateTime(iso);
 }
 
 function formatPresentElapsed(iso: string): string {
@@ -1002,7 +999,7 @@ async function sendChat(): Promise<void> {
         </div>
         <div>
           <dt>Live since</dt>
-          <dd>{{ channelLive.started_at ?? '—' }}</dd>
+          <dd>{{ channelLive.started_at ? formatDateTime(channelLive.started_at) : '—' }}</dd>
         </div>
         <div>
           <dt>Session uptime</dt>
