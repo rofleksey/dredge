@@ -64,10 +64,23 @@ func (h *Handler) UpdateTwitchUser(ctx context.Context, req *gen.UpdateTwitchUse
 	defer span.End()
 
 	patch := entity.TwitchUserPatch{}
+	enqueueEnrichmentOnMonitoredChange := false
 
 	if req.Monitored.IsSet() {
 		v := req.Monitored.Value
 		patch.Monitored = &v
+
+		before, err := h.twitch.GetTwitchUser(ctx, req.ID)
+		if err != nil {
+			if errors.Is(err, entity.ErrTwitchUserNotFound) {
+				return &gen.UpdateTwitchUserNotFound{Message: "twitch user not found"}, nil
+			}
+
+			h.obs.LogError(ctx, span, "load twitch user before monitored update failed", err, zap.Int64("id", req.ID))
+			return nil, err
+		}
+
+		enqueueEnrichmentOnMonitoredChange = before.Monitored != v
 	}
 
 	if req.Marked.IsSet() {
@@ -136,6 +149,10 @@ func (h *Handler) UpdateTwitchUser(ctx context.Context, req *gen.UpdateTwitchUse
 
 	if patch.Monitored != nil || patch.IrcOnlyWhenLive != nil {
 		h.twitch.ReconcileIRCJoins(ctx)
+	}
+
+	if enqueueEnrichmentOnMonitoredChange {
+		h.twitch.EnqueueUserEnrichment(req.ID)
 	}
 
 	if twitchsvc.PatchTouchesSuspicionFields(patch) {
