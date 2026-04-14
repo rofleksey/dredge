@@ -52,10 +52,7 @@ func (h *Handler) CreateTwitchUser(ctx context.Context, req *gen.CreateTwitchUse
 		return nil, err
 	}
 
-	if err := h.twitch.RestartMonitor(ctx); err != nil {
-		h.obs.LogError(ctx, span, "restart monitor failed", err, zap.String("username", resolved.Username))
-		return nil, err
-	}
+	h.twitch.ReconcileIRCJoins(ctx)
 
 	tu := entityTwitchUserToGen(u)
 

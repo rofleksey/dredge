@@ -296,6 +296,14 @@ func (r *Runtime) runJoinReconcileLoop(ctx context.Context) {
 }
 
 func (r *Runtime) reconcileIRCJoinsOnce(ctx context.Context) {
+	r.monitorMu.Lock()
+	client := r.monitorClient
+	r.monitorMu.Unlock()
+
+	if client == nil {
+		return
+	}
+
 	reconcileCtx, cancel := context.WithTimeout(r.persistContext(), 60*time.Second)
 	defer cancel()
 
@@ -379,10 +387,6 @@ func (r *Runtime) applyJoinDiffs(ctx context.Context, want map[string]bool) {
 	r.monitorMu.Lock()
 	client := r.monitorClient
 	r.monitorMu.Unlock()
-
-	if client == nil {
-		return
-	}
 
 	r.joinStateMu.Lock()
 

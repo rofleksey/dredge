@@ -16,7 +16,6 @@ import (
 func TestReconcileIRCJoins_emptyMonitoredNoClient(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	repo := repomocks.NewMockStore(ctrl)
-	repo.EXPECT().ListMonitoredTwitchUsers(gomock.Any()).Return(nil, nil)
 
 	obs := &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")}
 	r := NewRuntime(Config{
