@@ -55,24 +55,40 @@ func (r *Runtime) runPresenceSnapshot(ctx context.Context) {
 		return
 	}
 
+	ids := make([]int64, 0, len(channels))
+	for _, ch := range channels {
+		ids = append(ids, ch.ID)
+	}
+
+	liveByID, err := r.helix.HelixStreamsLiveByBroadcasterIDs(ctx, ids)
+	if err != nil {
+		r.obs.Logger.Warn("presence: helix live status failed", zap.Error(err))
+		return
+	}
+
 	for _, ch := range channels {
 		login := NormalizeTwitchChannel(ch.Username)
 		if login == "" {
 			continue
 		}
-		if err := r.snapshotChannelPresence(ctx, client, ch, login); err != nil {
+		if err := r.snapshotChannelPresence(ctx, client, ch, login, liveByID[ch.ID]); err != nil {
 			r.obs.Logger.Debug("presence snapshot channel skipped", zap.String("channel", login), zap.Error(err))
 		}
 	}
 }
 
-func (r *Runtime) snapshotChannelPresence(ctx context.Context, client *twitchirc.Client, channel entity.TwitchUser, ircLogin string) error {
-	logins, err := client.Userlist(ircLogin)
-	if err != nil {
-		if !isGoTwitchIRCUserlistMissing(err) {
-			return err
+func (r *Runtime) snapshotChannelPresence(ctx context.Context, client *twitchirc.Client, channel entity.TwitchUser, ircLogin string, channelLive bool) error {
+	var logins []string
+
+	if channelLive {
+		var err error
+		logins, err = client.Userlist(ircLogin)
+		if err != nil {
+			if !isGoTwitchIRCUserlistMissing(err) {
+				return err
+			}
+			logins = nil
 		}
-		logins = nil
 	}
 
 	prev, err := r.repo.ListChannelChatterIDs(ctx, channel.ID)
@@ -87,9 +103,13 @@ func (r *Runtime) snapshotChannelPresence(ctx context.Context, client *twitchirc
 
 	loginBatch := append([]string{}, logins...)
 
-	idByLogin, err := r.helix.HelixUsersByLogins(ctx, loginBatch)
-	if err != nil {
-		return err
+	idByLogin := make(map[string]int64, len(loginBatch))
+	if len(loginBatch) > 0 {
+		var err error
+		idByLogin, err = r.helix.HelixUsersByLogins(ctx, loginBatch)
+		if err != nil {
+			return err
+		}
 	}
 
 	curr := make([]int64, 0, len(idByLogin))
@@ -121,12 +141,25 @@ func (r *Runtime) snapshotChannelPresence(ctx context.Context, client *twitchirc
 
 	chID := channel.ID
 
-	if len(prevSet) == 0 && len(currSet) > 0 {
-		if err := r.repo.ReplaceChannelChattersSnapshot(ctx, chID, curr); err != nil {
-			return err
-		}
-		return nil
-	}
+	r.emitPresenceDiffEvents(ctx, chID, prevSet, currSet)
 
 	return r.repo.ReplaceChannelChattersSnapshot(ctx, chID, curr)
+}
+
+func (r *Runtime) emitPresenceDiffEvents(ctx context.Context, channelID int64, prevSet, currSet map[int64]struct{}) {
+	// Emit activity edges from snapshot diff:
+	// - users newly present in NAMES => chat_online
+	// - users missing from NAMES      => chat_offline
+	for uid := range currSet {
+		if _, wasPresent := prevSet[uid]; wasPresent {
+			continue
+		}
+		_ = r.repo.InsertUserActivityEvent(ctx, uid, entity.UserActivityChatOnline, &channelID, nil)
+	}
+	for uid := range prevSet {
+		if _, stillPresent := currSet[uid]; stillPresent {
+			continue
+		}
+		_ = r.repo.InsertUserActivityEvent(ctx, uid, entity.UserActivityChatOffline, &channelID, nil)
+	}
 }

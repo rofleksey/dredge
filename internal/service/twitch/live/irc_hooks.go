@@ -89,13 +89,12 @@ func (r *Runtime) handleIRCChatterPresence(ctx context.Context, channelLogin, us
 		ev = entity.UserActivityChatOnline
 	}
 
-	_ = r.repo.InsertUserActivityEvent(persistCtx, uid, ev, &chID, nil)
-
 	if join {
 		_, upErr := r.repo.UpsertChannelChatterPresence(persistCtx, chID, uid)
 		if upErr != nil {
 			return
 		}
+		_ = r.repo.InsertUserActivityEvent(persistCtx, uid, ev, &chID, nil)
 
 		return
 	}
@@ -104,6 +103,7 @@ func (r *Runtime) handleIRCChatterPresence(ctx context.Context, channelLogin, us
 	if delErr != nil || !hadRow {
 		return
 	}
+	_ = r.repo.InsertUserActivityEvent(persistCtx, uid, ev, &chID, nil)
 
 	_ = since
 }
