@@ -171,7 +171,7 @@ type Invoker interface {
 	// ListTwitchUsers invokes listTwitchUsers operation.
 	//
 	// GET /settings/twitch-users
-	ListTwitchUsers(ctx context.Context) ([]TwitchUser, error)
+	ListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) ([]TwitchUser, error)
 	// Login invokes login operation.
 	//
 	// POST /auth/login
@@ -4430,12 +4430,12 @@ func (c *Client) sendListTwitchUserActivity(ctx context.Context, request *ListTw
 // ListTwitchUsers invokes listTwitchUsers operation.
 //
 // GET /settings/twitch-users
-func (c *Client) ListTwitchUsers(ctx context.Context) ([]TwitchUser, error) {
-	res, err := c.sendListTwitchUsers(ctx)
+func (c *Client) ListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) ([]TwitchUser, error) {
+	res, err := c.sendListTwitchUsers(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendListTwitchUsers(ctx context.Context) (res []TwitchUser, err error) {
+func (c *Client) sendListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) (res []TwitchUser, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchUsers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -4475,6 +4475,27 @@ func (c *Client) sendListTwitchUsers(ctx context.Context) (res []TwitchUser, err
 	var pathParts [1]string
 	pathParts[0] = "/settings/twitch-users"
 	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "monitored_only" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "monitored_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.MonitoredOnly.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)

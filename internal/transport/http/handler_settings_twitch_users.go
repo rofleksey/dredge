@@ -11,11 +11,12 @@ import (
 	"github.com/rofleksey/dredge/internal/transport/http/gen"
 )
 
-func (h *Handler) ListTwitchUsers(ctx context.Context) ([]gen.TwitchUser, error) {
+func (h *Handler) ListTwitchUsers(ctx context.Context, params gen.ListTwitchUsersParams) ([]gen.TwitchUser, error) {
 	ctx, span := h.obs.StartSpan(ctx, "handler.list_twitch_users")
 	defer span.End()
 
-	list, err := h.sett.ListTwitchUsers(ctx)
+	monitoredOnly := params.MonitoredOnly.Value
+	list, err := h.sett.ListTwitchUsers(ctx, monitoredOnly)
 	if err != nil {
 		h.obs.LogError(ctx, span, "list twitch users failed", err)
 		return nil, err

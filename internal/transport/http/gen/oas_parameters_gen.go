@@ -2504,3 +2504,74 @@ func decodeListTwitchMessagesParams(args [0]string, argsEscaped bool, r *http.Re
 	}
 	return params, nil
 }
+
+// ListTwitchUsersParams is parameters of listTwitchUsers operation.
+type ListTwitchUsersParams struct {
+	// When true, return only monitored channels (same TwitchUser fields as the full list;
+	// profile_image_url and channel_live are not populated on this path).
+	MonitoredOnly OptBool `json:",omitempty,omitzero"`
+}
+
+func unpackListTwitchUsersParams(packed middleware.Parameters) (params ListTwitchUsersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "monitored_only",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.MonitoredOnly = v.(OptBool)
+		}
+	}
+	return params
+}
+
+func decodeListTwitchUsersParams(args [0]string, argsEscaped bool, r *http.Request) (params ListTwitchUsersParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: monitored_only.
+	{
+		val := bool(false)
+		params.MonitoredOnly.SetTo(val)
+	}
+	// Decode query: monitored_only.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "monitored_only",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotMonitoredOnlyVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotMonitoredOnlyVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.MonitoredOnly.SetTo(paramsDotMonitoredOnlyVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "monitored_only",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}

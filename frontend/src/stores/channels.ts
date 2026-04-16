@@ -10,7 +10,7 @@ export const useChannelsStore = defineStore('channels', () => {
   const monitoredChannels = computed(() => channels.value.filter((c) => c.monitored));
 
   async function fetch(): Promise<void> {
-    channels.value = await DefaultService.listTwitchUsers();
+    channels.value = await DefaultService.listTwitchUsers({ monitoredOnly: true });
     loaded.value = true;
   }
 

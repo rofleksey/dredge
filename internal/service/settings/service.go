@@ -15,11 +15,21 @@ func New(repo repository.Store, obs *observability.Stack) *Service {
 	return &Service{repo: repo, obs: obs}
 }
 
-func (s *Service) ListTwitchUsers(ctx context.Context) ([]entity.TwitchUser, error) {
+func (s *Service) ListTwitchUsers(ctx context.Context, monitoredOnly bool) ([]entity.TwitchUser, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.settings.list_twitch_users")
 	defer span.End()
 
-	out, err := s.repo.ListTwitchUsers(ctx)
+	var (
+		out []entity.TwitchUser
+		err error
+	)
+
+	if monitoredOnly {
+		out, err = s.repo.ListMonitoredTwitchUsers(ctx)
+	} else {
+		out, err = s.repo.ListTwitchUsers(ctx)
+	}
+
 	if err != nil {
 		s.obs.LogError(ctx, span, "list twitch users failed", err)
 	}

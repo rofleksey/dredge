@@ -252,7 +252,7 @@ func (UnimplementedHandler) ListTwitchUserActivity(ctx context.Context, req *Lis
 // ListTwitchUsers implements listTwitchUsers operation.
 //
 // GET /settings/twitch-users
-func (UnimplementedHandler) ListTwitchUsers(ctx context.Context) (r []TwitchUser, _ error) {
+func (UnimplementedHandler) ListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) (r []TwitchUser, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

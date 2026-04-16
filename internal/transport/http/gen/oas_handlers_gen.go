@@ -6061,6 +6061,16 @@ func (s *Server) handleListTwitchUsersRequest(args [0]string, argsEscaped bool, 
 			return
 		}
 	}
+	params, err := decodeListTwitchUsersParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
 
 	var rawBody []byte
 
@@ -6073,13 +6083,18 @@ func (s *Server) handleListTwitchUsersRequest(args [0]string, argsEscaped bool, 
 			OperationID:      "listTwitchUsers",
 			Body:             nil,
 			RawBody:          rawBody,
-			Params:           middleware.Parameters{},
-			Raw:              r,
+			Params: middleware.Parameters{
+				{
+					Name: "monitored_only",
+					In:   "query",
+				}: params.MonitoredOnly,
+			},
+			Raw: r,
 		}
 
 		type (
 			Request  = struct{}
-			Params   = struct{}
+			Params   = ListTwitchUsersParams
 			Response = []TwitchUser
 		)
 		response, err = middleware.HookMiddleware[
@@ -6089,14 +6104,14 @@ func (s *Server) handleListTwitchUsersRequest(args [0]string, argsEscaped bool, 
 		](
 			m,
 			mreq,
-			nil,
+			unpackListTwitchUsersParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.ListTwitchUsers(ctx)
+				response, err = s.h.ListTwitchUsers(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.ListTwitchUsers(ctx)
+		response, err = s.h.ListTwitchUsers(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)

@@ -83,10 +83,20 @@ export class DefaultService {
      * @returns TwitchUser Twitch users (streamers/channels); monitored flag controls IRC monitoring
      * @throws ApiError
      */
-    public static listTwitchUsers(): CancelablePromise<Array<TwitchUser>> {
+    public static listTwitchUsers({
+        monitoredOnly = false,
+    }: {
+        /**
+         * When true, return only monitored channels (same TwitchUser fields as the full list; profile_image_url and channel_live are not populated on this path).
+         */
+        monitoredOnly?: boolean,
+    }): CancelablePromise<Array<TwitchUser>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/settings/twitch-users',
+            query: {
+                'monitored_only': monitoredOnly,
+            },
         });
     }
     /**

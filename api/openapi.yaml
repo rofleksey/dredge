@@ -46,6 +46,13 @@ paths:
       operationId: listTwitchUsers
       security:
         - bearerAuth: []
+      parameters:
+        - name: monitored_only
+          in: query
+          description: When true, return only monitored channels (same TwitchUser fields as the full list; profile_image_url and channel_live are not populated on this path).
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: Twitch users (streamers/channels); monitored flag controls IRC monitoring

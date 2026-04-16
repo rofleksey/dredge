@@ -151,7 +151,7 @@ type Handler interface {
 	// ListTwitchUsers implements listTwitchUsers operation.
 	//
 	// GET /settings/twitch-users
-	ListTwitchUsers(ctx context.Context) ([]TwitchUser, error)
+	ListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) ([]TwitchUser, error)
 	// Login implements login operation.
 	//
 	// POST /auth/login
