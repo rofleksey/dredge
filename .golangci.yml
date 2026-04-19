@@ -18,7 +18,7 @@ linters:
       branch-max-lines: 10
   exclusions:
     paths:
-      - internal/transport/http/gen/.*\.go$
+      - internal/http/gen/.*\.go$
       - internal/gen/.*\.go$
       - .*/mocks/.*\.go$
 
@@ -27,6 +27,6 @@ formatters:
     - gofmt
   exclusions:
     paths:
-      - internal/transport/http/gen/.*\.go$
+      - internal/http/gen/.*\.go$
       - internal/gen/.*\.go$
       - .*/mocks/.*\.go$

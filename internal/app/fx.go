@@ -11,17 +11,18 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/rofleksey/dredge/internal/config"
+	"github.com/rofleksey/dredge/internal/http/gen"
+	"github.com/rofleksey/dredge/internal/http/handler"
+	httpmw "github.com/rofleksey/dredge/internal/http/middleware"
 	"github.com/rofleksey/dredge/internal/observability"
 	"github.com/rofleksey/dredge/internal/repository"
 	"github.com/rofleksey/dredge/internal/repository/postgres"
 	twitchoauth "github.com/rofleksey/dredge/internal/service/twitch"
-	httptransport "github.com/rofleksey/dredge/internal/transport/http"
-	"github.com/rofleksey/dredge/internal/transport/http/gen"
-	"github.com/rofleksey/dredge/internal/transport/ws"
 	"github.com/rofleksey/dredge/internal/usecase/auth"
 	"github.com/rofleksey/dredge/internal/usecase/settings"
 	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 	"github.com/rofleksey/dredge/internal/webui"
+	"github.com/rofleksey/dredge/internal/ws"
 )
 
 func newPGXPool(cfg config.Config) (*pgxpool.Pool, error) {
@@ -78,16 +79,16 @@ func fxOptions() fx.Option {
 					cfg.JWT.Secret,
 				)
 			},
-			httptransport.NewHandler,
-			httptransport.NewSecurity,
-			func(cfg config.Config) *httptransport.LoginLimiter {
-				return httptransport.NewLoginLimiter(cfg.Server.LoginRateLimitPerMinute)
+			handler.NewHandler,
+			handler.NewSecurity,
+			func(cfg config.Config) *httpmw.LoginLimiter {
+				return httpmw.NewLoginLimiter(cfg.Server.LoginRateLimitPerMinute)
 			},
-			func(h *httptransport.Handler, sec *httptransport.Security, limiter *httptransport.LoginLimiter) (*gen.Server, error) {
+			func(h *handler.Handler, sec *handler.Security, limiter *httpmw.LoginLimiter) (*gen.Server, error) {
 				return gen.NewServer(h, sec,
-					gen.WithMiddleware(httptransport.LoginRateLimitMiddleware(limiter)),
-					gen.WithMiddleware(httptransport.RequireAdminMiddleware()),
-					gen.WithErrorHandler(httptransport.OgenErrorHandler()),
+					gen.WithMiddleware(httpmw.LoginRateLimitMiddleware(limiter)),
+					gen.WithMiddleware(httpmw.RequireAdminMiddleware()),
+					gen.WithErrorHandler(httpmw.OgenErrorHandler()),
 				)
 			},
 			func(cfg config.Config, authSvc *auth.Service, srv *gen.Server, hub *ws.Hub, tw *twitchuc.Service, oauth *twitchoauth.OAuth, sett *settings.Service, obs *observability.Stack, origin config.AllowedWebOrigin) (*http.Server, error) {
@@ -101,11 +102,11 @@ func fxOptions() fx.Option {
 					w.WriteHeader(http.StatusOK)
 					_, _ = w.Write([]byte("ok"))
 				})
-				mux.Handle("/ws", httptransport.LiveWebsocketHandler(authSvc, hub, tw, obs.Logger))
-				mux.Handle(httptransport.TwitchOAuthCallbackPath, httptransport.NewTwitchOAuthCallback(oauth, sett, obs))
+				mux.Handle("/ws", handler.LiveWebsocketHandler(authSvc, hub, tw, obs.Logger))
+				mux.Handle(handler.TwitchOAuthCallbackPath, handler.NewTwitchOAuthCallback(oauth, sett, obs))
 				mux.Handle("/", webui.NewMux(srv))
 
-				return &http.Server{Addr: cfg.Server.Address, Handler: obs.InstrumentHTTP(httptransport.WrapCORS(string(origin), mux))}, nil
+				return &http.Server{Addr: cfg.Server.Address, Handler: obs.InstrumentHTTP(httpmw.WrapCORS(string(origin), mux))}, nil
 			},
 		),
 		fx.Invoke(registerLifecycle),

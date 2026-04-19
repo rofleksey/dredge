@@ -7,7 +7,7 @@ POSTGRES_PORT=5432
 .PHONY: gen generate mocks test lint build run docker-build tidy clean-generated frontend-build frontend-dev infra-up infra-down infra-rm
 
 gen:
-	go run github.com/ogen-go/ogen/cmd/ogen@latest --target internal/transport/http/gen --package gen --clean api/openapi.yaml
+	go run github.com/ogen-go/ogen/cmd/ogen@latest --target internal/http/gen --package gen --clean api/openapi.yaml
 
 generate: gen
 
@@ -53,4 +53,4 @@ tidy:
 	go mod tidy
 
 clean-generated:
-	rm -rf internal/transport/http/gen internal/repository/mocks internal/gen
+	rm -rf internal/http/gen internal/repository/mocks internal/gen
