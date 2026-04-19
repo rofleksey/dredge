@@ -9,6 +9,7 @@ import (
 func TestIsAPIPath(t *testing.T) {
 	t.Parallel()
 
+	assert.NotEmpty(t, PrefixAI)
 	assert.NotEmpty(t, PrefixAuth)
 	assert.NotEmpty(t, PrefixSettings)
 	assert.NotEmpty(t, PrefixTwitch)
@@ -22,6 +23,9 @@ func TestIsAPIPath(t *testing.T) {
 		{"/me/x", true},
 		{"/settings/rules", true},
 		{"/twitch/users", true},
+		{"/ai/settings", true},
+		{"/ai/conversations", true},
+		{"/ai/conversations/1/messages", true},
 		{"/", false},
 		{"/assets/foo.js", false},
 	}

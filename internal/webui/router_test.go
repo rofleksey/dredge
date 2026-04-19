@@ -51,6 +51,8 @@ func TestIsAPIPath(t *testing.T) {
 		{"/me/foo", true},
 		{"/settings/x", true},
 		{"/twitch/foo", true},
+		{"/ai/settings", true},
+		{"/ai/conversations", true},
 		{"/", false},
 		{"/index.html", false},
 		{"/assets/app.js", false},

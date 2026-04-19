@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { ApiError, DefaultService } from '../api/generated';
 import type { AiConversation, AiMessage } from '../api/generated';
 import SubmitButton from '../components/SubmitButton.vue';
@@ -48,24 +48,47 @@ function describeAgentEvent(ev: Record<string, unknown>): string {
   return k || 'event';
 }
 
+function validConversationId(c: AiConversation): c is AiConversation & { id: number } {
+  return typeof c.id === 'number' && Number.isFinite(c.id);
+}
+
+/** Active conversation id, or null if none / invalid (never undefined). */
+function resolvedActiveId(): number | null {
+  const v = activeId.value;
+  if (v === null || v === undefined || !Number.isFinite(v)) {
+    return null;
+  }
+  return v;
+}
+
+const hasActiveConversation = computed(() => resolvedActiveId() !== null);
+
 async function loadConversations(): Promise<void> {
-  conversations.value = await DefaultService.listAiConversations();
-  if (activeId.value === null && conversations.value.length) {
+  const list = await DefaultService.listAiConversations();
+  conversations.value = list.filter(validConversationId);
+  if (resolvedActiveId() === null && conversations.value.length) {
     activeId.value = conversations.value[0].id;
+  } else if (resolvedActiveId() !== null && !conversations.value.some((c) => c.id === activeId.value)) {
+    activeId.value = conversations.value[0]?.id ?? null;
   }
 }
 
 async function loadMessages(): Promise<void> {
-  if (activeId.value === null) {
+  const cid = activeId.value;
+  if (cid === null || cid === undefined || !Number.isFinite(cid)) {
     messages.value = [];
     return;
   }
-  messages.value = await DefaultService.listAiMessages({ conversationId: activeId.value });
+  messages.value = await DefaultService.listAiMessages({ conversationId: cid });
 }
 
 async function onNewConversation(): Promise<void> {
   try {
     const c = await DefaultService.createAiConversation({});
+    if (!validConversationId(c)) {
+      notify({ id: 'ai-new', type: 'error', title: 'AI', description: 'Invalid conversation from server.' });
+      return;
+    }
     await loadConversations();
     activeId.value = c.id;
     await loadMessages();
@@ -75,10 +98,10 @@ async function onNewConversation(): Promise<void> {
 }
 
 async function onDeleteConversation(): Promise<void> {
-  if (activeId.value === null) {
+  const id = resolvedActiveId();
+  if (id === null) {
     return;
   }
-  const id = activeId.value;
   try {
     await DefaultService.deleteAiConversation({ conversationId: id });
     pending.value = null;
@@ -92,13 +115,14 @@ async function onDeleteConversation(): Promise<void> {
 
 async function onSend(): Promise<void> {
   const text = draft.value.trim();
-  if (!text || activeId.value === null || sending.value) {
+  const cid = resolvedActiveId();
+  if (!text || cid === null || sending.value) {
     return;
   }
   sending.value = true;
   try {
     await DefaultService.createAiMessage({
-      conversationId: activeId.value,
+      conversationId: cid,
       requestBody: { content: text },
     });
     draft.value = '';
@@ -115,11 +139,12 @@ async function onSend(): Promise<void> {
 }
 
 async function onStop(): Promise<void> {
-  if (activeId.value === null) {
+  const cid = resolvedActiveId();
+  if (cid === null) {
     return;
   }
   try {
-    await DefaultService.stopAiAgent({ conversationId: activeId.value });
+    await DefaultService.stopAiAgent({ conversationId: cid });
     pushActivity('Stop requested', 'stop');
   } catch {
     notify({ id: 'ai-stop', type: 'error', title: 'AI', description: 'Could not stop agent.' });
@@ -127,12 +152,13 @@ async function onStop(): Promise<void> {
 }
 
 async function onConfirm(approve: boolean): Promise<void> {
-  if (!pending.value || activeId.value === null) {
+  const cid = resolvedActiveId();
+  if (!pending.value || cid === null) {
     return;
   }
   try {
     await DefaultService.confirmAiTool({
-      conversationId: activeId.value,
+      conversationId: cid,
       requestBody: { tool_call_id: pending.value.tool_call_id, approve },
     });
     pending.value = null;
@@ -162,7 +188,8 @@ watch(
       typeof last.conversation_id === 'number'
         ? last.conversation_id
         : Number(last.conversation_id);
-    if (activeId.value !== null && Number.isFinite(cid) && cid !== activeId.value) {
+    const cur = resolvedActiveId();
+    if (cur !== null && Number.isFinite(cid) && cid !== cur) {
       return;
     }
     const kind = String(last.kind ?? '');
@@ -208,7 +235,10 @@ function convLabel(c: AiConversation): string {
   if (c.title) {
     return c.title;
   }
-  return `Conversation #${c.id}`;
+  if (typeof c.id === 'number' && Number.isFinite(c.id)) {
+    return `Conversation #${c.id}`;
+  }
+  return 'Conversation';
 }
 
 function formatMeta(m: Record<string, unknown>): string {
@@ -237,11 +267,11 @@ function formatMeta(m: Record<string, unknown>): string {
           <button type="button" class="btn-ghost" @click="onNewConversation">New</button>
         </div>
         <ul class="ai-conv-list">
-          <li v-for="c in conversations" :key="c.id">
+          <li v-for="c in conversations" :key="String(c.id)">
             <button
               type="button"
               class="ai-conv-btn"
-              :class="{ active: activeId === c.id }"
+              :class="{ active: resolvedActiveId() === c.id }"
               @click="activeId = c.id"
             >
               {{ convLabel(c) }}
@@ -251,7 +281,7 @@ function formatMeta(m: Record<string, unknown>): string {
         <button
           type="button"
           class="btn-danger-ghost"
-          :disabled="activeId === null"
+          :disabled="!hasActiveConversation"
           @click="onDeleteConversation"
         >
           Delete chat
@@ -297,7 +327,7 @@ function formatMeta(m: Record<string, unknown>): string {
 
         <form class="ai-compose panel" @submit.prevent="onSend">
           <textarea v-model="draft" rows="3" placeholder="Message the agent…" />
-          <SubmitButton :loading="sending" :disabled="activeId === null">Send</SubmitButton>
+          <SubmitButton :loading="sending" :disabled="!hasActiveConversation">Send</SubmitButton>
         </form>
       </main>
     </div>
@@ -306,15 +336,17 @@ function formatMeta(m: Record<string, unknown>): string {
 
 <style scoped lang="scss">
 .ai-wrap {
-  padding: 0.75rem 1rem;
-  max-width: 1200px;
+  padding: 0.75rem 1.25rem;
+  max-width: min(1680px, 96vw);
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .ai-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 1rem;
+  grid-template-columns: minmax(240px, 280px) 1fr;
+  gap: 1.25rem;
   min-height: 60vh;
 }
 
