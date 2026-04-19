@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref, watch } from 'vue';
-import { ApiError, DefaultService } from '../api/generated';
-import type { AiConversation, AiMessage } from '../api/generated';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { AiMessage, ApiError, DefaultService } from '../api/generated';
+import type { AiConversation } from '../api/generated';
+import ChatMessageLine from '../components/ChatMessageLine.vue';
 import SubmitButton from '../components/SubmitButton.vue';
 import { notify } from '../lib/notify';
 import { useLiveSocketStore } from '../stores/liveSocket';
+
+type ActivityEntry = { ts: number; text: string; kind?: string };
+
+type TimelineRow =
+  | { type: 'message'; message: AiMessage }
+  | { type: 'activity'; entry: ActivityEntry };
 
 const conversations = ref<AiConversation[]>([]);
 const activeId = ref<number | null>(null);
@@ -13,7 +20,8 @@ const messages = ref<AiMessage[]>([]);
 const draft = ref('');
 const sending = ref(false);
 const pending = ref<{ tool_call_id: string; tool_name: string; arguments: string } | null>(null);
-const activityLog = ref<{ ts: number; text: string; kind?: string }[]>([]);
+const activityLog = ref<ActivityEntry[]>([]);
+const chatEl = ref<HTMLElement | null>(null);
 
 const live = useLiveSocketStore();
 const { aiAgentEvents } = storeToRefs(live);
@@ -47,6 +55,50 @@ function describeAgentEvent(ev: Record<string, unknown>): string {
   }
   return k || 'event';
 }
+
+const timelineRows = computed<TimelineRow[]>(() => {
+  const rows: TimelineRow[] = [];
+  for (const m of messages.value) {
+    rows.push({ type: 'message', message: m });
+  }
+  for (const e of activityLog.value) {
+    rows.push({ type: 'activity', entry: e });
+  }
+  rows.sort((a, b) => {
+    const ta = a.type === 'message' ? new Date(a.message.created_at).getTime() : a.entry.ts;
+    const tb = b.type === 'message' ? new Date(b.message.created_at).getTime() : b.entry.ts;
+    if (ta !== tb) {
+      return ta - tb;
+    }
+    if (a.type === b.type) {
+      return 0;
+    }
+    return a.type === 'message' ? -1 : 1;
+  });
+  return rows;
+});
+
+async function scrollChatToBottom(): Promise<void> {
+  await nextTick();
+  const el = chatEl.value;
+  if (el) {
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+watch(
+  () => timelineRows.value.length,
+  () => {
+    void scrollChatToBottom();
+  },
+);
+
+watch(
+  () => messages.value.length,
+  () => {
+    void scrollChatToBottom();
+  },
+);
 
 function validConversationId(c: AiConversation): c is AiConversation & { id: number } {
   return typeof c.id === 'number' && Number.isFinite(c.id);
@@ -113,6 +165,14 @@ async function onDeleteConversation(): Promise<void> {
   }
 }
 
+function onComposerKeydown(e: KeyboardEvent): void {
+  if (e.key !== 'Enter' || e.shiftKey) {
+    return;
+  }
+  e.preventDefault();
+  void onSend();
+}
+
 async function onSend(): Promise<void> {
   const text = draft.value.trim();
   const cid = resolvedActiveId();
@@ -127,6 +187,7 @@ async function onSend(): Promise<void> {
     });
     draft.value = '';
     await loadMessages();
+    await scrollChatToBottom();
   } catch (e: unknown) {
     const msg =
       e instanceof ApiError && e.body && typeof e.body === 'object' && 'message' in e.body
@@ -174,6 +235,7 @@ async function onConfirm(approve: boolean): Promise<void> {
 
 watch(activeId, () => {
   pending.value = null;
+  activityLog.value = [];
   void loadMessages();
 });
 
@@ -211,6 +273,7 @@ watch(
     }
     if (
       kind === 'tool_attempt' ||
+      kind === 'tool_result' ||
       kind === 'llm_request' ||
       kind === 'error' ||
       kind === 'needs_confirmation' ||
@@ -225,7 +288,12 @@ watch(
 onMounted(async () => {
   try {
     await loadConversations();
-    await loadMessages();
+    if (conversations.value.length === 0) {
+      await onNewConversation();
+    } else {
+      await loadMessages();
+    }
+    await scrollChatToBottom();
   } catch {
     notify({ id: 'ai-load', type: 'error', title: 'AI', description: 'Failed to load (admin only?).' });
   }
@@ -256,6 +324,44 @@ function formatMeta(m: Record<string, unknown>): string {
   }
   return '';
 }
+
+function roleLabel(role: AiMessage.role): string {
+  if (role === AiMessage.role.USER) {
+    return 'You';
+  }
+  if (role === AiMessage.role.ASSISTANT) {
+    return 'Assistant';
+  }
+  return 'Tool';
+}
+
+function messageBody(m: AiMessage): string {
+  const meta = formatMeta(m.metadata);
+  if (!meta) {
+    return m.content;
+  }
+  return `${m.content}\n${meta}`;
+}
+
+function activityLineClass(kind?: string): string {
+  if (kind === 'error') {
+    return 'ai-agent-line ai-agent-line--err';
+  }
+  if (kind === 'needs_confirmation') {
+    return 'ai-agent-line ai-agent-line--confirm';
+  }
+  if (kind === 'tool_result' || kind === 'done') {
+    return 'ai-agent-line ai-agent-line--ok';
+  }
+  if (kind === 'llm_request') {
+    return 'ai-agent-line ai-agent-line--llm';
+  }
+  return 'ai-agent-line';
+}
+
+function formatShortTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
 </script>
 
 <template>
@@ -263,8 +369,8 @@ function formatMeta(m: Record<string, unknown>): string {
     <div class="ai-layout">
       <aside class="ai-sidebar">
         <div class="ai-sidebar-head">
-          <h2>Chats</h2>
-          <button type="button" class="btn-ghost" @click="onNewConversation">New</button>
+          <h2 class="ai-sidebar-title">Conversations</h2>
+          <button type="button" class="btn-ghost ai-sidebar-new" @click="onNewConversation">New</button>
         </div>
         <ul class="ai-conv-list">
           <li v-for="c in conversations" :key="String(c.id)">
@@ -274,30 +380,63 @@ function formatMeta(m: Record<string, unknown>): string {
               :class="{ active: resolvedActiveId() === c.id }"
               @click="activeId = c.id"
             >
-              {{ convLabel(c) }}
+              <span class="ai-conv-label">{{ convLabel(c) }}</span>
+              <span class="ai-conv-id">#{{ c.id }}</span>
             </button>
           </li>
         </ul>
+        <p v-if="!conversations.length" class="ai-sidebar-empty muted">No chats yet — one will be created for you.</p>
         <button
           type="button"
-          class="btn-danger-ghost"
+          class="btn-danger-ghost ai-sidebar-del"
           :disabled="!hasActiveConversation"
           @click="onDeleteConversation"
         >
-          Delete chat
+          Delete conversation
         </button>
       </aside>
-      <main class="ai-main">
-        <header class="ai-toolbar">
-          <h1>AI</h1>
-          <div class="ai-toolbar-actions">
-            <button type="button" class="btn-ghost" @click="onStop">Stop agent</button>
+
+      <section class="ai-chat">
+        <div class="pane-head ai-chat-head">
+          <div class="ai-chat-head-main">
+            <span class="ai-chat-title">AI assistant</span>
+            <span v-if="resolvedActiveId() != null" class="ai-chat-session">#{{ resolvedActiveId() }}</span>
+            <span v-else class="muted">—</span>
           </div>
-        </header>
+          <button type="button" class="btn-ghost ai-stop-btn" @click="onStop">Stop agent</button>
+        </div>
+
+        <ul ref="chatEl" class="lines">
+          <li v-if="!timelineRows.length" class="ai-empty-line muted">
+            No messages yet. Configure the model in Settings → AI, then send a prompt.
+          </li>
+          <template v-for="(row, idx) in timelineRows" v-else :key="row.type === 'message' ? `m-${row.message.id}` : `a-${row.entry.ts}-${idx}`">
+            <ChatMessageLine
+              v-if="row.type === 'message'"
+              :user="roleLabel(row.message.role)"
+              :message="messageBody(row.message)"
+              :keyword="false"
+              :from-sent="row.message.role === AiMessage.role.USER"
+              :user-marked="row.message.role === AiMessage.role.TOOL"
+              :user-is-sus="false"
+              :suspicious-title="''"
+              :first-message="false"
+              :badge-tags="[]"
+              :show-timestamp="false"
+              :created-at="row.message.created_at"
+            />
+            <li v-else :class="activityLineClass(row.entry.kind)">
+              <span class="ts">{{ formatShortTime(row.entry.ts) }}</span>
+              <span class="ai-nick">agent</span>
+              <span class="txt">{{ row.entry.text }}</span>
+            </li>
+          </template>
+        </ul>
 
         <div v-if="pending" class="ai-pending panel">
-          <p>
-            <strong>{{ pending.tool_name }}</strong> requires confirmation.
+          <p class="ai-pending-title">
+            <strong>{{ pending.tool_name }}</strong>
+            <span class="muted"> needs confirmation</span>
           </p>
           <pre class="ai-args">{{ pending.arguments }}</pre>
           <div class="row">
@@ -306,30 +445,32 @@ function formatMeta(m: Record<string, unknown>): string {
           </div>
         </div>
 
-        <div class="ai-messages panel">
-          <div v-for="m in messages" :key="m.id" class="ai-msg" :data-role="m.role">
-            <span class="ai-role">{{ m.role }}</span>
-            <pre class="ai-content">{{ m.content }}</pre>
-            <p v-if="formatMeta(m.metadata)" class="ai-meta muted">{{ formatMeta(m.metadata) }}</p>
-          </div>
-          <p v-if="!messages.length" class="muted">No messages yet. Configure the model in Settings → AI, then send a prompt.</p>
-        </div>
-
-        <div class="ai-activity panel">
-          <h3>Agent activity</h3>
-          <ul class="ai-log">
-            <li v-for="(e, i) in activityLog" :key="i">
-              <span class="muted">{{ new Date(e.ts).toLocaleTimeString() }}</span>
-              {{ e.text }}
-            </li>
-          </ul>
-        </div>
-
-        <form class="ai-compose panel" @submit.prevent="onSend">
-          <textarea v-model="draft" rows="3" placeholder="Message the agent…" />
-          <SubmitButton :loading="sending" :disabled="!hasActiveConversation">Send</SubmitButton>
+        <form class="composer" @submit.prevent="onSend">
+          <label class="ai-compose-label">
+            <span>Message</span>
+            <textarea
+              v-model="draft"
+              class="composer-textarea"
+              rows="3"
+              name="ai_message"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="Message the agent… (Enter to send, Shift+Enter for newline)"
+              @keydown="onComposerKeydown"
+            />
+          </label>
+          <SubmitButton
+            class="btn-send"
+            native-type="submit"
+            :loading="sending"
+            :disabled="!hasActiveConversation"
+          >
+            {{ sending ? 'Sending…' : 'Send' }}
+          </SubmitButton>
         </form>
-      </main>
+      </section>
     </div>
   </div>
 </template>
@@ -341,23 +482,35 @@ function formatMeta(m: Record<string, unknown>): string {
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+  min-height: calc(100vh - 4rem);
 }
 
 .ai-layout {
   display: grid;
-  grid-template-columns: minmax(240px, 280px) 1fr;
-  gap: 1.25rem;
-  min-height: 60vh;
+  grid-template-columns: minmax(260px, 300px) 1fr;
+  gap: 1rem;
+  align-items: stretch;
+  min-height: min(78vh, 720px);
 }
 
 .ai-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.65rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.75rem;
-  background: var(--bg-elevated);
+  border-radius: 0.35rem;
+  padding: 0.65rem 0.5rem;
+  background: linear-gradient(165deg, rgba(145, 71, 255, 0.06) 0%, var(--bg-elevated) 42%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.ai-sidebar-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  text-transform: uppercase;
 }
 
 .ai-sidebar-head {
@@ -365,160 +518,337 @@ function formatMeta(m: Record<string, unknown>): string {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  h2 {
-    margin: 0;
-    font-size: 1rem;
-  }
+  padding: 0.15rem 0.25rem 0.35rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ai-sidebar-new {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ai-sidebar-empty {
+  margin: 0.25rem 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .ai-conv-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0.15rem;
   flex: 1;
   overflow: auto;
-  max-height: 50vh;
+  min-height: 0;
+  max-height: min(52vh, 28rem);
 }
 
 .ai-conv-btn {
   width: 100%;
   text-align: left;
-  padding: 0.35rem 0.5rem;
-  border-radius: 6px;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.3rem;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text);
   cursor: pointer;
   font: inherit;
-  &.active {
-    border-color: var(--border);
-    background: var(--bg-base);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
   }
+
+  &.active {
+    border-color: rgba(145, 71, 255, 0.45);
+    background: rgba(145, 71, 255, 0.1);
+    box-shadow: 0 0 0 1px rgba(145, 71, 255, 0.12);
+  }
+}
+
+.ai-conv-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ai-conv-id {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .btn-danger-ghost {
   border: 1px solid var(--danger, #c44);
   color: var(--danger, #c44);
   background: transparent;
-  border-radius: 6px;
-  padding: 0.35rem 0.5rem;
+  border-radius: 0.3rem;
+  padding: 0.4rem 0.5rem;
   cursor: pointer;
   font: inherit;
+  font-size: 0.78rem;
+  margin-top: auto;
+
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
   }
 }
 
-.ai-main {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.ai-sidebar-del {
+  flex-shrink: 0;
 }
 
-.ai-toolbar {
+/* Match WatchChatSection: chat column */
+.ai-chat {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  overflow: hidden;
+}
+
+.pane-head {
+  flex-shrink: 0;
+  min-height: 2.875rem;
   display: flex;
   align-items: center;
+  box-sizing: border-box;
+  padding: 0.35rem 0;
+}
+
+.ai-chat-head {
+  width: 100%;
   justify-content: space-between;
-  h1 {
-    margin: 0;
-    font-size: 1.25rem;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  margin: 0;
+  padding-left: 0.65rem;
+  padding-right: 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ai-chat-head-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.ai-chat-title {
+  flex-shrink: 0;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+}
+
+.ai-chat-session {
+  font-weight: 700;
+  color: var(--accent-bright);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-stop-btn {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.lines {
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.ai-empty-line {
+  list-style: none;
+  padding: 1.25rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+/* Agent activity rows: same rhythm as ChatMessageLine */
+.ai-agent-line {
+  list-style: none;
+  padding: 0.2rem 0.15rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.35rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+
+  .ts {
+    display: inline-block;
+    min-width: 6.75rem;
+    margin-right: 0.15rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ai-nick {
+    font-weight: 700;
+    color: #c4a8ff;
+    margin-right: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  .txt {
+    word-break: break-word;
+    color: var(--text-muted);
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+
+  &--llm {
+    background: rgba(56, 189, 248, 0.06);
+    border-left: 2px solid rgba(56, 189, 248, 0.35);
+  }
+
+  &--ok {
+    background: rgba(0, 245, 147, 0.05);
+  }
+
+  &--confirm {
+    background: rgba(255, 193, 7, 0.08);
+    border-left: 2px solid rgba(255, 193, 7, 0.45);
+
+    .txt {
+      color: var(--text);
+    }
+  }
+
+  &--err {
+    background: rgba(244, 67, 54, 0.08);
+    border-left: 2px solid rgba(244, 67, 54, 0.5);
+
+    .txt {
+      color: #f8a8a0;
+    }
   }
 }
 
 .panel {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.75rem;
-  background: var(--bg-elevated);
-}
-
-.ai-messages {
-  flex: 1;
-  overflow: auto;
-  max-height: 42vh;
-}
-
-.ai-msg {
-  margin-bottom: 0.75rem;
-  &[data-role='user'] .ai-role {
-    color: var(--accent);
-  }
-  &[data-role='assistant'] .ai-role {
-    color: var(--text);
-  }
-  &[data-role='tool'] .ai-role {
-    color: var(--muted, #888);
-  }
-}
-
-.ai-role {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.ai-content {
-  margin: 0.25rem 0 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-family: inherit;
-  font-size: 0.95rem;
-}
-
-.ai-meta {
-  font-size: 0.8rem;
-  margin: 0.25rem 0 0;
+  border-radius: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(145, 71, 255, 0.06);
+  margin: 0 0.5rem 0.35rem;
+  flex-shrink: 0;
 }
 
 .ai-pending {
-  border-color: var(--accent);
+  border-color: rgba(145, 71, 255, 0.45);
+  box-shadow: 0 0 0 1px rgba(145, 71, 255, 0.12);
+}
+
+.ai-pending-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
 }
 
 .ai-args {
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   overflow: auto;
   max-height: 8rem;
-  margin: 0.5rem 0;
+  margin: 0.35rem 0 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.ai-activity {
-  max-height: 14rem;
-  overflow: auto;
-  h3 {
-    margin: 0 0 0.5rem;
-    font-size: 0.95rem;
+.composer {
+  border-top: 1px solid var(--border);
+  padding: 0.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+
+  .ai-compose-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    color: var(--text-muted);
+    margin: 0;
+
+    span {
+      font-size: 0.72rem;
+    }
   }
-}
 
-.ai-log {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  font-size: 0.85rem;
-  li {
-    margin-bottom: 0.35rem;
-  }
-}
-
-.ai-compose {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  select,
+  input,
   textarea {
-    width: 100%;
-    resize: vertical;
-    border-radius: 6px;
+    padding: 0.35rem 0.4rem;
+    border-radius: 0.2rem;
     border: 1px solid var(--border);
     background: var(--bg-base);
     color: var(--text);
-    padding: 0.5rem;
-    font: inherit;
+    font-size: 0.85rem;
+  }
+
+  .composer-textarea {
+    resize: vertical;
+    min-height: 3.25rem;
+    line-height: 1.35;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .btn-send {
+    grid-column: 1 / -1;
+    padding: 0.45rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 }
 
 .muted {
-  opacity: 0.75;
+  color: var(--text-muted);
 }
 
 .row {
@@ -527,19 +857,25 @@ function formatMeta(m: Record<string, unknown>): string {
   flex-wrap: wrap;
 }
 
-@media (max-width: 800px) {
-  .ai-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
 .btn-primary {
   border: none;
-  border-radius: 6px;
+  border-radius: 0.3rem;
   padding: 0.4rem 0.75rem;
   background: var(--accent);
   color: var(--bg-base, #0d0d0f);
   cursor: pointer;
   font: inherit;
+  font-weight: 600;
+}
+
+@media (max-width: 800px) {
+  .ai-layout {
+    grid-template-columns: 1fr;
+    min-height: unset;
+  }
+
+  .ai-conv-list {
+    max-height: 14rem;
+  }
 }
 </style>
