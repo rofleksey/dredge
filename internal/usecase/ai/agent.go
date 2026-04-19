@@ -75,10 +75,10 @@ func (u *Usecase) broadcast(convID int64, kind string, payload map[string]any) {
 		return
 	}
 	m := map[string]any{
-		"type":             "ai_agent",
+		"type":            "ai_agent",
 		"conversation_id": convID,
-		"kind":             kind,
-		"ts":               time.Now().UTC().Format(time.RFC3339Nano),
+		"kind":            kind,
+		"ts":              time.Now().UTC().Format(time.RFC3339Nano),
 	}
 	for k, v := range payload {
 		m[k] = v
@@ -187,7 +187,6 @@ iterLoop:
 			u.broadcast(convID, "tool_attempt", map[string]any{
 				"tool_name":    name,
 				"tool_call_id": tc.ID,
-				"arguments":    redactToolArgsJSON(args),
 			})
 
 			if ToolIsReadOnly(name) {
@@ -220,7 +219,6 @@ iterLoop:
 			u.broadcast(convID, "needs_confirmation", map[string]any{
 				"tool_name":    name,
 				"tool_call_id": tc.ID,
-				"arguments":    redactToolArgsJSON(args),
 			})
 
 			st.mu.Lock()
@@ -349,24 +347,6 @@ func (u *Usecase) openAIMessagesFromDB(ctx context.Context, convID int64) ([]ope
 		}
 	}
 	return out, nil
-}
-
-func redactToolArgsJSON(s string) string {
-	var m map[string]any
-	if err := json.Unmarshal([]byte(s), &m); err != nil {
-		return s
-	}
-	for k := range m {
-		lk := strings.ToLower(k)
-		if strings.Contains(lk, "token") || strings.Contains(lk, "secret") || strings.Contains(lk, "password") {
-			m[k] = "[redacted]"
-		}
-	}
-	b, err := json.Marshal(m)
-	if err != nil {
-		return s
-	}
-	return string(b)
 }
 
 // ConfirmPendingTool resumes a blocked mutating tool (called from HTTP handler).

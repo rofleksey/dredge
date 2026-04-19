@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/go-faster/jx"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/rofleksey/dredge/internal/entity"
 	"github.com/rofleksey/dredge/internal/http/gen"
@@ -121,7 +122,12 @@ func (h *Handler) ListAiMessages(ctx context.Context, params gen.ListAiMessagesP
 	}
 	out := make(gen.ListAiMessagesOKApplicationJSON, 0, len(msgs))
 	for _, m := range msgs {
-		out = append(out, genAiMessage(m))
+		sm := sanitizeAIMessageForAPI(m)
+		if sm.Role == entity.AIMessageRoleTool && strings.TrimSpace(sm.Content) == "" {
+			continue
+		}
+
+		out = append(out, genAiMessage(sm))
 	}
 	return &out, nil
 }

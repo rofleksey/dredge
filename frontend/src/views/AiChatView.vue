@@ -40,7 +40,7 @@ const showAgentSpinner = computed(() => sending.value || agentProcessing.value);
 function describeAgentEvent(ev: Record<string, unknown>): string {
   const k = String(ev.kind ?? '');
   if (k === 'tool_attempt') {
-    return `API tool: ${String(ev.tool_name ?? '')} ${String(ev.arguments ?? '').slice(0, 280)}`;
+    return `API tool: ${String(ev.tool_name ?? '')}`;
   }
   if (k === 'error') {
     return `Agent error: ${String(ev.message ?? '')}${ev.phase ? ` (${String(ev.phase)})` : ''}`;
@@ -332,9 +332,6 @@ function formatMeta(m: Record<string, unknown>): string {
   if (m.error) {
     return JSON.stringify(m);
   }
-  if (m.tool_calls) {
-    return '[tool_calls]';
-  }
   if (m.system) {
     return '[system]';
   }
@@ -458,7 +455,7 @@ function formatShortTime(ts: number): string {
             <strong>{{ pending.tool_name }}</strong>
             <span class="muted"> needs confirmation</span>
           </p>
-          <pre class="ai-args">{{ pending.arguments }}</pre>
+          <pre v-if="pending.arguments.trim()" class="ai-args">{{ pending.arguments }}</pre>
           <div class="row">
             <button type="button" class="btn-primary" @click="onConfirm(true)">Approve</button>
             <button type="button" class="btn-ghost" @click="onConfirm(false)">Reject</button>
