@@ -13,7 +13,7 @@ func startOfWeekMondayUTC(t time.Time) time.Time {
 	return start.AddDate(0, 0, -daysSinceMon)
 }
 
-func (s *Service) presenceSecondsThisWeek(ctx context.Context, chatterID int64) (int64, error) {
+func (s *Usecase) presenceSecondsThisWeek(ctx context.Context, chatterID int64) (int64, error) {
 	now := time.Now().UTC()
 	from := startOfWeekMondayUTC(now)
 

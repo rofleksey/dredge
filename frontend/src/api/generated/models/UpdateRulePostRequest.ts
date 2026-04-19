@@ -2,12 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { RuleActionType } from './RuleActionType';
+import type { RuleEventType } from './RuleEventType';
+import type { RuleMiddleware } from './RuleMiddleware';
 export type UpdateRulePostRequest = {
     id: number;
-    regex: string;
-    included_users: string;
-    denied_users: string;
-    included_channels: string;
-    denied_channels: string;
+    enabled: boolean;
+    event_type: RuleEventType;
+    event_settings: Record<string, any>;
+    middlewares: Array<RuleMiddleware>;
+    action_type: RuleActionType;
+    action_settings: Record<string, any>;
+    use_shared_pool: boolean;
 };
 

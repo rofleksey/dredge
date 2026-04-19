@@ -23,7 +23,7 @@ func isAutoSusType(t *string) bool {
 
 // evaluateSuspicionForUser applies automatic suspicion rules after enrichment data is fresh.
 // gqlTotalCount is total follows from Twitch (may exceed stored rows if pagination capped).
-func (s *Service) evaluateSuspicionForUser(ctx context.Context, userID int64, gqlTotalCount int) error {
+func (s *Usecase) evaluateSuspicionForUser(ctx context.Context, userID int64, gqlTotalCount int) error {
 	ownIDs, err := s.repo.ListLinkedTwitchAccountUserIDs(ctx)
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (s *Service) evaluateSuspicionForUser(ctx context.Context, userID int64, gq
 	return nil
 }
 
-func (s *Service) clearOwnAccountSuspicion(ctx context.Context, userID int64) error {
+func (s *Usecase) clearOwnAccountSuspicion(ctx context.Context, userID int64) error {
 	u, err := s.repo.GetTwitchUserByID(ctx, userID)
 	if err != nil {
 		return err
@@ -112,7 +112,7 @@ func (s *Service) clearOwnAccountSuspicion(ctx context.Context, userID int64) er
 	return s.applySuspicionPatch(ctx, userID, false, nil, nil)
 }
 
-func (s *Service) applySuspicionPatch(ctx context.Context, userID int64, isSus bool, susType *string, susDesc *string) error {
+func (s *Usecase) applySuspicionPatch(ctx context.Context, userID int64, isSus bool, susType *string, susDesc *string) error {
 	empty := ""
 
 	p := entity.TwitchUserPatch{IsSus: &isSus}

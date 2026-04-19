@@ -8,7 +8,7 @@ import (
 )
 
 // ListStreamActivity lists non-message activity in the stream time window.
-func (s *Service) ListStreamActivity(ctx context.Context, streamID int64, limit int, cursorCreatedAt *time.Time, cursorID *int64) ([]entity.UserActivityEvent, error) {
+func (s *Usecase) ListStreamActivity(ctx context.Context, streamID int64, limit int, cursorCreatedAt *time.Time, cursorID *int64) ([]entity.UserActivityEvent, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.list_stream_activity")
 	defer span.End()
 

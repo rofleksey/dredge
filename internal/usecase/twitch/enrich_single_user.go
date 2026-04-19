@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *Service) enrichSingleUser(ctx context.Context, userID int64) {
+func (s *Usecase) enrichSingleUser(ctx context.Context, userID int64) {
 	cooldown := s.enrichmentCooldown(ctx)
 	if cooldown > 0 {
 		_, helixFetchedAt, _, err := s.repo.GetHelixMeta(ctx, userID)
@@ -51,7 +51,7 @@ func (s *Service) enrichSingleUser(ctx context.Context, userID int64) {
 	}
 }
 
-func (s *Service) enrichmentCooldown(ctx context.Context) time.Duration {
+func (s *Usecase) enrichmentCooldown(ctx context.Context) time.Duration {
 	settings, err := s.repo.GetIrcMonitorSettings(ctx)
 	if err != nil {
 		return 24 * time.Hour

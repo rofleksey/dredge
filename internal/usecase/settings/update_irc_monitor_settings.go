@@ -7,7 +7,7 @@ import (
 	"github.com/rofleksey/dredge/internal/entity"
 )
 
-func (s *Service) UpdateIrcMonitorSettings(ctx context.Context, in entity.IrcMonitorSettings) (entity.IrcMonitorSettings, error) {
+func (s *Usecase) UpdateIrcMonitorSettings(ctx context.Context, in entity.IrcMonitorSettings) (entity.IrcMonitorSettings, error) {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.settings.update_irc_monitor_settings")
 	defer span.End()
 

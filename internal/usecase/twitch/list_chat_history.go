@@ -7,7 +7,7 @@ import (
 )
 
 // ListChatHistory returns persisted messages for a monitored channel (oldest first).
-func (s *Service) ListChatHistory(ctx context.Context, channel string, limit int) ([]entity.ChatHistoryMessage, error) {
+func (s *Usecase) ListChatHistory(ctx context.Context, channel string, limit int) ([]entity.ChatHistoryMessage, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.list_chat_history")
 	defer span.End()
 

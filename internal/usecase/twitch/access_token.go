@@ -8,7 +8,7 @@ import (
 
 // accessTokenForFirstLinkedAccount returns a cached OAuth access token (via helix.Client.CachedUserAccessTokenForAccount, ~30m)
 // for the first linked Twitch account, persisting a rotated refresh token when Twitch returns one.
-func (s *Service) accessTokenForFirstLinkedAccount(ctx context.Context) (accessToken string, acc entity.TwitchAccount, err error) {
+func (s *Usecase) accessTokenForFirstLinkedAccount(ctx context.Context) (accessToken string, acc entity.TwitchAccount, err error) {
 	accs, err := s.repo.ListTwitchAccounts(ctx)
 	if err != nil {
 		return "", entity.TwitchAccount{}, err

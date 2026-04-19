@@ -19,6 +19,7 @@ import (
 	"github.com/rofleksey/dredge/internal/observability"
 	repomocks "github.com/rofleksey/dredge/internal/repository/mocks"
 	"github.com/rofleksey/dredge/internal/usecase/auth"
+	"github.com/rofleksey/dredge/internal/usecase/rules"
 	"github.com/rofleksey/dredge/internal/usecase/settings"
 	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 )
@@ -56,7 +57,9 @@ func testHandler(t *testing.T) (*Handler, *gomock.Controller, *repomocks.MockSto
 	twSvc := twitchuc.New(repo, noopBroadcaster{}, testTwitchServiceConfig("cid", "sec"), obs)
 	setSvc := settings.New(repo, obs)
 
-	h := NewHandler(authSvc, setSvc, twSvc, nil, obs)
+	rulesSvc := rules.NewUsecase(repo, obs, nil, nil)
+
+	h := NewHandler(authSvc, setSvc, rulesSvc, twSvc, nil, obs)
 
 	return h, ctrl, repo
 }
@@ -116,42 +119,38 @@ func TestChatHistoryEntityToGen(t *testing.T) {
 func TestCreateRuleReqToEntity_defaults(t *testing.T) {
 	t.Parallel()
 
-	req := &gen.CreateRuleRequest{Regex: `foo`}
-	ent := createRuleReqToEntity(req)
-	assert.Equal(t, `foo`, ent.Regex)
-	assert.Equal(t, "*", ent.IncludedUsers)
-	assert.Equal(t, "*", ent.IncludedChannels)
-	assert.Empty(t, ent.DeniedUsers)
-	assert.Empty(t, ent.DeniedChannels)
-
-	req2 := &gen.CreateRuleRequest{
-		Regex:            `bar`,
-		IncludedUsers:    gen.NewOptString("a"),
-		IncludedChannels: gen.NewOptString("c"),
-		DeniedUsers:      gen.NewOptString("d"),
-		DeniedChannels:   gen.NewOptString("x"),
+	req := &gen.CreateRuleRequest{
+		EventType:      gen.RuleEventTypeChatMessage,
+		ActionType:     gen.RuleActionTypeNotify,
+		EventSettings:  gen.CreateRuleRequestEventSettings{},
+		Middlewares:    nil,
+		ActionSettings: gen.CreateRuleRequestActionSettings{},
 	}
-	ent2 := createRuleReqToEntity(req2)
-	assert.Equal(t, "a", ent2.IncludedUsers)
-	assert.Equal(t, "c", ent2.IncludedChannels)
-	assert.Equal(t, "d", ent2.DeniedUsers)
-	assert.Equal(t, "x", ent2.DeniedChannels)
+	ent := createRuleReqToEntity(req)
+	assert.True(t, ent.Enabled)
+	assert.Equal(t, "chat_message", ent.EventType)
+	assert.Equal(t, "notify", ent.ActionType)
+	assert.True(t, ent.UseSharedPool)
 }
 
 func TestRuleEntityToGen(t *testing.T) {
 	t.Parallel()
 
 	r := entity.Rule{
-		ID:               3,
-		Regex:            "x",
-		IncludedUsers:    "u",
-		DeniedUsers:      "",
-		IncludedChannels: "c",
-		DeniedChannels:   "",
+		ID:             3,
+		Enabled:        true,
+		EventType:      "chat_message",
+		EventSettings:  map[string]any{},
+		Middlewares:    nil,
+		ActionType:     "notify",
+		ActionSettings: map[string]any{},
+		UseSharedPool:  true,
+		CreatedAt:      time.Unix(1, 0).UTC(),
+		UpdatedAt:      time.Unix(1, 0).UTC(),
 	}
 	g := ruleEntityToGen(r)
 	assert.Equal(t, int64(3), g.ID)
-	assert.Equal(t, "x", g.Regex)
+	assert.Equal(t, gen.RuleEventTypeChatMessage, g.EventType)
 }
 
 func TestNotificationEntityToGen(t *testing.T) {
@@ -239,19 +238,19 @@ func TestEntityActivityToGen(t *testing.T) {
 func TestUpdateRulePostReqToEntity(t *testing.T) {
 	t.Parallel()
 
-	req := &gen.UpdateRulePostRequest{}
-	req.SetRegex(`x`)
-	req.SetIncludedUsers("a")
-	req.SetDeniedUsers("b")
-	req.SetIncludedChannels("c")
-	req.SetDeniedChannels("d")
+	req := &gen.UpdateRulePostRequest{
+		ID:             1,
+		Enabled:        true,
+		EventType:      gen.RuleEventTypeChatMessage,
+		EventSettings:  gen.UpdateRulePostRequestEventSettings{},
+		Middlewares:    nil,
+		ActionType:     gen.RuleActionTypeNotify,
+		ActionSettings: gen.UpdateRulePostRequestActionSettings{},
+		UseSharedPool:  true,
+	}
 
 	ent := updateRulePostReqToEntity(req)
-	assert.Equal(t, `x`, ent.Regex)
-	assert.Equal(t, "a", ent.IncludedUsers)
-	assert.Equal(t, "b", ent.DeniedUsers)
-	assert.Equal(t, "c", ent.IncludedChannels)
-	assert.Equal(t, "d", ent.DeniedChannels)
+	assert.Equal(t, "chat_message", ent.EventType)
 }
 
 func ptrInt64(v int64) *int64 {

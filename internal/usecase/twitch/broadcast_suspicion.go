@@ -12,7 +12,7 @@ func PatchTouchesSuspicionFields(p entity.TwitchUserPatch) bool {
 }
 
 // BroadcastTwitchUserSuspicion pushes current suspicion fields to all live WebSocket clients.
-func (s *Service) BroadcastTwitchUserSuspicion(u entity.TwitchUser) {
+func (s *Usecase) BroadcastTwitchUserSuspicion(u entity.TwitchUser) {
 	if s == nil || s.broadcaster == nil {
 		return
 	}

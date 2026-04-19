@@ -5,7 +5,7 @@ import (
 )
 
 // EnqueueUserEnrichment queues Helix meta fetch for a user (non-blocking; drops if full).
-func (s *Service) EnqueueUserEnrichment(userID int64) {
+func (s *Usecase) EnqueueUserEnrichment(userID int64) {
 	if s.enrichQueue == nil {
 		return
 	}

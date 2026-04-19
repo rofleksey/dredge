@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *Service) SetChannelBlacklist(ctx context.Context, login string, add bool) error {
+func (s *Usecase) SetChannelBlacklist(ctx context.Context, login string, add bool) error {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.settings.set_channel_blacklist")
 	defer span.End()
 

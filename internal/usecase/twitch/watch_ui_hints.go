@@ -3,7 +3,7 @@ package twitch
 import "time"
 
 // WatchUiHints exposes poll intervals for the SPA (seconds, minimum 1).
-func (s *Service) WatchUiHints() (viewerPollSec int, channelChattersSyncSec int, monitoredLivePollSec int) {
+func (s *Usecase) WatchUiHints() (viewerPollSec int, channelChattersSyncSec int, monitoredLivePollSec int) {
 	v := int(s.viewerPollInterval / time.Second)
 	c := int(s.channelChattersSyncInterval / time.Second)
 	m := int(s.streamSessionPollInterval / time.Second)

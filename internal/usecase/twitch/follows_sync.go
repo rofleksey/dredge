@@ -9,7 +9,7 @@ import (
 )
 
 // syncUserFollowsFromGQL fetches outgoing follows via Twitch GQL and replaces stored rows. Returns total follow count from Twitch (for suspicion thresholds).
-func (s *Service) syncUserFollowsFromGQL(ctx context.Context, userID int64) (totalCount int, err error) {
+func (s *Usecase) syncUserFollowsFromGQL(ctx context.Context, userID int64) (totalCount int, err error) {
 	settings, err := s.repo.GetSuspicionSettings(ctx)
 	if err != nil {
 		return 0, err

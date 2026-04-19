@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-func (s *Service) ListChannelBlacklist(ctx context.Context) ([]string, error) {
+func (s *Usecase) ListChannelBlacklist(ctx context.Context) ([]string, error) {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.settings.list_channel_blacklist")
 	defer span.End()
 

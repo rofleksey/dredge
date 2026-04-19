@@ -47,7 +47,7 @@ func TestHandler_StartTwitchOAuth(t *testing.T) {
 	twSvc := twitchuc.New(repo, noopBroadcaster{}, testTwitchServiceConfig("cid", "sec"), obs)
 	setSvc := settings.New(repo, obs)
 
-	h := NewHandler(authSvc, setSvc, twSvc, oauth, obs)
+	h := NewHandler(authSvc, setSvc, nil, twSvc, oauth, obs)
 
 	res, err := h.StartTwitchOAuth(adminCtx(), gen.OptStartTwitchOAuthRequest{})
 	require.NoError(t, err)

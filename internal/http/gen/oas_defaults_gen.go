@@ -13,20 +13,12 @@ func (s *CreateNotificationRequest) setDefaults() {
 // setDefaults set default value of fields.
 func (s *CreateRuleRequest) setDefaults() {
 	{
-		val := string("*")
-		s.IncludedUsers.SetTo(val)
+		val := bool(true)
+		s.Enabled.SetTo(val)
 	}
 	{
-		val := string("")
-		s.DeniedUsers.SetTo(val)
-	}
-	{
-		val := string("*")
-		s.IncludedChannels.SetTo(val)
-	}
-	{
-		val := string("")
-		s.DeniedChannels.SetTo(val)
+		val := bool(true)
+		s.UseSharedPool.SetTo(val)
 	}
 }
 
@@ -43,5 +35,13 @@ func (s *ListTwitchUserActivityRequest) setDefaults() {
 	{
 		val := int(50)
 		s.Limit.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *TestRuleRegexRequest) setDefaults() {
+	{
+		val := bool(false)
+		s.CaseInsensitive.SetTo(val)
 	}
 }

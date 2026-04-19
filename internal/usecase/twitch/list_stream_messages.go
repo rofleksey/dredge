@@ -7,7 +7,7 @@ import (
 )
 
 // ListStreamMessages lists chat messages tagged with this stream.
-func (s *Service) ListStreamMessages(ctx context.Context, streamID int64, f entity.ChatMessageListFilter) ([]entity.ChatHistoryMessage, error) {
+func (s *Usecase) ListStreamMessages(ctx context.Context, streamID int64, f entity.ChatMessageListFilter) ([]entity.ChatHistoryMessage, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.list_stream_messages")
 	defer span.End()
 

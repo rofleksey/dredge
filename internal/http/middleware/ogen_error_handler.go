@@ -2,11 +2,13 @@ package httpmw
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
 	"github.com/ogen-go/ogen/ogenerrors"
 
+	"github.com/rofleksey/dredge/internal/entity"
 	"github.com/rofleksey/dredge/internal/http/gen"
 )
 
@@ -17,6 +19,16 @@ func OgenErrorHandler() gen.ErrorHandler {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusTooManyRequests)
 			_, _ = w.Write([]byte(`{"error":"too many login attempts"}`))
+
+			return
+		}
+
+		if errors.Is(err, entity.ErrInvalidRule) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+
+			b, _ := json.Marshal(map[string]string{"message": err.Error()})
+			_, _ = w.Write(b)
 
 			return
 		}

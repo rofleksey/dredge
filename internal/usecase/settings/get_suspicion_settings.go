@@ -6,7 +6,7 @@ import (
 	"github.com/rofleksey/dredge/internal/entity"
 )
 
-func (s *Service) GetSuspicionSettings(ctx context.Context) (entity.SuspicionSettings, error) {
+func (s *Usecase) GetSuspicionSettings(ctx context.Context) (entity.SuspicionSettings, error) {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.settings.get_suspicion_settings")
 	defer span.End()
 

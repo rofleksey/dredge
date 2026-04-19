@@ -7,7 +7,7 @@ import (
 )
 
 // EnqueueMonitoredAndMarkedUsersForEnrichment pushes monitored/marked users to the enrichment queue.
-func (s *Service) EnqueueMonitoredAndMarkedUsersForEnrichment(ctx context.Context) {
+func (s *Usecase) EnqueueMonitoredAndMarkedUsersForEnrichment(ctx context.Context) {
 	ids, err := s.repo.ListMonitoredOrMarkedTwitchUserIDs(ctx)
 	if err != nil {
 		s.obs.Logger.Warn("enqueue startup enrichment users failed", zap.Error(err))

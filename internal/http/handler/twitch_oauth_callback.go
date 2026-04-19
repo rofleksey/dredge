@@ -18,7 +18,7 @@ import (
 const TwitchOAuthCallbackPath = "/oauth/twitch/callback"
 
 // NewTwitchOAuthCallback handles GET /oauth/twitch/callback after Twitch redirects the browser.
-func NewTwitchOAuthCallback(oauth *twitchoauth.OAuth, sett *settings.Service, obs *observability.Stack) http.Handler {
+func NewTwitchOAuthCallback(oauth *twitchoauth.OAuth, sett *settings.Usecase, obs *observability.Stack) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)

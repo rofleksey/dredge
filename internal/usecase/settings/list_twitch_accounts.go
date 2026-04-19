@@ -6,7 +6,7 @@ import (
 	"github.com/rofleksey/dredge/internal/entity"
 )
 
-func (s *Service) ListTwitchAccounts(ctx context.Context) ([]entity.TwitchAccount, error) {
+func (s *Usecase) ListTwitchAccounts(ctx context.Context) ([]entity.TwitchAccount, error) {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.settings.list_twitch_accounts")
 	defer span.End()
 

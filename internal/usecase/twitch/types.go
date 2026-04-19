@@ -16,8 +16,8 @@ type Broadcaster interface {
 	BroadcastJSON(v any)
 }
 
-// Service composes IRC chat monitoring, enrichment, notifications, and Helix API access.
-type Service struct {
+// Usecase composes IRC chat monitoring, enrichment, notifications, and Helix API access.
+type Usecase struct {
 	*helix.Client
 	gql  *gql.Client
 	live *live.Runtime

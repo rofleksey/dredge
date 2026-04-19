@@ -1,5 +1,5 @@
 package twitch
 
-func (s *Service) StopMonitor() {
+func (s *Usecase) StopMonitor() {
 	s.live.StopMonitor()
 }

@@ -15,7 +15,7 @@ func TestHandler_ListRules_admin(t *testing.T) {
 	h, ctrl, repo := testHandler(t)
 	defer ctrl.Finish()
 
-	repo.EXPECT().ListRules(gomock.Any()).Return([]entity.Rule{{ID: 1, Regex: "x"}}, nil)
+	repo.EXPECT().ListRules(gomock.Any()).Return([]entity.Rule{{ID: 1, Enabled: true, EventType: "chat_message", EventSettings: map[string]any{}, ActionType: "notify", ActionSettings: map[string]any{}, UseSharedPool: true}}, nil)
 
 	ctx := authctx.WithRole(authctx.WithUserID(context.Background(), int64(1)), "admin")
 

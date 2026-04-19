@@ -6,7 +6,7 @@ import (
 	"github.com/rofleksey/dredge/internal/entity"
 )
 
-func (s *Service) Me(ctx context.Context, accountID int64) (entity.Account, error) {
+func (s *Usecase) Me(ctx context.Context, accountID int64) (entity.Account, error) {
 	_, span := s.obs.StartSpan(ctx, "usecase.auth.me")
 	defer span.End()
 

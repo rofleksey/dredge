@@ -7,7 +7,7 @@ import (
 )
 
 func (h *Handler) CountRules(ctx context.Context) (*gen.CountResponse, error) {
-	n, err := h.sett.CountRules(ctx)
+	n, err := h.rules.CountRules(ctx)
 	if err != nil {
 		return nil, err
 	}

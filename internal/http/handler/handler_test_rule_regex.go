@@ -8,7 +8,12 @@ import (
 )
 
 func (h *Handler) TestRuleRegex(ctx context.Context, req *gen.TestRuleRegexRequest) (*gen.TestRuleRegexResponse, error) {
-	re, err := regexp.Compile(req.GetPattern())
+	pat := req.GetPattern()
+	if req.CaseInsensitive.Or(false) {
+		pat = "(?i)" + pat
+	}
+
+	re, err := regexp.Compile(pat)
 	if err != nil {
 		var ce gen.OptNilString
 		ce.SetTo(err.Error())

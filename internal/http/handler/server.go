@@ -9,16 +9,17 @@ import (
 	"github.com/rofleksey/dredge/internal/observability"
 	twitchoauth "github.com/rofleksey/dredge/internal/service/twitch"
 	"github.com/rofleksey/dredge/internal/usecase/auth"
+	"github.com/rofleksey/dredge/internal/usecase/rules"
 	"github.com/rofleksey/dredge/internal/usecase/settings"
 	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 )
 
-func NewSecurity(a *auth.Service, obs *observability.Stack) *Security {
+func NewSecurity(a *auth.Usecase, obs *observability.Stack) *Security {
 	return &Security{auth: a, obs: obs}
 }
 
-func NewHandler(a *auth.Service, sett *settings.Service, t *twitchuc.Service, oauth *twitchoauth.OAuth, obs *observability.Stack) *Handler {
-	return &Handler{auth: a, sett: sett, twitch: t, twitchOAuth: oauth, obs: obs}
+func NewHandler(a *auth.Usecase, sett *settings.Usecase, rulesSvc *rules.Usecase, t *twitchuc.Usecase, oauth *twitchoauth.OAuth, obs *observability.Stack) *Handler {
+	return &Handler{auth: a, sett: sett, rules: rulesSvc, twitch: t, twitchOAuth: oauth, obs: obs}
 }
 
 var _ gen.Handler = (*Handler)(nil)

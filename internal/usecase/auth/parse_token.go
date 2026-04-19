@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (s *Service) ParseToken(ctx context.Context, token string) (int64, string, error) {
+func (s *Usecase) ParseToken(ctx context.Context, token string) (int64, string, error) {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.auth.parse_token")
 	defer span.End()
 

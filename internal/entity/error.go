@@ -8,6 +8,7 @@ var ErrNoSentry = errors.New("err_no_sentry")
 // Sentinel errors returned by the repository layer for missing rows / business preconditions.
 var (
 	ErrRuleNotFound           = errors.New("rule not found")
+	ErrInvalidRule            = errors.New("invalid rule")
 	ErrNotificationNotFound   = errors.New("notification not found")
 	ErrTwitchAccountNotFound  = errors.New("twitch account not found")
 	ErrTwitchUserNotFound     = errors.New("twitch user not found")

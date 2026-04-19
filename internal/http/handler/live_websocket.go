@@ -15,7 +15,7 @@ type LiveWebsocketWelcomer interface {
 	LiveWebSocketWelcomePayloads(ctx context.Context) ([]any, error)
 }
 
-func LiveWebsocketHandler(authSvc *auth.Service, hub *ws.Hub, welcomer LiveWebsocketWelcomer, log *zap.Logger) http.HandlerFunc {
+func LiveWebsocketHandler(authSvc *auth.Usecase, hub *ws.Hub, welcomer LiveWebsocketWelcomer, log *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var token string
 

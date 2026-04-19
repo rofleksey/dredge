@@ -106,11 +106,15 @@ func TestRepository_integration(t *testing.T) {
 	assert.GreaterOrEqual(t, nAcc, int64(1))
 
 	rule, err := repo.CreateRule(ctx, entity.Rule{
-		Regex:            `hello`,
-		IncludedUsers:    "*",
-		DeniedUsers:      "",
-		IncludedChannels: "*",
-		DeniedChannels:   "",
+		Enabled:       true,
+		EventType:     "chat_message",
+		EventSettings: map[string]any{},
+		Middlewares: []entity.RuleMiddleware{
+			{Type: "match_regex", Settings: map[string]any{"pattern": "hello"}},
+		},
+		ActionType:     "notify",
+		ActionSettings: map[string]any{},
+		UseSharedPool:  true,
 	})
 	require.NoError(t, err)
 
@@ -123,11 +127,15 @@ func TestRepository_integration(t *testing.T) {
 	assert.GreaterOrEqual(t, nRules, int64(1))
 
 	_, err = repo.UpdateRule(ctx, rule.ID, entity.Rule{
-		Regex:            `world`,
-		IncludedUsers:    "*",
-		DeniedUsers:      "",
-		IncludedChannels: "*",
-		DeniedChannels:   "",
+		Enabled:       true,
+		EventType:     "chat_message",
+		EventSettings: map[string]any{},
+		Middlewares: []entity.RuleMiddleware{
+			{Type: "match_regex", Settings: map[string]any{"pattern": "world"}},
+		},
+		ActionType:     "notify",
+		ActionSettings: map[string]any{},
+		UseSharedPool:  true,
 	})
 	require.NoError(t, err)
 
@@ -337,7 +345,10 @@ func TestRepository_integration(t *testing.T) {
 	err = repo.DeleteRule(ctx, 999_999)
 	assert.ErrorIs(t, err, entity.ErrRuleNotFound)
 
-	_, err = repo.UpdateRule(ctx, 888_888, entity.Rule{Regex: `z`, IncludedUsers: "*", IncludedChannels: "*"})
+	_, err = repo.UpdateRule(ctx, 888_888, entity.Rule{
+		Enabled: true, EventType: "chat_message", EventSettings: map[string]any{},
+		Middlewares: nil, ActionType: "notify", ActionSettings: map[string]any{}, UseSharedPool: true,
+	})
 	assert.ErrorIs(t, err, entity.ErrRuleNotFound)
 
 	require.NoError(t, repo.DeleteRule(ctx, rule.ID))

@@ -60,47 +60,89 @@ func chatHistoryEntityToGen(m entity.ChatHistoryMessage) gen.ChatHistoryEntry {
 
 func ruleEntityToGen(r entity.Rule) gen.Rule {
 	return gen.Rule{
-		ID:               r.ID,
-		Regex:            r.Regex,
-		IncludedUsers:    r.IncludedUsers,
-		DeniedUsers:      r.DeniedUsers,
-		IncludedChannels: r.IncludedChannels,
-		DeniedChannels:   r.DeniedChannels,
+		ID:             r.ID,
+		Enabled:        r.Enabled,
+		EventType:      gen.RuleEventType(r.EventType),
+		EventSettings:  anyMapToRuleEventSettings(r.EventSettings),
+		Middlewares:    middlewaresEntityToGen(r.Middlewares),
+		ActionType:     gen.RuleActionType(r.ActionType),
+		ActionSettings: anyMapToActionSettings(r.ActionSettings),
+		UseSharedPool:  r.UseSharedPool,
+		CreatedAt:      r.CreatedAt,
+		UpdatedAt:      r.UpdatedAt,
 	}
 }
 
+func anyMapToRuleEventSettings(m map[string]any) gen.RuleEventSettings {
+	out := make(map[string]jx.Raw)
+
+	for k, v := range m {
+		raw, err := json.Marshal(v)
+		if err != nil {
+			continue
+		}
+
+		out[k] = jx.Raw(raw)
+	}
+
+	return out
+}
+
+func anyMapToActionSettings(m map[string]any) gen.RuleActionSettings {
+	return gen.RuleActionSettings(anyMapToRuleEventSettings(m))
+}
+
+func middlewaresEntityToGen(in []entity.RuleMiddleware) []gen.RuleMiddleware {
+	out := make([]gen.RuleMiddleware, 0, len(in))
+
+	for _, m := range in {
+		out = append(out, gen.RuleMiddleware{
+			Type:     m.Type,
+			Settings: anyMapToMiddlewareSettings(m.Settings),
+		})
+	}
+
+	return out
+}
+
+func anyMapToMiddlewareSettings(m map[string]any) gen.RuleMiddlewareSettings {
+	return gen.RuleMiddlewareSettings(anyMapToRuleEventSettings(m))
+}
+
 func createRuleReqToEntity(req *gen.CreateRuleRequest) entity.Rule {
-	r := entity.Rule{Regex: req.Regex}
-	if req.IncludedUsers.IsSet() {
-		r.IncludedUsers = req.IncludedUsers.Value
-	} else {
-		r.IncludedUsers = "*"
+	return entity.Rule{
+		Enabled:        req.Enabled.Or(true),
+		EventType:      string(req.EventType),
+		EventSettings:  rawSettingsToMap(req.EventSettings),
+		Middlewares:    middlewaresGenToEntity(req.Middlewares),
+		ActionType:     string(req.ActionType),
+		ActionSettings: rawSettingsToMap(req.ActionSettings),
+		UseSharedPool:  req.UseSharedPool.Or(true),
+	}
+}
+
+func middlewaresGenToEntity(in []gen.RuleMiddleware) []entity.RuleMiddleware {
+	out := make([]entity.RuleMiddleware, 0, len(in))
+
+	for _, m := range in {
+		out = append(out, entity.RuleMiddleware{
+			Type:     m.Type,
+			Settings: rawSettingsToMap(m.Settings),
+		})
 	}
 
-	if req.DeniedUsers.IsSet() {
-		r.DeniedUsers = req.DeniedUsers.Value
-	}
-
-	if req.IncludedChannels.IsSet() {
-		r.IncludedChannels = req.IncludedChannels.Value
-	} else {
-		r.IncludedChannels = "*"
-	}
-
-	if req.DeniedChannels.IsSet() {
-		r.DeniedChannels = req.DeniedChannels.Value
-	}
-
-	return r
+	return out
 }
 
 func updateRulePostReqToEntity(req *gen.UpdateRulePostRequest) entity.Rule {
 	return entity.Rule{
-		Regex:            req.GetRegex(),
-		IncludedUsers:    req.GetIncludedUsers(),
-		DeniedUsers:      req.GetDeniedUsers(),
-		IncludedChannels: req.GetIncludedChannels(),
-		DeniedChannels:   req.GetDeniedChannels(),
+		Enabled:        req.Enabled,
+		EventType:      string(req.EventType),
+		EventSettings:  rawSettingsToMap(req.EventSettings),
+		Middlewares:    middlewaresGenToEntity(req.Middlewares),
+		ActionType:     string(req.ActionType),
+		ActionSettings: rawSettingsToMap(req.ActionSettings),
+		UseSharedPool:  req.UseSharedPool,
 	}
 }
 

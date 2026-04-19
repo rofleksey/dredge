@@ -775,61 +775,105 @@ func (s *CreateNotificationRequestSettings) init() CreateNotificationRequestSett
 
 // Ref: #/components/schemas/CreateRuleRequest
 type CreateRuleRequest struct {
-	Regex            string    `json:"regex"`
-	IncludedUsers    OptString `json:"included_users"`
-	DeniedUsers      OptString `json:"denied_users"`
-	IncludedChannels OptString `json:"included_channels"`
-	DeniedChannels   OptString `json:"denied_channels"`
+	Enabled        OptBool                         `json:"enabled"`
+	EventType      RuleEventType                   `json:"event_type"`
+	EventSettings  CreateRuleRequestEventSettings  `json:"event_settings"`
+	Middlewares    []RuleMiddleware                `json:"middlewares"`
+	ActionType     RuleActionType                  `json:"action_type"`
+	ActionSettings CreateRuleRequestActionSettings `json:"action_settings"`
+	UseSharedPool  OptBool                         `json:"use_shared_pool"`
 }
 
-// GetRegex returns the value of Regex.
-func (s *CreateRuleRequest) GetRegex() string {
-	return s.Regex
+// GetEnabled returns the value of Enabled.
+func (s *CreateRuleRequest) GetEnabled() OptBool {
+	return s.Enabled
 }
 
-// GetIncludedUsers returns the value of IncludedUsers.
-func (s *CreateRuleRequest) GetIncludedUsers() OptString {
-	return s.IncludedUsers
+// GetEventType returns the value of EventType.
+func (s *CreateRuleRequest) GetEventType() RuleEventType {
+	return s.EventType
 }
 
-// GetDeniedUsers returns the value of DeniedUsers.
-func (s *CreateRuleRequest) GetDeniedUsers() OptString {
-	return s.DeniedUsers
+// GetEventSettings returns the value of EventSettings.
+func (s *CreateRuleRequest) GetEventSettings() CreateRuleRequestEventSettings {
+	return s.EventSettings
 }
 
-// GetIncludedChannels returns the value of IncludedChannels.
-func (s *CreateRuleRequest) GetIncludedChannels() OptString {
-	return s.IncludedChannels
+// GetMiddlewares returns the value of Middlewares.
+func (s *CreateRuleRequest) GetMiddlewares() []RuleMiddleware {
+	return s.Middlewares
 }
 
-// GetDeniedChannels returns the value of DeniedChannels.
-func (s *CreateRuleRequest) GetDeniedChannels() OptString {
-	return s.DeniedChannels
+// GetActionType returns the value of ActionType.
+func (s *CreateRuleRequest) GetActionType() RuleActionType {
+	return s.ActionType
 }
 
-// SetRegex sets the value of Regex.
-func (s *CreateRuleRequest) SetRegex(val string) {
-	s.Regex = val
+// GetActionSettings returns the value of ActionSettings.
+func (s *CreateRuleRequest) GetActionSettings() CreateRuleRequestActionSettings {
+	return s.ActionSettings
 }
 
-// SetIncludedUsers sets the value of IncludedUsers.
-func (s *CreateRuleRequest) SetIncludedUsers(val OptString) {
-	s.IncludedUsers = val
+// GetUseSharedPool returns the value of UseSharedPool.
+func (s *CreateRuleRequest) GetUseSharedPool() OptBool {
+	return s.UseSharedPool
 }
 
-// SetDeniedUsers sets the value of DeniedUsers.
-func (s *CreateRuleRequest) SetDeniedUsers(val OptString) {
-	s.DeniedUsers = val
+// SetEnabled sets the value of Enabled.
+func (s *CreateRuleRequest) SetEnabled(val OptBool) {
+	s.Enabled = val
 }
 
-// SetIncludedChannels sets the value of IncludedChannels.
-func (s *CreateRuleRequest) SetIncludedChannels(val OptString) {
-	s.IncludedChannels = val
+// SetEventType sets the value of EventType.
+func (s *CreateRuleRequest) SetEventType(val RuleEventType) {
+	s.EventType = val
 }
 
-// SetDeniedChannels sets the value of DeniedChannels.
-func (s *CreateRuleRequest) SetDeniedChannels(val OptString) {
-	s.DeniedChannels = val
+// SetEventSettings sets the value of EventSettings.
+func (s *CreateRuleRequest) SetEventSettings(val CreateRuleRequestEventSettings) {
+	s.EventSettings = val
+}
+
+// SetMiddlewares sets the value of Middlewares.
+func (s *CreateRuleRequest) SetMiddlewares(val []RuleMiddleware) {
+	s.Middlewares = val
+}
+
+// SetActionType sets the value of ActionType.
+func (s *CreateRuleRequest) SetActionType(val RuleActionType) {
+	s.ActionType = val
+}
+
+// SetActionSettings sets the value of ActionSettings.
+func (s *CreateRuleRequest) SetActionSettings(val CreateRuleRequestActionSettings) {
+	s.ActionSettings = val
+}
+
+// SetUseSharedPool sets the value of UseSharedPool.
+func (s *CreateRuleRequest) SetUseSharedPool(val OptBool) {
+	s.UseSharedPool = val
+}
+
+type CreateRuleRequestActionSettings map[string]jx.Raw
+
+func (s *CreateRuleRequestActionSettings) init() CreateRuleRequestActionSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type CreateRuleRequestEventSettings map[string]jx.Raw
+
+func (s *CreateRuleRequestEventSettings) init() CreateRuleRequestEventSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/CreateTwitchAccountRequest
@@ -2497,12 +2541,16 @@ func (*RecordedStream) getRecordedStreamRes() {}
 
 // Ref: #/components/schemas/Rule
 type Rule struct {
-	ID               int64  `json:"id"`
-	Regex            string `json:"regex"`
-	IncludedUsers    string `json:"included_users"`
-	DeniedUsers      string `json:"denied_users"`
-	IncludedChannels string `json:"included_channels"`
-	DeniedChannels   string `json:"denied_channels"`
+	ID             int64              `json:"id"`
+	Enabled        bool               `json:"enabled"`
+	EventType      RuleEventType      `json:"event_type"`
+	EventSettings  RuleEventSettings  `json:"event_settings"`
+	Middlewares    []RuleMiddleware   `json:"middlewares"`
+	ActionType     RuleActionType     `json:"action_type"`
+	ActionSettings RuleActionSettings `json:"action_settings"`
+	UseSharedPool  bool               `json:"use_shared_pool"`
+	CreatedAt      time.Time          `json:"created_at"`
+	UpdatedAt      time.Time          `json:"updated_at"`
 }
 
 // GetID returns the value of ID.
@@ -2510,29 +2558,49 @@ func (s *Rule) GetID() int64 {
 	return s.ID
 }
 
-// GetRegex returns the value of Regex.
-func (s *Rule) GetRegex() string {
-	return s.Regex
+// GetEnabled returns the value of Enabled.
+func (s *Rule) GetEnabled() bool {
+	return s.Enabled
 }
 
-// GetIncludedUsers returns the value of IncludedUsers.
-func (s *Rule) GetIncludedUsers() string {
-	return s.IncludedUsers
+// GetEventType returns the value of EventType.
+func (s *Rule) GetEventType() RuleEventType {
+	return s.EventType
 }
 
-// GetDeniedUsers returns the value of DeniedUsers.
-func (s *Rule) GetDeniedUsers() string {
-	return s.DeniedUsers
+// GetEventSettings returns the value of EventSettings.
+func (s *Rule) GetEventSettings() RuleEventSettings {
+	return s.EventSettings
 }
 
-// GetIncludedChannels returns the value of IncludedChannels.
-func (s *Rule) GetIncludedChannels() string {
-	return s.IncludedChannels
+// GetMiddlewares returns the value of Middlewares.
+func (s *Rule) GetMiddlewares() []RuleMiddleware {
+	return s.Middlewares
 }
 
-// GetDeniedChannels returns the value of DeniedChannels.
-func (s *Rule) GetDeniedChannels() string {
-	return s.DeniedChannels
+// GetActionType returns the value of ActionType.
+func (s *Rule) GetActionType() RuleActionType {
+	return s.ActionType
+}
+
+// GetActionSettings returns the value of ActionSettings.
+func (s *Rule) GetActionSettings() RuleActionSettings {
+	return s.ActionSettings
+}
+
+// GetUseSharedPool returns the value of UseSharedPool.
+func (s *Rule) GetUseSharedPool() bool {
+	return s.UseSharedPool
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Rule) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Rule) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
 }
 
 // SetID sets the value of ID.
@@ -2540,32 +2608,212 @@ func (s *Rule) SetID(val int64) {
 	s.ID = val
 }
 
-// SetRegex sets the value of Regex.
-func (s *Rule) SetRegex(val string) {
-	s.Regex = val
+// SetEnabled sets the value of Enabled.
+func (s *Rule) SetEnabled(val bool) {
+	s.Enabled = val
 }
 
-// SetIncludedUsers sets the value of IncludedUsers.
-func (s *Rule) SetIncludedUsers(val string) {
-	s.IncludedUsers = val
+// SetEventType sets the value of EventType.
+func (s *Rule) SetEventType(val RuleEventType) {
+	s.EventType = val
 }
 
-// SetDeniedUsers sets the value of DeniedUsers.
-func (s *Rule) SetDeniedUsers(val string) {
-	s.DeniedUsers = val
+// SetEventSettings sets the value of EventSettings.
+func (s *Rule) SetEventSettings(val RuleEventSettings) {
+	s.EventSettings = val
 }
 
-// SetIncludedChannels sets the value of IncludedChannels.
-func (s *Rule) SetIncludedChannels(val string) {
-	s.IncludedChannels = val
+// SetMiddlewares sets the value of Middlewares.
+func (s *Rule) SetMiddlewares(val []RuleMiddleware) {
+	s.Middlewares = val
 }
 
-// SetDeniedChannels sets the value of DeniedChannels.
-func (s *Rule) SetDeniedChannels(val string) {
-	s.DeniedChannels = val
+// SetActionType sets the value of ActionType.
+func (s *Rule) SetActionType(val RuleActionType) {
+	s.ActionType = val
+}
+
+// SetActionSettings sets the value of ActionSettings.
+func (s *Rule) SetActionSettings(val RuleActionSettings) {
+	s.ActionSettings = val
+}
+
+// SetUseSharedPool sets the value of UseSharedPool.
+func (s *Rule) SetUseSharedPool(val bool) {
+	s.UseSharedPool = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Rule) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Rule) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
 }
 
 func (*Rule) updateRuleRes() {}
+
+type RuleActionSettings map[string]jx.Raw
+
+func (s *RuleActionSettings) init() RuleActionSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/RuleActionType
+type RuleActionType string
+
+const (
+	RuleActionTypeNotify   RuleActionType = "notify"
+	RuleActionTypeSendChat RuleActionType = "send_chat"
+)
+
+// AllValues returns all RuleActionType values.
+func (RuleActionType) AllValues() []RuleActionType {
+	return []RuleActionType{
+		RuleActionTypeNotify,
+		RuleActionTypeSendChat,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RuleActionType) MarshalText() ([]byte, error) {
+	switch s {
+	case RuleActionTypeNotify:
+		return []byte(s), nil
+	case RuleActionTypeSendChat:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RuleActionType) UnmarshalText(data []byte) error {
+	switch RuleActionType(data) {
+	case RuleActionTypeNotify:
+		*s = RuleActionTypeNotify
+		return nil
+	case RuleActionTypeSendChat:
+		*s = RuleActionTypeSendChat
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type RuleEventSettings map[string]jx.Raw
+
+func (s *RuleEventSettings) init() RuleEventSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Chat_message — IRC chat line; stream_start / stream_end — Helix live edge; interval —
+// periodic tick (see event_settings).
+// Ref: #/components/schemas/RuleEventType
+type RuleEventType string
+
+const (
+	RuleEventTypeChatMessage RuleEventType = "chat_message"
+	RuleEventTypeStreamStart RuleEventType = "stream_start"
+	RuleEventTypeStreamEnd   RuleEventType = "stream_end"
+	RuleEventTypeInterval    RuleEventType = "interval"
+)
+
+// AllValues returns all RuleEventType values.
+func (RuleEventType) AllValues() []RuleEventType {
+	return []RuleEventType{
+		RuleEventTypeChatMessage,
+		RuleEventTypeStreamStart,
+		RuleEventTypeStreamEnd,
+		RuleEventTypeInterval,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RuleEventType) MarshalText() ([]byte, error) {
+	switch s {
+	case RuleEventTypeChatMessage:
+		return []byte(s), nil
+	case RuleEventTypeStreamStart:
+		return []byte(s), nil
+	case RuleEventTypeStreamEnd:
+		return []byte(s), nil
+	case RuleEventTypeInterval:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RuleEventType) UnmarshalText(data []byte) error {
+	switch RuleEventType(data) {
+	case RuleEventTypeChatMessage:
+		*s = RuleEventTypeChatMessage
+		return nil
+	case RuleEventTypeStreamStart:
+		*s = RuleEventTypeStreamStart
+		return nil
+	case RuleEventTypeStreamEnd:
+		*s = RuleEventTypeStreamEnd
+		return nil
+	case RuleEventTypeInterval:
+		*s = RuleEventTypeInterval
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/RuleMiddleware
+type RuleMiddleware struct {
+	// Filter_channel, filter_user, match_regex, contains_word, cooldown.
+	Type     string                 `json:"type"`
+	Settings RuleMiddlewareSettings `json:"settings"`
+}
+
+// GetType returns the value of Type.
+func (s *RuleMiddleware) GetType() string {
+	return s.Type
+}
+
+// GetSettings returns the value of Settings.
+func (s *RuleMiddleware) GetSettings() RuleMiddlewareSettings {
+	return s.Settings
+}
+
+// SetType sets the value of Type.
+func (s *RuleMiddleware) SetType(val string) {
+	s.Type = val
+}
+
+// SetSettings sets the value of Settings.
+func (s *RuleMiddleware) SetSettings(val RuleMiddlewareSettings) {
+	s.Settings = val
+}
+
+type RuleMiddlewareSettings map[string]jx.Raw
+
+func (s *RuleMiddlewareSettings) init() RuleMiddlewareSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 // SendMessageAccepted is response for SendMessage operation.
 type SendMessageAccepted struct{}
@@ -2883,6 +3131,8 @@ func (s *SuspicionSettings) SetMaxGqlFollowPages(val int) {
 type TestRuleRegexRequest struct {
 	Pattern string `json:"pattern"`
 	Sample  string `json:"sample"`
+	// Same as match_regex middleware case_insensitive.
+	CaseInsensitive OptBool `json:"case_insensitive"`
 }
 
 // GetPattern returns the value of Pattern.
@@ -2895,6 +3145,11 @@ func (s *TestRuleRegexRequest) GetSample() string {
 	return s.Sample
 }
 
+// GetCaseInsensitive returns the value of CaseInsensitive.
+func (s *TestRuleRegexRequest) GetCaseInsensitive() OptBool {
+	return s.CaseInsensitive
+}
+
 // SetPattern sets the value of Pattern.
 func (s *TestRuleRegexRequest) SetPattern(val string) {
 	s.Pattern = val
@@ -2903,6 +3158,11 @@ func (s *TestRuleRegexRequest) SetPattern(val string) {
 // SetSample sets the value of Sample.
 func (s *TestRuleRegexRequest) SetSample(val string) {
 	s.Sample = val
+}
+
+// SetCaseInsensitive sets the value of CaseInsensitive.
+func (s *TestRuleRegexRequest) SetCaseInsensitive(val OptBool) {
+	s.CaseInsensitive = val
 }
 
 // Ref: #/components/schemas/TestRuleRegexResponse
@@ -3496,12 +3756,14 @@ func (s *UpdateNotificationPostRequestSettings) init() UpdateNotificationPostReq
 
 // Ref: #/components/schemas/UpdateRulePostRequest
 type UpdateRulePostRequest struct {
-	ID               int64  `json:"id"`
-	Regex            string `json:"regex"`
-	IncludedUsers    string `json:"included_users"`
-	DeniedUsers      string `json:"denied_users"`
-	IncludedChannels string `json:"included_channels"`
-	DeniedChannels   string `json:"denied_channels"`
+	ID             int64                               `json:"id"`
+	Enabled        bool                                `json:"enabled"`
+	EventType      RuleEventType                       `json:"event_type"`
+	EventSettings  UpdateRulePostRequestEventSettings  `json:"event_settings"`
+	Middlewares    []RuleMiddleware                    `json:"middlewares"`
+	ActionType     RuleActionType                      `json:"action_type"`
+	ActionSettings UpdateRulePostRequestActionSettings `json:"action_settings"`
+	UseSharedPool  bool                                `json:"use_shared_pool"`
 }
 
 // GetID returns the value of ID.
@@ -3509,29 +3771,39 @@ func (s *UpdateRulePostRequest) GetID() int64 {
 	return s.ID
 }
 
-// GetRegex returns the value of Regex.
-func (s *UpdateRulePostRequest) GetRegex() string {
-	return s.Regex
+// GetEnabled returns the value of Enabled.
+func (s *UpdateRulePostRequest) GetEnabled() bool {
+	return s.Enabled
 }
 
-// GetIncludedUsers returns the value of IncludedUsers.
-func (s *UpdateRulePostRequest) GetIncludedUsers() string {
-	return s.IncludedUsers
+// GetEventType returns the value of EventType.
+func (s *UpdateRulePostRequest) GetEventType() RuleEventType {
+	return s.EventType
 }
 
-// GetDeniedUsers returns the value of DeniedUsers.
-func (s *UpdateRulePostRequest) GetDeniedUsers() string {
-	return s.DeniedUsers
+// GetEventSettings returns the value of EventSettings.
+func (s *UpdateRulePostRequest) GetEventSettings() UpdateRulePostRequestEventSettings {
+	return s.EventSettings
 }
 
-// GetIncludedChannels returns the value of IncludedChannels.
-func (s *UpdateRulePostRequest) GetIncludedChannels() string {
-	return s.IncludedChannels
+// GetMiddlewares returns the value of Middlewares.
+func (s *UpdateRulePostRequest) GetMiddlewares() []RuleMiddleware {
+	return s.Middlewares
 }
 
-// GetDeniedChannels returns the value of DeniedChannels.
-func (s *UpdateRulePostRequest) GetDeniedChannels() string {
-	return s.DeniedChannels
+// GetActionType returns the value of ActionType.
+func (s *UpdateRulePostRequest) GetActionType() RuleActionType {
+	return s.ActionType
+}
+
+// GetActionSettings returns the value of ActionSettings.
+func (s *UpdateRulePostRequest) GetActionSettings() UpdateRulePostRequestActionSettings {
+	return s.ActionSettings
+}
+
+// GetUseSharedPool returns the value of UseSharedPool.
+func (s *UpdateRulePostRequest) GetUseSharedPool() bool {
+	return s.UseSharedPool
 }
 
 // SetID sets the value of ID.
@@ -3539,29 +3811,61 @@ func (s *UpdateRulePostRequest) SetID(val int64) {
 	s.ID = val
 }
 
-// SetRegex sets the value of Regex.
-func (s *UpdateRulePostRequest) SetRegex(val string) {
-	s.Regex = val
+// SetEnabled sets the value of Enabled.
+func (s *UpdateRulePostRequest) SetEnabled(val bool) {
+	s.Enabled = val
 }
 
-// SetIncludedUsers sets the value of IncludedUsers.
-func (s *UpdateRulePostRequest) SetIncludedUsers(val string) {
-	s.IncludedUsers = val
+// SetEventType sets the value of EventType.
+func (s *UpdateRulePostRequest) SetEventType(val RuleEventType) {
+	s.EventType = val
 }
 
-// SetDeniedUsers sets the value of DeniedUsers.
-func (s *UpdateRulePostRequest) SetDeniedUsers(val string) {
-	s.DeniedUsers = val
+// SetEventSettings sets the value of EventSettings.
+func (s *UpdateRulePostRequest) SetEventSettings(val UpdateRulePostRequestEventSettings) {
+	s.EventSettings = val
 }
 
-// SetIncludedChannels sets the value of IncludedChannels.
-func (s *UpdateRulePostRequest) SetIncludedChannels(val string) {
-	s.IncludedChannels = val
+// SetMiddlewares sets the value of Middlewares.
+func (s *UpdateRulePostRequest) SetMiddlewares(val []RuleMiddleware) {
+	s.Middlewares = val
 }
 
-// SetDeniedChannels sets the value of DeniedChannels.
-func (s *UpdateRulePostRequest) SetDeniedChannels(val string) {
-	s.DeniedChannels = val
+// SetActionType sets the value of ActionType.
+func (s *UpdateRulePostRequest) SetActionType(val RuleActionType) {
+	s.ActionType = val
+}
+
+// SetActionSettings sets the value of ActionSettings.
+func (s *UpdateRulePostRequest) SetActionSettings(val UpdateRulePostRequestActionSettings) {
+	s.ActionSettings = val
+}
+
+// SetUseSharedPool sets the value of UseSharedPool.
+func (s *UpdateRulePostRequest) SetUseSharedPool(val bool) {
+	s.UseSharedPool = val
+}
+
+type UpdateRulePostRequestActionSettings map[string]jx.Raw
+
+func (s *UpdateRulePostRequestActionSettings) init() UpdateRulePostRequestActionSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type UpdateRulePostRequestEventSettings map[string]jx.Raw
+
+func (s *UpdateRulePostRequestEventSettings) init() UpdateRulePostRequestEventSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/UpdateTwitchAccountPostRequest

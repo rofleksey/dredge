@@ -1,0 +1,27 @@
+---
+description: File layout for usecases, handlers, and internal/service packages
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Layer layout (dredge)
+
+## Use cases (`internal/usecase/...`)
+
+- The primary type in each package is **`Usecase`**, not `Service`. Use **`uc.go`** for the struct, constructor (`New` / `NewUsecase`), and **group related or minor API methods** there when they do not warrant their own file (e.g. thin CRUD, accessors, bootstrap). Prefer **`helpers.go`** for pure helpers and unexported glue.
+- **Split a method into its own file** (with **`method_test.go`** when tests add value) when the method is **non-trivial**, **security-sensitive**, or **needs focused tests**. Do **not** create a separate file + test file for **minor methods that do not require dedicated testing**—keep those on `uc.go` / `helpers.go` instead.
+- **Allowed aggregate files:** `uc.go`, `types.go`, `deps.go`, `errors.go`, `const.go`, `helper.go` / `helpers.go`, `engine.go` (rules `Engine`: struct + `NewEngine` + exported methods that are thin dispatchers or belong with the type), `engine_helpers.go` for unexported engine internals. Avoid ad-hoc `misc.go`; merge into an allowed name.
+
+## Handlers (`internal/http/handler`)
+
+- **`Handler` / `Security`** naming unchanged. One generated method per `handler_<operation>.go` + **`handler_<operation>_test.go`** when the handler merits tests. `server.go` for constructors and thin wiring; `types.go` for struct definitions; `helpers.go` / `helpers_test.go` for shared helpers. Non-ogen entrypoints (`live_websocket.go`, etc.) each get an adjacent `*_test.go` when tested.
+
+## Service layer (`internal/service/...`)
+
+- Split **substantial** exported methods on `helix.Client`, `live.Runtime`, `OAuth`, `gql.Client` into dedicated files when clarity or testing benefits; otherwise group related methods or leave cohesive bundles (e.g. large `helix.go`) until a split helps.
+- **`client.go` / `runtime.go`:** struct definition and `New*` constructor; small accessors may live here.
+- Unexported helpers: `helpers.go` or next to the only caller. Merge tiny single-helper files into `helpers.go`.
+
+## Generated code
+
+- Never hand-edit `internal/http/gen` or other generated outputs.

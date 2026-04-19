@@ -10,7 +10,7 @@ import (
 )
 
 // GetTwitchUserProfile returns profile fields, message count, IRC presence seconds this week (UTC Mon..now), helix created_at, profile image, monitored follows, GQL full follows list, and global blacklist for UI.
-func (s *Service) GetTwitchUserProfile(ctx context.Context, id int64) (
+func (s *Usecase) GetTwitchUserProfile(ctx context.Context, id int64) (
 	u entity.TwitchUser,
 	messageCount int64,
 	presenceSec int64,

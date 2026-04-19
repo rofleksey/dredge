@@ -7,7 +7,7 @@ import (
 )
 
 // ListTwitchUsersBrowse lists known Twitch identities for the directory UI.
-func (s *Service) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchDirectoryEntry, error) {
+func (s *Usecase) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) ([]entity.TwitchDirectoryEntry, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.list_twitch_users_browse")
 	defer span.End()
 

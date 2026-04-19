@@ -8,7 +8,7 @@ import (
 )
 
 // GetUserActivityTimeline returns merged presence segments in a window.
-func (s *Service) GetUserActivityTimeline(ctx context.Context, chatterID int64, from, to time.Time) ([]entity.ActivityTimelineSegment, error) {
+func (s *Usecase) GetUserActivityTimeline(ctx context.Context, chatterID int64, from, to time.Time) ([]entity.ActivityTimelineSegment, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.user_activity_timeline")
 	defer span.End()
 

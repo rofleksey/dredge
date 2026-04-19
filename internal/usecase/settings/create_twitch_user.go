@@ -8,7 +8,7 @@ import (
 	"github.com/rofleksey/dredge/internal/entity"
 )
 
-func (s *Service) CreateTwitchUser(ctx context.Context, id int64, username string) (entity.TwitchUser, error) {
+func (s *Usecase) CreateTwitchUser(ctx context.Context, id int64, username string) (entity.TwitchUser, error) {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.settings.create_twitch_user")
 	defer span.End()
 

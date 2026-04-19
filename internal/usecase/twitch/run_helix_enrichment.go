@@ -8,7 +8,7 @@ import (
 )
 
 // RunHelixEnrichment refreshes account creation times and follow relationships (best-effort).
-func (s *Service) RunHelixEnrichment(ctx context.Context) {
+func (s *Usecase) RunHelixEnrichment(ctx context.Context) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.helix_enrichment")
 	defer span.End()
 
@@ -84,7 +84,7 @@ func (s *Service) RunHelixEnrichment(ctx context.Context) {
 
 const maxFollowerPages = 25
 
-func (s *Service) findFollowedAtForChatter(ctx context.Context, accessToken string, broadcasterID, moderatorID, chatterID int64) *time.Time {
+func (s *Usecase) findFollowedAtForChatter(ctx context.Context, accessToken string, broadcasterID, moderatorID, chatterID int64) *time.Time {
 	var cursor string
 
 	for page := 0; page < maxFollowerPages; page++ {

@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *Service) Login(ctx context.Context, email, password string) (string, error) {
+func (s *Usecase) Login(ctx context.Context, email, password string) (string, error) {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.auth.login")
 	defer span.End()
 

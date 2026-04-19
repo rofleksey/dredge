@@ -59,7 +59,7 @@ func (r *Runtime) buildIRCMonitorClient(ctx context.Context) (client *twitchirc.
 	return twitchirc.NewClient(username, oauthIRC), oauthIRC, true, nil
 }
 
-func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled []compiledRule) {
+func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client) {
 	client.OnPrivateMessage(func(msg twitchirc.PrivateMessage) {
 		ch := NormalizeTwitchChannel(msg.Channel)
 		if ch == "" {
@@ -67,15 +67,6 @@ func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled 
 		}
 
 		chatterLogin := strings.ToLower(strings.TrimSpace(msg.User.Name))
-
-		keyword := false
-
-		for i := range compiled {
-			if compiled[i].matches(chatterLogin, ch, msg.Message) {
-				keyword = true
-				break
-			}
-		}
 
 		badgeTags := badgeTagsFromIRC(msg.User)
 
@@ -103,13 +94,16 @@ func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled 
 			}
 		}
 
+		keyword := false
+
+		if re := r.ruleEng(); re != nil {
+			keyword = re.KeywordMatchChat(persistCtx, ch, chatterLogin, msg.Message)
+			re.HandleChatMessage(ch, chatterLogin, msg.Message)
+		}
+
 		_, err := r.repo.InsertChatMessageForChannelLogin(persistCtx, ch, chatterID, chatterLogin, msg.Message, keyword, "irc", badgeTags, msg.FirstMessage)
 		if err != nil {
 			r.obs.Logger.Warn("persist chat message failed", zap.Error(err), zap.String("channel", ch))
-		}
-
-		if keyword {
-			go r.dispatchRuleHitNotifications(context.Background(), ch, chatterLogin, msg.Message)
 		}
 
 		var chatterMarked bool
@@ -152,17 +146,6 @@ func (r *Runtime) StartMonitor(ctx context.Context) error {
 
 	r.obs.Logger.Debug("start twitch monitor")
 
-	rules, err := r.repo.ListRules(ctx)
-	if err != nil {
-		r.obs.LogError(ctx, span, "list rules failed", err)
-		return err
-	}
-
-	compiled, bad := compileRules(rules)
-	for _, e := range bad {
-		r.obs.LogError(ctx, span, "compile monitor rule regex failed", e)
-	}
-
 	client, oauthIRC, useOAuthSync, err := r.buildIRCMonitorClient(ctx)
 	if err != nil {
 		r.obs.LogError(ctx, span, "irc monitor credentials failed", err)
@@ -173,7 +156,7 @@ func (r *Runtime) StartMonitor(ctx context.Context) error {
 
 	r.attachIRCMonitorAppHandlers(client)
 	r.attachIRCMonitorDebug(client)
-	r.wirePrivateMessageHandlers(client, compiled)
+	r.wirePrivateMessageHandlers(client)
 
 	if err := r.repo.TruncateChannelChatters(ctx); err != nil {
 		r.obs.Logger.Warn("truncate channel chatters failed", zap.Error(err))
@@ -335,6 +318,7 @@ func (r *Runtime) reconcileIRCJoinsOnce(ctx context.Context) {
 	}
 
 	streamStarts := make([]streamStartNotify, 0)
+	streamEnds := make([]string, 0)
 
 	r.joinStateMu.Lock()
 
@@ -345,6 +329,10 @@ func (r *Runtime) reconcileIRCJoinsOnce(ctx context.Context) {
 		if !edge.initialized {
 			r.streamEdge[u.ID] = streamLiveEdge{initialized: true, wasLive: nowLive}
 			continue
+		}
+
+		if edge.initialized && edge.wasLive && !nowLive {
+			streamEnds = append(streamEnds, u.Username)
 		}
 
 		if u.NotifyStreamStart && !edge.wasLive && nowLive {
@@ -363,9 +351,24 @@ func (r *Runtime) reconcileIRCJoinsOnce(ctx context.Context) {
 	}
 	r.joinStateMu.Unlock()
 
+	re := r.ruleEng()
+
 	for _, ev := range streamStarts {
 		ev := ev
-		go r.dispatchStreamStartNotifications(context.Background(), ev.login, ev.title)
+		if re != nil {
+			go func(login, title string) {
+				re.HandleStreamStart(login, title)
+			}(ev.login, ev.title)
+		}
+	}
+
+	for _, login := range streamEnds {
+		login := login
+		if re != nil {
+			go func(l string) {
+				re.HandleStreamEnd(l)
+			}(login)
+		}
 	}
 
 	want := make(map[string]bool, len(monitored))

@@ -43,7 +43,7 @@ func userIDsToEnrichMissingAccounts(list []entity.ChannelChatterEntry, limit int
 
 // ListChannelChatters returns chatters from the IRC-maintained snapshot with presence and Helix account dates when known.
 // If sessionStartedAt is set, MessageCount is filled from persisted chat for this channel since that instant.
-func (s *Service) ListChannelChatters(ctx context.Context, accountID int64, channelLogin string, sessionStartedAt *time.Time) ([]entity.ChannelChatterEntry, error) {
+func (s *Usecase) ListChannelChatters(ctx context.Context, accountID int64, channelLogin string, sessionStartedAt *time.Time) ([]entity.ChannelChatterEntry, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.list_channel_chatters")
 	defer span.End()
 

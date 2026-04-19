@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *Service) DeleteTwitchAccount(ctx context.Context, id int64) error {
+func (s *Usecase) DeleteTwitchAccount(ctx context.Context, id int64) error {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.settings.delete_twitch_account")
 	defer span.End()
 

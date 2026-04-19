@@ -1136,21 +1136,37 @@ components:
           type: boolean
     UpdateRulePostRequest:
       type: object
-      required: [id, regex, included_users, denied_users, included_channels, denied_channels]
+      required:
+        - id
+        - enabled
+        - event_type
+        - event_settings
+        - middlewares
+        - action_type
+        - action_settings
+        - use_shared_pool
       properties:
         id:
           type: integer
           format: int64
-        regex:
-          type: string
-        included_users:
-          type: string
-        denied_users:
-          type: string
-        included_channels:
-          type: string
-        denied_channels:
-          type: string
+        enabled:
+          type: boolean
+        event_type:
+          $ref: "#/components/schemas/RuleEventType"
+        event_settings:
+          type: object
+          additionalProperties: true
+        middlewares:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuleMiddleware"
+        action_type:
+          $ref: "#/components/schemas/RuleActionType"
+        action_settings:
+          type: object
+          additionalProperties: true
+        use_shared_pool:
+          type: boolean
     UpdateNotificationPostRequest:
       type: object
       required: [id]
@@ -1677,55 +1693,124 @@ components:
         details:
           type: object
           additionalProperties: true
+    RuleEventType:
+      type: string
+      description: |
+        chat_message — IRC chat line; stream_start / stream_end — Helix live edge; interval — periodic tick (see event_settings).
+      enum: [chat_message, stream_start, stream_end, interval]
+    RuleActionType:
+      type: string
+      enum: [notify, send_chat]
+    RuleMiddleware:
+      type: object
+      required: [type, settings]
+      properties:
+        type:
+          type: string
+          description: |
+            filter_channel, filter_user, match_regex, contains_word, cooldown
+        settings:
+          type: object
+          additionalProperties: true
     Rule:
       type: object
-      required: [id, regex, included_users, denied_users, included_channels, denied_channels]
+      required:
+        - id
+        - enabled
+        - event_type
+        - event_settings
+        - middlewares
+        - action_type
+        - action_settings
+        - use_shared_pool
+        - created_at
+        - updated_at
       properties:
         id:
           type: integer
           format: int64
-        regex:
+        enabled:
+          type: boolean
+        event_type:
+          $ref: "#/components/schemas/RuleEventType"
+        event_settings:
+          type: object
+          additionalProperties: true
+        middlewares:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuleMiddleware"
+        action_type:
+          $ref: "#/components/schemas/RuleActionType"
+        action_settings:
+          type: object
+          additionalProperties: true
+        use_shared_pool:
+          type: boolean
+        created_at:
           type: string
-        included_users:
+          format: date-time
+        updated_at:
           type: string
-        denied_users:
-          type: string
-        included_channels:
-          type: string
-        denied_channels:
-          type: string
+          format: date-time
     CreateRuleRequest:
       type: object
-      required: [regex]
+      required:
+        - event_type
+        - event_settings
+        - middlewares
+        - action_type
+        - action_settings
       properties:
-        regex:
-          type: string
-        included_users:
-          type: string
-          default: "*"
-        denied_users:
-          type: string
-          default: ""
-        included_channels:
-          type: string
-          default: "*"
-        denied_channels:
-          type: string
-          default: ""
+        enabled:
+          type: boolean
+          default: true
+        event_type:
+          $ref: "#/components/schemas/RuleEventType"
+        event_settings:
+          type: object
+          additionalProperties: true
+        middlewares:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuleMiddleware"
+        action_type:
+          $ref: "#/components/schemas/RuleActionType"
+        action_settings:
+          type: object
+          additionalProperties: true
+        use_shared_pool:
+          type: boolean
+          default: true
     UpdateRuleRequest:
       type: object
-      required: [regex, included_users, denied_users, included_channels, denied_channels]
+      required:
+        - enabled
+        - event_type
+        - event_settings
+        - middlewares
+        - action_type
+        - action_settings
+        - use_shared_pool
       properties:
-        regex:
-          type: string
-        included_users:
-          type: string
-        denied_users:
-          type: string
-        included_channels:
-          type: string
-        denied_channels:
-          type: string
+        enabled:
+          type: boolean
+        event_type:
+          $ref: "#/components/schemas/RuleEventType"
+        event_settings:
+          type: object
+          additionalProperties: true
+        middlewares:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuleMiddleware"
+        action_type:
+          $ref: "#/components/schemas/RuleActionType"
+        action_settings:
+          type: object
+          additionalProperties: true
+        use_shared_pool:
+          type: boolean
     NotificationEntry:
       type: object
       required: [id, provider, settings, enabled, created_at]
@@ -1840,6 +1925,10 @@ components:
           type: string
         sample:
           type: string
+        case_insensitive:
+          type: boolean
+          default: false
+          description: Same as match_regex middleware case_insensitive
     TestRuleRegexResponse:
       type: object
       required: [matches]

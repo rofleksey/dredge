@@ -13,7 +13,7 @@ import {
 } from '../api/generated';
 import type { IrcMonitorSettings, IrcMonitorStatus } from '../api/generated';
 import type { SuspicionSettings } from '../api/generated';
-import type { Rule } from '../api/generated';
+import type { CreateRuleRequest, Rule } from '../api/generated';
 import AppModal from '../components/AppModal.vue';
 import SubmitButton from '../components/SubmitButton.vue';
 import { isChannelJoinedOnIrc } from '../lib/ircMonitorJoined';
@@ -57,15 +57,26 @@ const ruleModalOpen = ref(false);
 const regexTestModalOpen = ref(false);
 const regexTestPattern = ref('');
 const regexTestSample = ref('');
+const regexTestCaseInsensitive = ref(false);
 const regexTestMatches = ref<boolean | null>(null);
 const regexTestCompileError = ref<string | null>(null);
-const ruleDraft = reactive({
-  regex: '',
-  included_users: '*',
-  denied_users: '',
-  included_channels: '*',
-  denied_channels: '',
-});
+
+const defaultRuleJson = `{
+  "enabled": true,
+  "event_type": "chat_message",
+  "event_settings": {},
+  "middlewares": [
+    {
+      "type": "match_regex",
+      "settings": { "pattern": "keyword", "case_insensitive": false }
+    }
+  ],
+  "action_type": "notify",
+  "action_settings": {},
+  "use_shared_pool": true
+}`;
+
+const ruleJsonText = ref(defaultRuleJson);
 
 const notifModalOpen = ref(false);
 const notifDraft = reactive({
@@ -278,6 +289,7 @@ const runRegexTestDebounced = useDebounceFn(async () => {
       requestBody: {
         pattern: regexTestPattern.value,
         sample: regexTestSample.value,
+        case_insensitive: regexTestCaseInsensitive.value,
       },
     });
     regexTestMatches.value = res.matches;
@@ -287,7 +299,7 @@ const runRegexTestDebounced = useDebounceFn(async () => {
   }
 }, 320);
 
-watch([regexTestPattern, regexTestSample], () => {
+watch([regexTestPattern, regexTestSample, regexTestCaseInsensitive], () => {
   if (!regexTestModalOpen.value) {
     return;
   }
@@ -297,6 +309,7 @@ watch([regexTestPattern, regexTestSample], () => {
 function openRegexTestModal(): void {
   regexTestPattern.value = '';
   regexTestSample.value = '';
+  regexTestCaseInsensitive.value = false;
   regexTestMatches.value = null;
   regexTestCompileError.value = null;
   regexTestModalOpen.value = true;
@@ -304,11 +317,7 @@ function openRegexTestModal(): void {
 }
 
 function openRuleModal(): void {
-  ruleDraft.regex = '';
-  ruleDraft.included_users = '*';
-  ruleDraft.denied_users = '';
-  ruleDraft.included_channels = '*';
-  ruleDraft.denied_channels = '';
+  ruleJsonText.value = defaultRuleJson;
   ruleModalOpen.value = true;
 }
 
@@ -318,14 +327,20 @@ async function saveRuleModal(): Promise<void> {
   }
   savingRule.value = true;
   try {
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(ruleJsonText.value) as Record<string, unknown>;
+    } catch {
+      notify({
+        id: 'settings-add-rule',
+        type: 'error',
+        title: 'Rules',
+        description: 'Invalid JSON in rule editor.',
+      });
+      return;
+    }
     await DefaultService.createRule({
-      requestBody: {
-        regex: ruleDraft.regex.trim(),
-        included_users: ruleDraft.included_users,
-        denied_users: ruleDraft.denied_users,
-        included_channels: ruleDraft.included_channels,
-        denied_channels: ruleDraft.denied_channels,
-      },
+      requestBody: body as CreateRuleRequest,
     });
     ruleModalOpen.value = false;
     notify({ id: 'settings-add-rule', type: 'success', title: 'Rules', description: 'Rule added.' });
@@ -335,7 +350,7 @@ async function saveRuleModal(): Promise<void> {
       id: 'settings-add-rule',
       type: 'error',
       title: 'Rules',
-      description: 'Could not add rule (invalid regex?).',
+      description: 'Could not add rule (validation failed?).',
     });
   } finally {
     savingRule.value = false;
@@ -707,10 +722,9 @@ const filteredChannelBlacklist = computed(() => {
           <li v-for="r in rules" :key="r.id" class="rule-row">
             <button type="button" class="btn-danger btn-inline-x" @click="deleteRule(r.id)">x</button>
             <div>
-              <code>{{ r.regex }}</code>
-              <div class="rule-meta muted small">
-                users: {{ r.included_users }} / {{ r.denied_users }} · ch: {{ r.included_channels }} / {{ r.denied_channels }}
-              </div>
+              <code>{{ r.event_type }} → {{ r.action_type }}</code>
+              <span class="muted small">#{{ r.id }}</span>
+              <span v-if="!r.enabled" class="muted small"> (disabled)</span>
             </div>
           </li>
         </ul>
@@ -883,6 +897,10 @@ const filteredChannelBlacklist = computed(() => {
           <span>Sample text</span>
           <textarea v-model="regexTestSample" rows="3" autocomplete="off" placeholder="string to match" />
         </label>
+        <label class="row-inline">
+          <input v-model="regexTestCaseInsensitive" type="checkbox" />
+          <span>Case insensitive (match_regex)</span>
+        </label>
         <p v-if="regexTestCompileError" class="regex-test-err">{{ regexTestCompileError }}</p>
         <p v-else-if="regexTestMatches !== null" class="regex-test-ok">
           {{ regexTestMatches ? 'Matches.' : 'Does not match.' }}
@@ -896,25 +914,13 @@ const filteredChannelBlacklist = computed(() => {
 
     <AppModal :open="ruleModalOpen" title="New rule" @close="ruleModalOpen = false">
       <form class="stack modal-form" autocomplete="off" @submit.prevent="saveRuleModal">
-        <label>
-          <span>Regex</span>
-          <input v-model="ruleDraft.regex" name="dredge_rule_regex" required placeholder="pattern" autocomplete="off" />
-        </label>
-        <label>
-          <span>Included users (* = all)</span>
-          <input v-model="ruleDraft.included_users" name="dredge_rule_included_users" autocomplete="off" />
-        </label>
-        <label>
-          <span>Denied users (empty = none)</span>
-          <input v-model="ruleDraft.denied_users" name="dredge_rule_denied_users" autocomplete="off" />
-        </label>
-        <label>
-          <span>Included channels (* = all)</span>
-          <input v-model="ruleDraft.included_channels" name="dredge_rule_included_channels" autocomplete="off" />
-        </label>
-        <label>
-          <span>Denied channels (empty = none)</span>
-          <input v-model="ruleDraft.denied_channels" name="dredge_rule_denied_channels" autocomplete="off" />
+        <p class="muted small">
+          JSON body for <code>POST /settings/rules</code>: <code>event_type</code>, <code>middlewares</code>,
+          <code>action_type</code>, etc.
+        </p>
+        <label class="stack">
+          <span>Rule (JSON)</span>
+          <textarea v-model="ruleJsonText" name="dredge_rule_json" rows="18" class="rule-json" spellcheck="false" />
         </label>
         <footer class="modal-actions">
           <button type="button" class="btn-secondary" @click="ruleModalOpen = false">Cancel</button>
@@ -1039,6 +1045,13 @@ h2 {
 
 .muted {
   color: var(--text-muted);
+}
+
+.rule-json {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
 .small {

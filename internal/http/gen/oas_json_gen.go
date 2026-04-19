@@ -1767,41 +1767,51 @@ func (s *CreateRuleRequest) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *CreateRuleRequest) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("regex")
-		e.Str(s.Regex)
-	}
-	{
-		if s.IncludedUsers.Set {
-			e.FieldStart("included_users")
-			s.IncludedUsers.Encode(e)
+		if s.Enabled.Set {
+			e.FieldStart("enabled")
+			s.Enabled.Encode(e)
 		}
 	}
 	{
-		if s.DeniedUsers.Set {
-			e.FieldStart("denied_users")
-			s.DeniedUsers.Encode(e)
-		}
+		e.FieldStart("event_type")
+		s.EventType.Encode(e)
 	}
 	{
-		if s.IncludedChannels.Set {
-			e.FieldStart("included_channels")
-			s.IncludedChannels.Encode(e)
-		}
+		e.FieldStart("event_settings")
+		s.EventSettings.Encode(e)
 	}
 	{
-		if s.DeniedChannels.Set {
-			e.FieldStart("denied_channels")
-			s.DeniedChannels.Encode(e)
+		e.FieldStart("middlewares")
+		e.ArrStart()
+		for _, elem := range s.Middlewares {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("action_type")
+		s.ActionType.Encode(e)
+	}
+	{
+		e.FieldStart("action_settings")
+		s.ActionSettings.Encode(e)
+	}
+	{
+		if s.UseSharedPool.Set {
+			e.FieldStart("use_shared_pool")
+			s.UseSharedPool.Encode(e)
 		}
 	}
 }
 
-var jsonFieldsNameOfCreateRuleRequest = [5]string{
-	0: "regex",
-	1: "included_users",
-	2: "denied_users",
-	3: "included_channels",
-	4: "denied_channels",
+var jsonFieldsNameOfCreateRuleRequest = [7]string{
+	0: "enabled",
+	1: "event_type",
+	2: "event_settings",
+	3: "middlewares",
+	4: "action_type",
+	5: "action_settings",
+	6: "use_shared_pool",
 }
 
 // Decode decodes CreateRuleRequest from json.
@@ -1814,57 +1824,83 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "regex":
-			requiredBitSet[0] |= 1 << 0
+		case "enabled":
 			if err := func() error {
-				v, err := d.Str()
-				s.Regex = string(v)
-				if err != nil {
+				s.Enabled.Reset()
+				if err := s.Enabled.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"regex\"")
+				return errors.Wrap(err, "decode field \"enabled\"")
 			}
-		case "included_users":
+		case "event_type":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.IncludedUsers.Reset()
-				if err := s.IncludedUsers.Decode(d); err != nil {
+				if err := s.EventType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"included_users\"")
+				return errors.Wrap(err, "decode field \"event_type\"")
 			}
-		case "denied_users":
+		case "event_settings":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				s.DeniedUsers.Reset()
-				if err := s.DeniedUsers.Decode(d); err != nil {
+				if err := s.EventSettings.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"denied_users\"")
+				return errors.Wrap(err, "decode field \"event_settings\"")
 			}
-		case "included_channels":
+		case "middlewares":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				s.IncludedChannels.Reset()
-				if err := s.IncludedChannels.Decode(d); err != nil {
+				s.Middlewares = make([]RuleMiddleware, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem RuleMiddleware
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Middlewares = append(s.Middlewares, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"included_channels\"")
+				return errors.Wrap(err, "decode field \"middlewares\"")
 			}
-		case "denied_channels":
+		case "action_type":
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				s.DeniedChannels.Reset()
-				if err := s.DeniedChannels.Decode(d); err != nil {
+				if err := s.ActionType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"denied_channels\"")
+				return errors.Wrap(err, "decode field \"action_type\"")
+			}
+		case "action_settings":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.ActionSettings.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"action_settings\"")
+			}
+		case "use_shared_pool":
+			if err := func() error {
+				s.UseSharedPool.Reset()
+				if err := s.UseSharedPool.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"use_shared_pool\"")
 			}
 		default:
 			return d.Skip()
@@ -1876,7 +1912,7 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00111110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -1918,6 +1954,122 @@ func (s *CreateRuleRequest) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *CreateRuleRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s CreateRuleRequestActionSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s CreateRuleRequestActionSettings) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes CreateRuleRequestActionSettings from json.
+func (s *CreateRuleRequestActionSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreateRuleRequestActionSettings to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode CreateRuleRequestActionSettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s CreateRuleRequestActionSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreateRuleRequestActionSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s CreateRuleRequestEventSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s CreateRuleRequestEventSettings) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes CreateRuleRequestEventSettings from json.
+func (s *CreateRuleRequestEventSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreateRuleRequestEventSettings to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode CreateRuleRequestEventSettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s CreateRuleRequestEventSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreateRuleRequestEventSettings) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -5326,34 +5478,58 @@ func (s *Rule) encodeFields(e *jx.Encoder) {
 		e.Int64(s.ID)
 	}
 	{
-		e.FieldStart("regex")
-		e.Str(s.Regex)
+		e.FieldStart("enabled")
+		e.Bool(s.Enabled)
 	}
 	{
-		e.FieldStart("included_users")
-		e.Str(s.IncludedUsers)
+		e.FieldStart("event_type")
+		s.EventType.Encode(e)
 	}
 	{
-		e.FieldStart("denied_users")
-		e.Str(s.DeniedUsers)
+		e.FieldStart("event_settings")
+		s.EventSettings.Encode(e)
 	}
 	{
-		e.FieldStart("included_channels")
-		e.Str(s.IncludedChannels)
+		e.FieldStart("middlewares")
+		e.ArrStart()
+		for _, elem := range s.Middlewares {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
 	}
 	{
-		e.FieldStart("denied_channels")
-		e.Str(s.DeniedChannels)
+		e.FieldStart("action_type")
+		s.ActionType.Encode(e)
+	}
+	{
+		e.FieldStart("action_settings")
+		s.ActionSettings.Encode(e)
+	}
+	{
+		e.FieldStart("use_shared_pool")
+		e.Bool(s.UseSharedPool)
+	}
+	{
+		e.FieldStart("created_at")
+		json.EncodeDateTime(e, s.CreatedAt)
+	}
+	{
+		e.FieldStart("updated_at")
+		json.EncodeDateTime(e, s.UpdatedAt)
 	}
 }
 
-var jsonFieldsNameOfRule = [6]string{
+var jsonFieldsNameOfRule = [10]string{
 	0: "id",
-	1: "regex",
-	2: "included_users",
-	3: "denied_users",
-	4: "included_channels",
-	5: "denied_channels",
+	1: "enabled",
+	2: "event_type",
+	3: "event_settings",
+	4: "middlewares",
+	5: "action_type",
+	6: "action_settings",
+	7: "use_shared_pool",
+	8: "created_at",
+	9: "updated_at",
 }
 
 // Decode decodes Rule from json.
@@ -5361,7 +5537,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Rule to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -5377,65 +5553,111 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"id\"")
 			}
-		case "regex":
+		case "enabled":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.Regex = string(v)
+				v, err := d.Bool()
+				s.Enabled = bool(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"regex\"")
+				return errors.Wrap(err, "decode field \"enabled\"")
 			}
-		case "included_users":
+		case "event_type":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.IncludedUsers = string(v)
-				if err != nil {
+				if err := s.EventType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"included_users\"")
+				return errors.Wrap(err, "decode field \"event_type\"")
 			}
-		case "denied_users":
+		case "event_settings":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Str()
-				s.DeniedUsers = string(v)
-				if err != nil {
+				if err := s.EventSettings.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"denied_users\"")
+				return errors.Wrap(err, "decode field \"event_settings\"")
 			}
-		case "included_channels":
+		case "middlewares":
 			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.Str()
-				s.IncludedChannels = string(v)
-				if err != nil {
+				s.Middlewares = make([]RuleMiddleware, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem RuleMiddleware
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Middlewares = append(s.Middlewares, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"included_channels\"")
+				return errors.Wrap(err, "decode field \"middlewares\"")
 			}
-		case "denied_channels":
+		case "action_type":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := d.Str()
-				s.DeniedChannels = string(v)
+				if err := s.ActionType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"action_type\"")
+			}
+		case "action_settings":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				if err := s.ActionSettings.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"action_settings\"")
+			}
+		case "use_shared_pool":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Bool()
+				s.UseSharedPool = bool(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"denied_channels\"")
+				return errors.Wrap(err, "decode field \"use_shared_pool\"")
+			}
+		case "created_at":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.CreatedAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		case "updated_at":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.UpdatedAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updated_at\"")
 			}
 		default:
 			return d.Skip()
@@ -5446,8 +5668,9 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00111111,
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -5489,6 +5712,375 @@ func (s *Rule) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Rule) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s RuleActionSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s RuleActionSettings) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes RuleActionSettings from json.
+func (s *RuleActionSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RuleActionSettings to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RuleActionSettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RuleActionSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RuleActionSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RuleActionType as json.
+func (s RuleActionType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes RuleActionType from json.
+func (s *RuleActionType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RuleActionType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch RuleActionType(v) {
+	case RuleActionTypeNotify:
+		*s = RuleActionTypeNotify
+	case RuleActionTypeSendChat:
+		*s = RuleActionTypeSendChat
+	default:
+		*s = RuleActionType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RuleActionType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RuleActionType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s RuleEventSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s RuleEventSettings) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes RuleEventSettings from json.
+func (s *RuleEventSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RuleEventSettings to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RuleEventSettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RuleEventSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RuleEventSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RuleEventType as json.
+func (s RuleEventType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes RuleEventType from json.
+func (s *RuleEventType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RuleEventType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch RuleEventType(v) {
+	case RuleEventTypeChatMessage:
+		*s = RuleEventTypeChatMessage
+	case RuleEventTypeStreamStart:
+		*s = RuleEventTypeStreamStart
+	case RuleEventTypeStreamEnd:
+		*s = RuleEventTypeStreamEnd
+	case RuleEventTypeInterval:
+		*s = RuleEventTypeInterval
+	default:
+		*s = RuleEventType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RuleEventType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RuleEventType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RuleMiddleware) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RuleMiddleware) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("type")
+		e.Str(s.Type)
+	}
+	{
+		e.FieldStart("settings")
+		s.Settings.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfRuleMiddleware = [2]string{
+	0: "type",
+	1: "settings",
+}
+
+// Decode decodes RuleMiddleware from json.
+func (s *RuleMiddleware) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RuleMiddleware to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "type":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "settings":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Settings.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"settings\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RuleMiddleware")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRuleMiddleware) {
+					name = jsonFieldsNameOfRuleMiddleware[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RuleMiddleware) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RuleMiddleware) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s RuleMiddlewareSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s RuleMiddlewareSettings) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes RuleMiddlewareSettings from json.
+func (s *RuleMiddlewareSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RuleMiddlewareSettings to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RuleMiddlewareSettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RuleMiddlewareSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RuleMiddlewareSettings) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -6296,11 +6888,18 @@ func (s *TestRuleRegexRequest) encodeFields(e *jx.Encoder) {
 		e.FieldStart("sample")
 		e.Str(s.Sample)
 	}
+	{
+		if s.CaseInsensitive.Set {
+			e.FieldStart("case_insensitive")
+			s.CaseInsensitive.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfTestRuleRegexRequest = [2]string{
+var jsonFieldsNameOfTestRuleRegexRequest = [3]string{
 	0: "pattern",
 	1: "sample",
+	2: "case_insensitive",
 }
 
 // Decode decodes TestRuleRegexRequest from json.
@@ -6309,6 +6908,7 @@ func (s *TestRuleRegexRequest) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode TestRuleRegexRequest to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -6335,6 +6935,16 @@ func (s *TestRuleRegexRequest) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"sample\"")
+			}
+		case "case_insensitive":
+			if err := func() error {
+				s.CaseInsensitive.Reset()
+				if err := s.CaseInsensitive.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"case_insensitive\"")
 			}
 		default:
 			return d.Skip()
@@ -7670,34 +8280,48 @@ func (s *UpdateRulePostRequest) encodeFields(e *jx.Encoder) {
 		e.Int64(s.ID)
 	}
 	{
-		e.FieldStart("regex")
-		e.Str(s.Regex)
+		e.FieldStart("enabled")
+		e.Bool(s.Enabled)
 	}
 	{
-		e.FieldStart("included_users")
-		e.Str(s.IncludedUsers)
+		e.FieldStart("event_type")
+		s.EventType.Encode(e)
 	}
 	{
-		e.FieldStart("denied_users")
-		e.Str(s.DeniedUsers)
+		e.FieldStart("event_settings")
+		s.EventSettings.Encode(e)
 	}
 	{
-		e.FieldStart("included_channels")
-		e.Str(s.IncludedChannels)
+		e.FieldStart("middlewares")
+		e.ArrStart()
+		for _, elem := range s.Middlewares {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
 	}
 	{
-		e.FieldStart("denied_channels")
-		e.Str(s.DeniedChannels)
+		e.FieldStart("action_type")
+		s.ActionType.Encode(e)
+	}
+	{
+		e.FieldStart("action_settings")
+		s.ActionSettings.Encode(e)
+	}
+	{
+		e.FieldStart("use_shared_pool")
+		e.Bool(s.UseSharedPool)
 	}
 }
 
-var jsonFieldsNameOfUpdateRulePostRequest = [6]string{
+var jsonFieldsNameOfUpdateRulePostRequest = [8]string{
 	0: "id",
-	1: "regex",
-	2: "included_users",
-	3: "denied_users",
-	4: "included_channels",
-	5: "denied_channels",
+	1: "enabled",
+	2: "event_type",
+	3: "event_settings",
+	4: "middlewares",
+	5: "action_type",
+	6: "action_settings",
+	7: "use_shared_pool",
 }
 
 // Decode decodes UpdateRulePostRequest from json.
@@ -7721,65 +8345,87 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"id\"")
 			}
-		case "regex":
+		case "enabled":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.Regex = string(v)
+				v, err := d.Bool()
+				s.Enabled = bool(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"regex\"")
+				return errors.Wrap(err, "decode field \"enabled\"")
 			}
-		case "included_users":
+		case "event_type":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.IncludedUsers = string(v)
-				if err != nil {
+				if err := s.EventType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"included_users\"")
+				return errors.Wrap(err, "decode field \"event_type\"")
 			}
-		case "denied_users":
+		case "event_settings":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Str()
-				s.DeniedUsers = string(v)
-				if err != nil {
+				if err := s.EventSettings.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"denied_users\"")
+				return errors.Wrap(err, "decode field \"event_settings\"")
 			}
-		case "included_channels":
+		case "middlewares":
 			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.Str()
-				s.IncludedChannels = string(v)
-				if err != nil {
+				s.Middlewares = make([]RuleMiddleware, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem RuleMiddleware
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Middlewares = append(s.Middlewares, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"included_channels\"")
+				return errors.Wrap(err, "decode field \"middlewares\"")
 			}
-		case "denied_channels":
+		case "action_type":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := d.Str()
-				s.DeniedChannels = string(v)
+				if err := s.ActionType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"action_type\"")
+			}
+		case "action_settings":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				if err := s.ActionSettings.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"action_settings\"")
+			}
+		case "use_shared_pool":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Bool()
+				s.UseSharedPool = bool(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"denied_channels\"")
+				return errors.Wrap(err, "decode field \"use_shared_pool\"")
 			}
 		default:
 			return d.Skip()
@@ -7791,7 +8437,7 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111111,
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -7833,6 +8479,122 @@ func (s *UpdateRulePostRequest) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UpdateRulePostRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s UpdateRulePostRequestActionSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s UpdateRulePostRequestActionSettings) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes UpdateRulePostRequestActionSettings from json.
+func (s *UpdateRulePostRequestActionSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateRulePostRequestActionSettings to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UpdateRulePostRequestActionSettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UpdateRulePostRequestActionSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdateRulePostRequestActionSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s UpdateRulePostRequestEventSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s UpdateRulePostRequestEventSettings) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes UpdateRulePostRequestEventSettings from json.
+func (s *UpdateRulePostRequestEventSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateRulePostRequestEventSettings to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UpdateRulePostRequestEventSettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UpdateRulePostRequestEventSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdateRulePostRequestEventSettings) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -6,7 +6,7 @@ import (
 )
 
 // StartEnrichmentWorker drains enrichQueue with one worker until ctx is cancelled.
-func (s *Service) StartEnrichmentWorker(ctx context.Context) {
+func (s *Usecase) StartEnrichmentWorker(ctx context.Context) {
 	go func() {
 		for {
 			select {

@@ -9,7 +9,7 @@ import (
 )
 
 // GetChannelLive returns Helix stream metadata plus the IRC-maintained chatter count when the DB query succeeds.
-func (s *Service) GetChannelLive(ctx context.Context, login string) (info helix.ChannelLiveInfo, channelChatterCount *int64, err error) {
+func (s *Usecase) GetChannelLive(ctx context.Context, login string) (info helix.ChannelLiveInfo, channelChatterCount *int64, err error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.get_channel_live")
 	defer span.End()
 

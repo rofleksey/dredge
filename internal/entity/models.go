@@ -88,14 +88,24 @@ type TwitchUser struct {
 	NotifyStreamStart       bool
 }
 
-// Rule matches chat lines after user/channel allow/deny filters and regex.
+// Rule is an automation: event + ordered middlewares + action (see api RuleEventType / middleware types).
 type Rule struct {
-	ID               int64
-	Regex            string
-	IncludedUsers    string
-	DeniedUsers      string
-	IncludedChannels string
-	DeniedChannels   string
+	ID             int64
+	Enabled        bool
+	EventType      string
+	EventSettings  map[string]any
+	Middlewares    []RuleMiddleware
+	ActionType     string
+	ActionSettings map[string]any
+	UseSharedPool  bool
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+// RuleMiddleware is one predicate step (type + settings JSON).
+type RuleMiddleware struct {
+	Type     string
+	Settings map[string]any
 }
 
 // TwitchAccount is an OAuth-linked Twitch identity used to send chat via Helix.

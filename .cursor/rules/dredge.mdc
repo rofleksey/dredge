@@ -20,8 +20,8 @@ alwaysApply: true
 
 - **HTTP API:** OpenAPI in `api/openapi.yaml`; **ogen** output in `internal/http/gen` — do not hand-edit generated files.
 - **Handlers:** `internal/http/handler` — one file per generated `Handler` / `SecurityHandler` method (plus `server.go` for wiring); implement interfaces and return `gen.*` response types. **Middleware:** `internal/http/middleware` (package `httpmw`). **Auth context keys:** `internal/http/authctx`.
-- **Use cases:** `internal/usecase/{auth,settings,twitch}` — application logic; each exported use-case method in its own file with an adjacent `*_test.go` where tested.
-- **External clients:** `internal/service/twitch` — Twitch Helix (`helix/`), GraphQL (`gql/`), IRC (`live/`), and OAuth (`oauth.go`); no orchestration layer here.
+- **Use cases:** `internal/usecase/...` — application logic; primary type is **`Usecase`** (see `.cursor/rules/layout.mdc`). Group minor methods in `uc.go` / `helpers.go`; split non-trivial methods into their own files with tests when warranted.
+- **External clients:** `internal/service/twitch` — Twitch Helix (`helix/`), GraphQL (`gql/`), IRC (`live/`), and OAuth (see `layout.mdc` for split vs bundle). No orchestration layer here.
 - **DB:** `internal/repository/postgres`, SQL migrations in `migrations/`.
 - **WebSocket:** `internal/ws`.
 - **Observability:** `internal/observability` (zap, tracing, metrics).

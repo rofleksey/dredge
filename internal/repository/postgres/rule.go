@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/jackc/pgx/v5"
@@ -14,7 +15,8 @@ func (r *Repository) ListRules(ctx context.Context) ([]entity.Rule, error) {
 	defer span.End()
 
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, regex, included_users, denied_users, included_channels, denied_channels
+		SELECT id, enabled, event_type, event_settings, middlewares, action_type, action_settings,
+			use_shared_pool, created_at, updated_at
 		FROM rules ORDER BY id
 	`)
 	if err != nil {
@@ -26,8 +28,8 @@ func (r *Repository) ListRules(ctx context.Context) ([]entity.Rule, error) {
 	out := make([]entity.Rule, 0)
 
 	for rows.Next() {
-		var rr entity.Rule
-		if err := rows.Scan(&rr.ID, &rr.Regex, &rr.IncludedUsers, &rr.DeniedUsers, &rr.IncludedChannels, &rr.DeniedChannels); err != nil {
+		rr, err := scanRule(rows)
+		if err != nil {
 			r.obs.LogError(ctx, span, "scan rule failed", err)
 			return nil, err
 		}
@@ -41,6 +43,61 @@ func (r *Repository) ListRules(ctx context.Context) ([]entity.Rule, error) {
 	}
 
 	return out, err
+}
+
+func scanRule(row interface {
+	Scan(dest ...any) error
+}) (entity.Rule, error) {
+	var (
+		rr            entity.Rule
+		eventJSON     []byte
+		middlewaresJSON []byte
+		actionJSON    []byte
+	)
+
+	err := row.Scan(
+		&rr.ID,
+		&rr.Enabled,
+		&rr.EventType,
+		&eventJSON,
+		&middlewaresJSON,
+		&rr.ActionType,
+		&actionJSON,
+		&rr.UseSharedPool,
+		&rr.CreatedAt,
+		&rr.UpdatedAt,
+	)
+	if err != nil {
+		return entity.Rule{}, err
+	}
+
+	if len(eventJSON) > 0 {
+		if err := json.Unmarshal(eventJSON, &rr.EventSettings); err != nil {
+			return entity.Rule{}, err
+		}
+	}
+
+	if rr.EventSettings == nil {
+		rr.EventSettings = map[string]any{}
+	}
+
+	if len(middlewaresJSON) > 0 {
+		if err := json.Unmarshal(middlewaresJSON, &rr.Middlewares); err != nil {
+			return entity.Rule{}, err
+		}
+	}
+
+	if len(actionJSON) > 0 {
+		if err := json.Unmarshal(actionJSON, &rr.ActionSettings); err != nil {
+			return entity.Rule{}, err
+		}
+	}
+
+	if rr.ActionSettings == nil {
+		rr.ActionSettings = map[string]any{}
+	}
+
+	return rr, nil
 }
 
 func (r *Repository) CountRules(ctx context.Context) (int64, error) {
@@ -60,35 +117,121 @@ func (r *Repository) CreateRule(ctx context.Context, rr entity.Rule) (entity.Rul
 	ctx, span := r.obs.StartSpan(ctx, "repo.create_rule")
 	defer span.End()
 
-	err := r.pool.QueryRow(ctx, `
-		INSERT INTO rules (regex, included_users, denied_users, included_channels, denied_channels)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, regex, included_users, denied_users, included_channels, denied_channels
-	`, rr.Regex, rr.IncludedUsers, rr.DeniedUsers, rr.IncludedChannels, rr.DeniedChannels).Scan(
-		&rr.ID, &rr.Regex, &rr.IncludedUsers, &rr.DeniedUsers, &rr.IncludedChannels, &rr.DeniedChannels,
-	)
+	eventJSON, err := json.Marshal(rr.EventSettings)
 	if err != nil {
-		r.obs.LogError(ctx, span, "create rule failed", err, zap.String("regex", rr.Regex))
+		return entity.Rule{}, err
 	}
 
-	return rr, err
+	mwJSON, err := json.Marshal(rr.Middlewares)
+	if err != nil {
+		return entity.Rule{}, err
+	}
+
+	actionJSON, err := json.Marshal(rr.ActionSettings)
+	if err != nil {
+		return entity.Rule{}, err
+	}
+
+	err = r.pool.QueryRow(ctx, `
+		INSERT INTO rules (enabled, event_type, event_settings, middlewares, action_type, action_settings, use_shared_pool)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id, enabled, event_type, event_settings, middlewares, action_type, action_settings,
+			use_shared_pool, created_at, updated_at
+	`, rr.Enabled, rr.EventType, eventJSON, mwJSON, rr.ActionType, actionJSON, rr.UseSharedPool).Scan(
+		&rr.ID,
+		&rr.Enabled,
+		&rr.EventType,
+		&eventJSON,
+		&mwJSON,
+		&rr.ActionType,
+		&actionJSON,
+		&rr.UseSharedPool,
+		&rr.CreatedAt,
+		&rr.UpdatedAt,
+	)
+	if err != nil {
+		r.obs.LogError(ctx, span, "create rule failed", err, zap.String("event_type", rr.EventType))
+		return entity.Rule{}, err
+	}
+
+	return scanRuleFromInsert(rr, eventJSON, mwJSON, actionJSON)
+}
+
+func scanRuleFromInsert(rr entity.Rule, eventJSON, mwJSON, actionJSON []byte) (entity.Rule, error) {
+	rr.EventSettings = nil
+	if len(eventJSON) > 0 {
+		if err := json.Unmarshal(eventJSON, &rr.EventSettings); err != nil {
+			return entity.Rule{}, err
+		}
+	}
+
+	if rr.EventSettings == nil {
+		rr.EventSettings = map[string]any{}
+	}
+
+	rr.Middlewares = nil
+	if len(mwJSON) > 0 {
+		if err := json.Unmarshal(mwJSON, &rr.Middlewares); err != nil {
+			return entity.Rule{}, err
+		}
+	}
+
+	if rr.ActionSettings == nil {
+		rr.ActionSettings = map[string]any{}
+	}
+
+	if len(actionJSON) > 0 {
+		if err := json.Unmarshal(actionJSON, &rr.ActionSettings); err != nil {
+			return entity.Rule{}, err
+		}
+	}
+
+	return rr, nil
 }
 
 func (r *Repository) UpdateRule(ctx context.Context, id int64, rr entity.Rule) (entity.Rule, error) {
 	ctx, span := r.obs.StartSpan(ctx, "repo.update_rule")
 	defer span.End()
 
-	err := r.pool.QueryRow(ctx, `
+	eventJSON, err := json.Marshal(rr.EventSettings)
+	if err != nil {
+		return entity.Rule{}, err
+	}
+
+	mwJSON, err := json.Marshal(rr.Middlewares)
+	if err != nil {
+		return entity.Rule{}, err
+	}
+
+	actionJSON, err := json.Marshal(rr.ActionSettings)
+	if err != nil {
+		return entity.Rule{}, err
+	}
+
+	err = r.pool.QueryRow(ctx, `
 		UPDATE rules SET
-			regex = $2,
-			included_users = $3,
-			denied_users = $4,
-			included_channels = $5,
-			denied_channels = $6
+			enabled = $2,
+			event_type = $3,
+			event_settings = $4,
+			middlewares = $5,
+			action_type = $6,
+			action_settings = $7,
+			use_shared_pool = $8,
+			updated_at = NOW()
 		WHERE id = $1
-		RETURNING id, regex, included_users, denied_users, included_channels, denied_channels
-	`, id, rr.Regex, rr.IncludedUsers, rr.DeniedUsers, rr.IncludedChannels, rr.DeniedChannels).Scan(
-		&rr.ID, &rr.Regex, &rr.IncludedUsers, &rr.DeniedUsers, &rr.IncludedChannels, &rr.DeniedChannels,
+		RETURNING id, enabled, event_type, event_settings, middlewares, action_type, action_settings,
+			use_shared_pool, created_at, updated_at
+	`, id, rr.Enabled, rr.EventType, eventJSON, mwJSON, rr.ActionType, actionJSON, rr.UseSharedPool).Scan(
+		&rr.ID,
+		&rr.Enabled,
+		&rr.EventType,
+		&eventJSON,
+		&mwJSON,
+		&rr.ActionType,
+		&actionJSON,
+		&rr.UseSharedPool,
+		&rr.CreatedAt,
+		&rr.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -96,9 +239,10 @@ func (r *Repository) UpdateRule(ctx context.Context, id int64, rr entity.Rule) (
 		}
 
 		r.obs.LogError(ctx, span, "update rule failed", err, zap.Int64("id", id))
+		return entity.Rule{}, err
 	}
 
-	return rr, err
+	return scanRuleFromInsert(rr, eventJSON, mwJSON, actionJSON)
 }
 
 func (r *Repository) DeleteRule(ctx context.Context, id int64) error {

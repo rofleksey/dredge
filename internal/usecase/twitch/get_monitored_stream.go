@@ -9,7 +9,7 @@ import (
 )
 
 // GetMonitoredStream returns a stream row if the channel is monitored.
-func (s *Service) GetMonitoredStream(ctx context.Context, id int64) (entity.Stream, error) {
+func (s *Usecase) GetMonitoredStream(ctx context.Context, id int64) (entity.Stream, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.get_monitored_stream")
 	defer span.End()
 

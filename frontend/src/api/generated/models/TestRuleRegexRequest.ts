@@ -5,5 +5,9 @@
 export type TestRuleRegexRequest = {
     pattern: string;
     sample: string;
+    /**
+     * Same as match_regex middleware case_insensitive
+     */
+    case_insensitive?: boolean;
 };
 

@@ -60,14 +60,14 @@ func fxOptions() fx.Option {
 			newPGXPool,
 			postgres.New,
 			func(r *postgres.Repository) repository.Store { return r },
-			func(cfg config.Config, obs *observability.Stack) (*auth.Service, error) {
+			func(cfg config.Config, obs *observability.Stack) (*auth.Usecase, error) {
 				return auth.New(cfg, cfg.JWT.Secret, cfg.JWT.TTL, obs)
 			},
 			settings.New,
 			func(origin config.AllowedWebOrigin) (*ws.Hub, error) {
 				return ws.NewHub(string(origin)), nil
 			},
-			func(r repository.Store, hub *ws.Hub, cfg config.Config, obs *observability.Stack) *twitchuc.Service {
+			func(r repository.Store, hub *ws.Hub, cfg config.Config, obs *observability.Stack) *twitchuc.Usecase {
 				return twitchuc.New(r, hub, cfg, obs)
 			},
 			func(cfg config.Config) *twitchoauth.OAuth {
@@ -79,6 +79,7 @@ func fxOptions() fx.Option {
 					cfg.JWT.Secret,
 				)
 			},
+			newRulesServices,
 			handler.NewHandler,
 			handler.NewSecurity,
 			func(cfg config.Config) *httpmw.LoginLimiter {
@@ -91,7 +92,7 @@ func fxOptions() fx.Option {
 					gen.WithErrorHandler(httpmw.OgenErrorHandler()),
 				)
 			},
-			func(cfg config.Config, authSvc *auth.Service, srv *gen.Server, hub *ws.Hub, tw *twitchuc.Service, oauth *twitchoauth.OAuth, sett *settings.Service, obs *observability.Stack, origin config.AllowedWebOrigin) (*http.Server, error) {
+			func(cfg config.Config, authSvc *auth.Usecase, srv *gen.Server, hub *ws.Hub, tw *twitchuc.Usecase, oauth *twitchoauth.OAuth, sett *settings.Usecase, obs *observability.Stack, origin config.AllowedWebOrigin) (*http.Server, error) {
 				mux := http.NewServeMux()
 				mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 					if r.Method != http.MethodGet {
@@ -109,6 +110,7 @@ func fxOptions() fx.Option {
 				return &http.Server{Addr: cfg.Server.Address, Handler: obs.InstrumentHTTP(httpmw.WrapCORS(string(origin), mux))}, nil
 			},
 		),
+		fx.Invoke(registerRulesLifecycle),
 		fx.Invoke(registerLifecycle),
 	)
 }

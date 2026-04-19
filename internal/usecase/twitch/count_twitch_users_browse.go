@@ -7,6 +7,6 @@ import (
 )
 
 // CountTwitchUsersBrowse delegates to repository.
-func (s *Service) CountTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) (int64, error) {
+func (s *Usecase) CountTwitchUsersBrowse(ctx context.Context, f entity.TwitchUserBrowseFilter) (int64, error) {
 	return s.repo.CountTwitchUsersBrowse(ctx, f)
 }

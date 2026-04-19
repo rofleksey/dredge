@@ -47,6 +47,9 @@ type Runtime struct {
 	monitorLoopsWG     sync.WaitGroup
 
 	notifySem chan struct{}
+
+	ruleEngineMu sync.RWMutex
+	ruleEngine   RuleEngine
 }
 
 // NewRuntime constructs runtime state for IRC-backed features.
@@ -87,4 +90,19 @@ func (r *Runtime) persistContext() context.Context {
 		return r.persistParent()
 	}
 	return context.Background()
+}
+
+// SetRuleEngine wires the optional automation engine (may be nil).
+func (r *Runtime) SetRuleEngine(e RuleEngine) {
+	r.ruleEngineMu.Lock()
+	defer r.ruleEngineMu.Unlock()
+
+	r.ruleEngine = e
+}
+
+func (r *Runtime) ruleEng() RuleEngine {
+	r.ruleEngineMu.RLock()
+	defer r.ruleEngineMu.RUnlock()
+
+	return r.ruleEngine
 }

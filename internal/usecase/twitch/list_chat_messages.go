@@ -7,7 +7,7 @@ import (
 )
 
 // ListChatMessages returns persisted messages matching filters (newest first).
-func (s *Service) ListChatMessages(ctx context.Context, f entity.ChatMessageListFilter) ([]entity.ChatHistoryMessage, error) {
+func (s *Usecase) ListChatMessages(ctx context.Context, f entity.ChatMessageListFilter) ([]entity.ChatHistoryMessage, error) {
 	ctx, span := s.obs.StartSpan(ctx, "service.twitch.list_chat_messages")
 	defer span.End()
 

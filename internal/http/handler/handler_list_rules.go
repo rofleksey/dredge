@@ -10,7 +10,7 @@ func (h *Handler) ListRules(ctx context.Context) ([]gen.Rule, error) {
 	ctx, span := h.obs.StartSpan(ctx, "handler.list_rules")
 	defer span.End()
 
-	list, err := h.sett.ListRules(ctx)
+	list, err := h.rules.ListRules(ctx)
 	if err != nil {
 		h.obs.LogError(ctx, span, "list rules failed", err)
 		return nil, err

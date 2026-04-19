@@ -8,7 +8,7 @@ import (
 	"github.com/rofleksey/dredge/internal/entity"
 )
 
-func (s *Service) PatchTwitchUser(ctx context.Context, id int64, patch entity.TwitchUserPatch) (entity.TwitchUser, error) {
+func (s *Usecase) PatchTwitchUser(ctx context.Context, id int64, patch entity.TwitchUserPatch) (entity.TwitchUser, error) {
 	ctx, span := s.obs.StartSpan(ctx, "usecase.settings.patch_twitch_user")
 	defer span.End()
 

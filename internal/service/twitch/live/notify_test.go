@@ -49,7 +49,7 @@ func TestDispatchRuleHitNotifications_empty(t *testing.T) {
 
 	repo.EXPECT().ListEnabledNotificationEntries(gomock.Any()).Return(nil, nil)
 
-	r.dispatchRuleHitNotifications(context.Background(), "ch", "u", "msg")
+	r.NotifyChatKeyword(context.Background(), "ch", "u", "msg", "")
 }
 
 func TestDispatchRuleHitNotifications_webhook(t *testing.T) {
@@ -69,7 +69,7 @@ func TestDispatchRuleHitNotifications_webhook(t *testing.T) {
 		{Provider: "webhook", Settings: map[string]any{"url": srv.URL}},
 	}, nil)
 
-	r.dispatchRuleHitNotifications(context.Background(), "ch", "u", "msg")
+	r.NotifyChatKeyword(context.Background(), "ch", "u", "msg", "")
 
 	time.Sleep(150 * time.Millisecond)
 }

@@ -14,7 +14,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func (r *Runtime) dispatchStreamStartNotifications(ctx context.Context, channelLogin, title string) {
+// NotifyChatKeyword sends keyword-style notifications to all enabled providers (rules engine).
+// When textTemplate is empty, uses the legacy default Telegram line "[%s] %s: %s".
+func (r *Runtime) NotifyChatKeyword(ctx context.Context, channel, user, message, textTemplate string) {
 	_ = ctx
 
 	entries, err := r.repo.ListEnabledNotificationEntries(r.persistContext())
@@ -23,10 +25,16 @@ func (r *Runtime) dispatchStreamStartNotifications(ctx context.Context, channelL
 	}
 
 	payload := map[string]any{
-		"type":    "stream_start",
-		"channel": channelLogin,
-		"title":   title,
+		"type":    "keyword_match",
+		"channel": channel,
+		"user":    user,
+		"message": truncateString(message, 400),
 	}
+
+	if strings.TrimSpace(textTemplate) != "" {
+		payload["text"] = textTemplate
+	}
+
 	body, _ := json.Marshal(payload)
 
 	for _, e := range entries {
@@ -42,7 +50,7 @@ func (r *Runtime) dispatchStreamStartNotifications(ctx context.Context, channelL
 
 			switch e.Provider {
 			case "telegram":
-				r.sendTelegramStreamStart(nctx, e.Settings, channelLogin, title)
+				r.sendTelegram(nctx, e.Settings, channel, user, message, textTemplate)
 			case "webhook":
 				r.postWebhook(nctx, e.Settings, body)
 			default:
@@ -52,7 +60,95 @@ func (r *Runtime) dispatchStreamStartNotifications(ctx context.Context, channelL
 	}
 }
 
-func (r *Runtime) sendTelegramStreamStart(ctx context.Context, settings map[string]any, channelLogin, title string) {
+// NotifyStreamStart sends stream go-live notifications (rules engine).
+// When textTemplate is empty, uses the legacy default Telegram line for stream start.
+func (r *Runtime) NotifyStreamStart(ctx context.Context, channelLogin, title, textTemplate string) {
+	_ = ctx
+
+	entries, err := r.repo.ListEnabledNotificationEntries(r.persistContext())
+	if err != nil || len(entries) == 0 {
+		return
+	}
+
+	payload := map[string]any{
+		"type":    "stream_start",
+		"channel": channelLogin,
+		"title":   title,
+	}
+
+	if strings.TrimSpace(textTemplate) != "" {
+		payload["text"] = textTemplate
+	}
+
+	body, _ := json.Marshal(payload)
+
+	for _, e := range entries {
+		e := e
+
+		go func() {
+			r.notifySem <- struct{}{}
+
+			defer func() { <-r.notifySem }()
+
+			nctx, cancel := context.WithTimeout(r.persistContext(), 15*time.Second)
+			defer cancel()
+
+			switch e.Provider {
+			case "telegram":
+				r.sendTelegramStreamStart(nctx, e.Settings, channelLogin, title, textTemplate)
+			case "webhook":
+				r.postWebhook(nctx, e.Settings, body)
+			default:
+				r.obs.Logger.Debug("unknown notification provider", zap.String("provider", e.Provider))
+			}
+		}()
+	}
+}
+
+// NotifyStreamEnd sends stream offline notifications (rules engine).
+func (r *Runtime) NotifyStreamEnd(ctx context.Context, channelLogin, textTemplate string) {
+	_ = ctx
+
+	entries, err := r.repo.ListEnabledNotificationEntries(r.persistContext())
+	if err != nil || len(entries) == 0 {
+		return
+	}
+
+	payload := map[string]any{
+		"type":    "stream_end",
+		"channel": channelLogin,
+	}
+
+	if strings.TrimSpace(textTemplate) != "" {
+		payload["text"] = textTemplate
+	}
+
+	body, _ := json.Marshal(payload)
+
+	for _, e := range entries {
+		e := e
+
+		go func() {
+			r.notifySem <- struct{}{}
+
+			defer func() { <-r.notifySem }()
+
+			nctx, cancel := context.WithTimeout(r.persistContext(), 15*time.Second)
+			defer cancel()
+
+			switch e.Provider {
+			case "telegram":
+				r.sendTelegramStreamEnd(nctx, e.Settings, channelLogin, textTemplate)
+			case "webhook":
+				r.postWebhook(nctx, e.Settings, body)
+			default:
+				r.obs.Logger.Debug("unknown notification provider", zap.String("provider", e.Provider))
+			}
+		}()
+	}
+}
+
+func (r *Runtime) sendTelegramStreamStart(ctx context.Context, settings map[string]any, channelLogin, title, textTemplate string) {
 	tok, _ := settings["bot_token"].(string)
 
 	chatID, _ := settings["chat_id"].(string)
@@ -64,6 +160,10 @@ func (r *Runtime) sendTelegramStreamStart(ctx context.Context, settings map[stri
 	text := fmt.Sprintf("[live] #%s started streaming", channelLogin)
 	if strings.TrimSpace(title) != "" {
 		text += ": " + truncateString(title, 500)
+	}
+
+	if strings.TrimSpace(textTemplate) != "" {
+		text = textTemplate
 	}
 
 	form := url.Values{}
@@ -93,45 +193,48 @@ func (r *Runtime) sendTelegramStreamStart(ctx context.Context, settings map[stri
 	}
 }
 
-func (r *Runtime) dispatchRuleHitNotifications(ctx context.Context, channel, user, message string) {
-	_ = ctx
+func (r *Runtime) sendTelegramStreamEnd(ctx context.Context, settings map[string]any, channelLogin, textTemplate string) {
+	tok, _ := settings["bot_token"].(string)
 
-	entries, err := r.repo.ListEnabledNotificationEntries(r.persistContext())
-	if err != nil || len(entries) == 0 {
+	chatID, _ := settings["chat_id"].(string)
+	if tok == "" || chatID == "" {
+		r.obs.Logger.Debug("telegram notification missing bot_token or chat_id")
 		return
 	}
 
-	payload := map[string]any{
-		"channel": channel,
-		"user":    user,
-		"message": truncateString(message, 400),
+	text := fmt.Sprintf("[offline] #%s stopped streaming", channelLogin)
+	if strings.TrimSpace(textTemplate) != "" {
+		text = textTemplate
 	}
-	body, _ := json.Marshal(payload)
 
-	for _, e := range entries {
-		e := e
+	form := url.Values{}
+	form.Set("chat_id", chatID)
+	form.Set("text", text)
 
-		go func() {
-			r.notifySem <- struct{}{}
+	u := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tok)
 
-			defer func() { <-r.notifySem }()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, strings.NewReader(form.Encode()))
+	if err != nil {
+		return
+	}
 
-			nctx, cancel := context.WithTimeout(r.persistContext(), 15*time.Second)
-			defer cancel()
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-			switch e.Provider {
-			case "telegram":
-				r.sendTelegram(nctx, e.Settings, channel, user, message)
-			case "webhook":
-				r.postWebhook(nctx, e.Settings, body)
-			default:
-				r.obs.Logger.Debug("unknown notification provider", zap.String("provider", e.Provider))
-			}
-		}()
+	resp, err := r.helix.HTTPClient.Do(req)
+	if err != nil {
+		r.obs.Logger.Debug("telegram send failed", zap.Error(err))
+		return
+	}
+
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		b, _ := io.ReadAll(resp.Body)
+		r.obs.Logger.Debug("telegram send rejected", zap.Int("status", resp.StatusCode), zap.ByteString("body", b))
 	}
 }
 
-func (r *Runtime) sendTelegram(ctx context.Context, settings map[string]any, channel, user, msg string) {
+func (r *Runtime) sendTelegram(ctx context.Context, settings map[string]any, channel, user, msg, textTemplate string) {
 	tok, _ := settings["bot_token"].(string)
 
 	chatID, _ := settings["chat_id"].(string)
@@ -141,6 +244,10 @@ func (r *Runtime) sendTelegram(ctx context.Context, settings map[string]any, cha
 	}
 
 	text := fmt.Sprintf("[%s] %s: %s", channel, user, truncateString(msg, 3500))
+	if strings.TrimSpace(textTemplate) != "" {
+		text = textTemplate
+	}
+
 	form := url.Values{}
 	form.Set("chat_id", chatID)
 	form.Set("text", text)
