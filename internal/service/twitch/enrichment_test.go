@@ -76,7 +76,10 @@ func TestRunHelixEnrichment_accountsButRefreshFails(t *testing.T) {
 
 	repo.EXPECT().ListDistinctChattersWithMessages(gomock.Any(), 800).Return(nil, nil)
 	repo.EXPECT().ListTwitchAccounts(gomock.Any()).Return([]entity.TwitchAccount{
-		{ID: 1, Username: "u", RefreshToken: "bad"},
+		{ID: 1, Username: "u"},
+	}, nil)
+	repo.EXPECT().GetTwitchAccountByID(gomock.Any(), int64(1)).Return(entity.TwitchAccount{
+		ID: 1, Username: "u", RefreshToken: "bad",
 	}, nil)
 
 	svc.RunHelixEnrichment(context.Background())

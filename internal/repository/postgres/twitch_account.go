@@ -17,7 +17,7 @@ func (r *Repository) ListTwitchAccounts(ctx context.Context) ([]entity.TwitchAcc
 	defer span.End()
 
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, username, refresh_token, account_type, created_at
+		SELECT id, username, account_type, created_at
 		FROM twitch_accounts
 		WHERE deleted_at IS NULL
 	`+twitchAccountOrder)
@@ -31,7 +31,7 @@ func (r *Repository) ListTwitchAccounts(ctx context.Context) ([]entity.TwitchAcc
 
 	for rows.Next() {
 		var a entity.TwitchAccount
-		if err := rows.Scan(&a.ID, &a.Username, &a.RefreshToken, &a.AccountType, &a.CreatedAt); err != nil {
+		if err := rows.Scan(&a.ID, &a.Username, &a.AccountType, &a.CreatedAt); err != nil {
 			r.obs.LogError(ctx, span, "scan twitch account failed", err)
 			return nil, err
 		}

@@ -128,7 +128,7 @@ func (r *Runtime) GetIrcMonitorStatus(ctx context.Context) (connected bool, chan
 		tcp = false
 	}
 
-	r.joinStateMu.Lock()
+	r.joinStateMu.RLock()
 
 	out := make([]IRCMonitorChannelStatus, 0, len(monitored))
 
@@ -137,7 +137,7 @@ func (r *Runtime) GetIrcMonitorStatus(ctx context.Context) (connected bool, chan
 		ok := tcp && clientUp && login != "" && r.reconcilerJoined[login]
 		out = append(out, IRCMonitorChannelStatus{Login: u.Username, IrcOK: ok})
 	}
-	r.joinStateMu.Unlock()
+	r.joinStateMu.RUnlock()
 
 	return tcp, out, nil
 }

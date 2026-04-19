@@ -384,9 +384,16 @@ func (r *Runtime) reconcileIRCJoinsOnce(ctx context.Context) {
 }
 
 func (r *Runtime) applyJoinDiffs(ctx context.Context, want map[string]bool) {
+	r.applyJoinSerialMu.Lock()
+	defer r.applyJoinSerialMu.Unlock()
+
 	r.monitorMu.Lock()
 	client := r.monitorClient
 	r.monitorMu.Unlock()
+
+	if client == nil {
+		return
+	}
 
 	r.joinStateMu.Lock()
 
@@ -406,15 +413,27 @@ func (r *Runtime) applyJoinDiffs(ctx context.Context, want map[string]bool) {
 		}
 	}
 
+	r.joinStateMu.Unlock()
+
+	// Depart/Join can block on IRC I/O; must not hold joinStateMu so GetIrcMonitorStatus can RLock.
 	for _, ch := range toLeave {
 		client.Depart(ch)
-		delete(r.reconcilerJoined, ch)
 	}
 
 	for _, ch := range toJoin {
 		client.Join(ch)
+	}
+
+	r.joinStateMu.Lock()
+
+	for _, ch := range toLeave {
+		delete(r.reconcilerJoined, ch)
+	}
+
+	for _, ch := range toJoin {
 		r.reconcilerJoined[ch] = true
 	}
+
 	r.joinStateMu.Unlock()
 
 	for _, ch := range toLeave {
@@ -487,6 +506,10 @@ func (r *Runtime) StopMonitor() {
 	r.monitorLoopsMu.Unlock()
 
 	r.monitorLoopsWG.Wait()
+
+	// Wait for any in-flight applyJoinDiffs (e.g. HTTP ReconcileIRCJoins) before tearing down maps/client.
+	r.applyJoinSerialMu.Lock()
+	defer r.applyJoinSerialMu.Unlock()
 
 	r.monitorMu.Lock()
 	if r.monitorClient != nil {

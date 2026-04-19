@@ -364,16 +364,18 @@ func (r *Repository) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchU
 			COALESCE(cc.cnt, 0)::bigint
 		FROM twitch_users u
 		LEFT JOIN twitch_user_helix_meta m ON m.twitch_user_id = u.id
-		LEFT JOIN LATERAL (
-			SELECT title, game_name, started_at, viewer_count, helix_synced_at
+		LEFT JOIN (
+			SELECT DISTINCT ON (channel_twitch_user_id)
+				channel_twitch_user_id, title, game_name, started_at, viewer_count, helix_synced_at
 			FROM streams
-			WHERE channel_twitch_user_id = u.id AND ended_at IS NULL
-			ORDER BY started_at DESC
-			LIMIT 1
-		) s ON true
-		LEFT JOIN LATERAL (
-			SELECT COUNT(*)::bigint AS cnt FROM channel_chatters WHERE channel_twitch_user_id = u.id
-		) cc ON true
+			WHERE ended_at IS NULL
+			ORDER BY channel_twitch_user_id, started_at DESC
+		) s ON s.channel_twitch_user_id = u.id
+		LEFT JOIN (
+			SELECT channel_twitch_user_id, COUNT(*)::bigint AS cnt
+			FROM channel_chatters
+			GROUP BY channel_twitch_user_id
+		) cc ON cc.channel_twitch_user_id = u.id
 		WHERE u.monitored = true`)
 	} else {
 		b.WriteString(`SELECT id, username, monitored, marked, is_sus, sus_type, sus_description, sus_auto_suppressed,

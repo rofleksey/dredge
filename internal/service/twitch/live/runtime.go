@@ -36,7 +36,8 @@ type Runtime struct {
 	ircMonitorMu  sync.Mutex
 	ircMonitorTCP bool
 
-	joinStateMu       sync.Mutex
+	joinStateMu       sync.RWMutex // RLock for reads (e.g. GetIrcMonitorStatus); never hold Lock during IRC Depart/Join
+	applyJoinSerialMu sync.Mutex   // one applyJoinDiffs at a time (ticker vs HTTP ReconcileIRCJoins)
 	reconcilerJoined  map[string]bool
 	streamEdge        map[int64]streamLiveEdge
 	lastIRCOAuthToken string

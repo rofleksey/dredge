@@ -18,7 +18,11 @@ func (s *Service) accessTokenForFirstLinkedAccount(ctx context.Context) (accessT
 		return "", entity.TwitchAccount{}, ErrNoLinkedTwitchAccount
 	}
 
-	acc = accs[0]
+	// List omits refresh_token; load full row for OAuth.
+	acc, err = s.repo.GetTwitchAccountByID(ctx, accs[0].ID)
+	if err != nil {
+		return "", entity.TwitchAccount{}, err
+	}
 
 	at, newRT, err := s.CachedUserAccessTokenForAccount(ctx, acc.ID, acc.RefreshToken)
 	if err != nil {
