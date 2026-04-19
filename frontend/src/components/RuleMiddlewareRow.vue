@@ -8,9 +8,11 @@ function onTypeChange(ev: Event): void {
   if (!MIDDLEWARE_TYPES.includes(v as (typeof MIDDLEWARE_TYPES)[number])) {
     return;
   }
+  const prev = row.value.type;
   row.value = {
     ...row.value,
     type: v as MiddlewareFormRow['type'],
+    ...(v === 'contains_word' && prev !== 'contains_word' ? { caseInsensitive: true } : {}),
   };
 }
 </script>
@@ -60,6 +62,10 @@ function onTypeChange(ev: Event): void {
       <label class="stack tight">
         <span>Words (one per line or comma-separated)</span>
         <textarea v-model="row.words" rows="3" spellcheck="false" autocomplete="off" />
+      </label>
+      <label class="row-inline">
+        <input v-model="row.caseInsensitive" type="checkbox" />
+        <span>Case insensitive</span>
       </label>
     </template>
 

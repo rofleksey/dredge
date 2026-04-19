@@ -114,7 +114,10 @@ export function middlewareRowToApi(row: MiddlewareFormRow): RuleMiddleware {
     case 'contains_word':
       return {
         type: row.type,
-        settings: { words: parseWords(row.words) },
+        settings: {
+          words: parseWords(row.words),
+          case_insensitive: row.caseInsensitive,
+        },
       };
     case 'cooldown': {
       const sec = Number.parseFloat(row.seconds);
@@ -153,6 +156,7 @@ function apiRowToForm(mw: RuleMiddleware): MiddlewareFormRow {
     } else {
       row.words = '';
     }
+    row.caseInsensitive = typeof s.case_insensitive === 'boolean' ? s.case_insensitive : true;
   }
   if (row.type === 'cooldown') {
     const sec = s.seconds;

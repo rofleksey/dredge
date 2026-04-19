@@ -208,7 +208,15 @@ func mwContainsWord(s map[string]any, text string) bool {
 		return false
 	}
 
-	lower := strings.ToLower(text)
+	caseInsensitive := true
+	if v, ok := s["case_insensitive"].(bool); ok {
+		caseInsensitive = v
+	}
+
+	hay := text
+	if caseInsensitive {
+		hay = strings.ToLower(hay)
+	}
 
 	for _, w := range wordsAny {
 		sw, ok := w.(string)
@@ -216,12 +224,17 @@ func mwContainsWord(s map[string]any, text string) bool {
 			continue
 		}
 
-		sw = strings.ToLower(strings.TrimSpace(sw))
+		sw = strings.TrimSpace(sw)
 		if sw == "" {
 			continue
 		}
 
-		if strings.Contains(lower, sw) {
+		needle := sw
+		if caseInsensitive {
+			needle = strings.ToLower(needle)
+		}
+
+		if strings.Contains(hay, needle) {
 			return true
 		}
 	}

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useDebounceFn } from '@vueuse/core';
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ApiError, DefaultService } from '../api/generated';
@@ -34,34 +33,6 @@ const deleting = ref(false);
 
 const form = ref<RuleFormState>(defaultRuleForm());
 const loadedRuleId = ref<number | null>(null);
-
-const regexTestPattern = ref('');
-const regexTestSample = ref('');
-const regexTestCaseInsensitive = ref(false);
-const regexTestMatches = ref<boolean | null>(null);
-const regexTestCompileError = ref<string | null>(null);
-
-const runRegexTestDebounced = useDebounceFn(async () => {
-  regexTestMatches.value = null;
-  regexTestCompileError.value = null;
-  try {
-    const res = await DefaultService.testRuleRegex({
-      requestBody: {
-        pattern: regexTestPattern.value,
-        sample: regexTestSample.value,
-        case_insensitive: regexTestCaseInsensitive.value,
-      },
-    });
-    regexTestMatches.value = res.matches;
-    regexTestCompileError.value = res.compile_error ?? null;
-  } catch {
-    regexTestCompileError.value = 'Request failed';
-  }
-}, 320);
-
-watch([regexTestPattern, regexTestSample, regexTestCaseInsensitive], () => {
-  void runRegexTestDebounced();
-});
 
 function notifyErr(e: unknown, id: string, title: string): void {
   const msg =
@@ -314,28 +285,6 @@ const accountPickValue = computed(() => {
         </template>
       </section>
 
-      <section class="panel">
-        <h2>Test regex</h2>
-        <p class="muted small">Uses the same API as Settings → Test regex. Handy while editing <code>match_regex</code>.</p>
-        <label class="stack gap-setting">
-          <span>Pattern</span>
-          <input v-model="regexTestPattern" type="text" autocomplete="off" />
-        </label>
-        <label class="stack gap-setting">
-          <span>Sample text</span>
-          <textarea v-model="regexTestSample" rows="2" autocomplete="off" />
-        </label>
-        <label class="row-inline">
-          <input v-model="regexTestCaseInsensitive" type="checkbox" />
-          <span>Case insensitive</span>
-        </label>
-        <p v-if="regexTestCompileError" class="regex-test-err">{{ regexTestCompileError }}</p>
-        <p v-else-if="regexTestMatches !== null" class="regex-test-ok">
-          {{ regexTestMatches ? 'Matches.' : 'Does not match.' }}
-        </p>
-        <p v-else class="muted small">Enter pattern and sample…</p>
-      </section>
-
       <footer class="rule-editor-footer">
         <button type="button" class="btn-secondary" @click="cancel">Cancel</button>
         <SubmitButton :loading="saving">Save</SubmitButton>
@@ -495,18 +444,6 @@ h2 {
     opacity: 0.5;
     cursor: not-allowed;
   }
-}
-
-.regex-test-err {
-  color: #e74c3c;
-  font-size: 0.85rem;
-  margin: 0.35rem 0;
-}
-
-.regex-test-ok {
-  color: #2ecc71;
-  font-size: 0.85rem;
-  margin: 0.35rem 0;
 }
 
 .rule-editor-footer {
