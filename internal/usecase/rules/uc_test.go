@@ -80,6 +80,34 @@ func TestUsecase_CreateRule_validationError(t *testing.T) {
 	require.ErrorIs(t, err, entity.ErrInvalidRule)
 }
 
+func TestUsecase_CreateRule_sendChat_unknownAccount(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := repomocks.NewMockStore(ctrl)
+	obs := &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")}
+	uc := NewUsecase(repo, obs, nil, nil)
+
+	r := entity.Rule{
+		Name:           "r",
+		Enabled:        true,
+		EventType:      EventChatMessage,
+		EventSettings:  map[string]any{},
+		Middlewares:    nil,
+		ActionType:     ActionSendChat,
+		ActionSettings: map[string]any{"message": "hi", "account_id": float64(999)},
+		UseSharedPool:  true,
+	}
+
+	repo.EXPECT().GetTwitchAccountByID(gomock.Any(), int64(999)).Return(entity.TwitchAccount{}, entity.ErrTwitchAccountNotFound)
+
+	_, err := uc.CreateRule(context.Background(), r)
+	require.Error(t, err)
+	require.ErrorIs(t, err, entity.ErrInvalidRule)
+}
+
 func TestUsecase_UpdateRule_validationError(t *testing.T) {
 	t.Parallel()
 

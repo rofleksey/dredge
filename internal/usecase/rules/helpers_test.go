@@ -35,6 +35,8 @@ func TestMwContainsWordCaseInsensitive(t *testing.T) {
 	}
 	require.True(t, mwContainsWord(s, "hello foo there"))
 	require.False(t, mwContainsWord(s, "hello bar"))
+	require.False(t, mwContainsWord(s, "the food is good"))
+	require.False(t, mwContainsWord(s, "unfoobar"))
 
 	sExplicit := map[string]any{
 		"words":            []any{"Foo"},

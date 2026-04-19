@@ -227,7 +227,16 @@ func (e *Engine) execAction(ctx context.Context, rule entity.Rule, p EvalPayload
 			return
 		}
 
-		err := e.send.SendMessage(ctx, 0, ch, msg)
+		accountID, parseErr := ParseSendChatAccountID(rule.ActionSettings)
+		if parseErr != nil {
+			if e.obs != nil {
+				e.obs.Logger.Debug("rules send_chat skipped: bad account_id", zap.Error(parseErr), zap.Int64("rule_id", rule.ID))
+			}
+
+			return
+		}
+
+		err := e.send.SendMessage(ctx, accountID, ch, msg)
 		if err != nil {
 			if e.obs != nil {
 				e.obs.Logger.Debug("rules send_chat failed", zap.Error(err), zap.Int64("rule_id", rule.ID))

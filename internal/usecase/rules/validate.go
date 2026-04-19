@@ -2,7 +2,9 @@ package rules
 
 import (
 	"fmt"
+	"math"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/rofleksey/dredge/internal/entity"
@@ -45,6 +47,10 @@ func ValidateRule(r entity.Rule) error {
 		if msg == "" {
 			return fmt.Errorf("send_chat requires message template: %w", entity.ErrInvalidRule)
 		}
+
+		if _, err := ParseSendChatAccountID(r.ActionSettings); err != nil {
+			return fmt.Errorf("send_chat action_settings: %w: %w", err, entity.ErrInvalidRule)
+		}
 	default:
 		return fmt.Errorf("unknown action_type %q: %w", r.ActionType, entity.ErrInvalidRule)
 	}
@@ -64,6 +70,68 @@ func ValidateRule(r entity.Rule) error {
 	}
 
 	return nil
+}
+
+// ParseSendChatAccountID reads optional action_settings.account_id for send_chat.
+// 0 means the server picks a linked account (bot preferred, else first linked).
+// Values must be non-negative integers; use a string for IDs that do not fit float64 safely.
+func ParseSendChatAccountID(m map[string]any) (int64, error) {
+	if m == nil {
+		return 0, nil
+	}
+
+	v, ok := m["account_id"]
+	if !ok || v == nil {
+		return 0, nil
+	}
+
+	switch n := v.(type) {
+	case float64:
+		if math.IsNaN(n) || math.IsInf(n, 0) {
+			return 0, fmt.Errorf("invalid account_id")
+		}
+
+		if n < 0 {
+			return 0, fmt.Errorf("account_id must be non-negative")
+		}
+
+		if n > float64(1<<53) {
+			return 0, fmt.Errorf("account_id is too large; use a string value")
+		}
+
+		ri := int64(n)
+		if float64(ri) != n {
+			return 0, fmt.Errorf("account_id must be a whole number")
+		}
+
+		return ri, nil
+	case int:
+		if n < 0 {
+			return 0, fmt.Errorf("account_id must be non-negative")
+		}
+
+		return int64(n), nil
+	case int64:
+		if n < 0 {
+			return 0, fmt.Errorf("account_id must be non-negative")
+		}
+
+		return n, nil
+	case string:
+		s := strings.TrimSpace(n)
+		if s == "" {
+			return 0, nil
+		}
+
+		parsed, err := strconv.ParseInt(s, 10, 64)
+		if err != nil || parsed < 0 {
+			return 0, fmt.Errorf("invalid account_id")
+		}
+
+		return parsed, nil
+	default:
+		return 0, fmt.Errorf("account_id must be a number or numeric string")
+	}
 }
 
 func validateMiddleware(typ string, s map[string]any) error {

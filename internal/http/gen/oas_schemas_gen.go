@@ -2692,7 +2692,10 @@ func (s *RuleActionSettings) init() RuleActionSettings {
 
 // Notify — deliver `action_settings.text` via notification providers.
 // send_chat — post to the event channel via Helix; `action_settings` requires `message` (template).
-// OAuth account is chosen server-side (bot account if linked, else first linked account).
+// Optional `account_id` (integer, app-linked Twitch OAuth row id) selects which linked account sends
+// the message;
+// if omitted or zero, the server uses the linked bot account when present, otherwise the first
+// linked account.
 // Ref: #/components/schemas/RuleActionType
 type RuleActionType string
 

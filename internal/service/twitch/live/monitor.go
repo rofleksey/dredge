@@ -18,7 +18,7 @@ import (
 
 const sendMessageTimeout = 45 * time.Second
 
-// defaultSendAccountID picks an OAuth account for automated sends (e.g. rules send_chat with no stored account_id).
+// defaultSendAccountID picks an OAuth account for automated sends (e.g. rules send_chat when account_id is unset or 0).
 // Prefers account_type "bot", otherwise the first linked account (same ordering as list APIs).
 func (r *Runtime) defaultSendAccountID(ctx context.Context) (int64, error) {
 	accs, err := r.repo.ListTwitchAccounts(ctx)

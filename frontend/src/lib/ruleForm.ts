@@ -179,6 +179,8 @@ export type RuleFormState = {
   middlewares: MiddlewareFormRow[];
   actionType: RuleActionType;
   notifyText: string;
+  /** 0 = server default (linked bot, else first linked account). */
+  sendAccountId: number;
   sendMessage: string;
 };
 
@@ -193,6 +195,7 @@ export function defaultRuleForm(): RuleFormState {
     middlewares: [defaultMiddlewareRow('match_regex')],
     actionType: AT.NOTIFY,
     notifyText: '[$CHANNEL] $USERNAME: $TEXT',
+    sendAccountId: 0,
     sendMessage: '',
   };
 }
@@ -221,8 +224,24 @@ export function ruleToFormState(r: Rule): RuleFormState {
   }
   if (r.action_type === AT.SEND_CHAT) {
     st.sendMessage = typeof as.message === 'string' ? as.message : '';
+    st.sendAccountId = accountIdFromActionSettings(as);
   }
   return st;
+}
+
+function accountIdFromActionSettings(as: Record<string, unknown>): number {
+  const v = as.account_id;
+  if (v === undefined || v === null) {
+    return 0;
+  }
+  if (typeof v === 'number' && Number.isFinite(v)) {
+    return Math.trunc(v);
+  }
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number.parseInt(v, 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+  return 0;
 }
 
 function buildEventSettings(st: RuleFormState): Record<string, unknown> {
@@ -241,9 +260,13 @@ function buildActionSettings(st: RuleFormState): Record<string, unknown> {
     const t = st.notifyText.trim();
     return t ? { text: t } : {};
   }
-  return {
+  const out: Record<string, unknown> = {
     message: st.sendMessage,
   };
+  if (st.sendAccountId > 0) {
+    out.account_id = st.sendAccountId;
+  }
+  return out;
 }
 
 export function formStateToCreateRequest(st: RuleFormState): CreateRuleRequest {

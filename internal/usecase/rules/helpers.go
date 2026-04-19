@@ -230,11 +230,6 @@ func mwContainsWord(s map[string]any, text string) bool {
 		caseInsensitive = v
 	}
 
-	hay := text
-	if caseInsensitive {
-		hay = strings.ToLower(hay)
-	}
-
 	for _, w := range wordsAny {
 		sw, ok := w.(string)
 		if !ok {
@@ -246,12 +241,17 @@ func mwContainsWord(s map[string]any, text string) bool {
 			continue
 		}
 
-		needle := sw
+		pat := `\b` + regexp.QuoteMeta(sw) + `\b`
 		if caseInsensitive {
-			needle = strings.ToLower(needle)
+			pat = "(?i)" + pat
 		}
 
-		if strings.Contains(hay, needle) {
+		re, err := regexp.Compile(pat)
+		if err != nil {
+			continue
+		}
+
+		if re.MatchString(text) {
 			return true
 		}
 	}

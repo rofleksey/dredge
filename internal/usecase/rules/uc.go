@@ -3,6 +3,7 @@ package rules
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"go.uber.org/zap"
 
@@ -97,6 +98,11 @@ func (s *Usecase) CreateRule(ctx context.Context, r entity.Rule) (entity.Rule, e
 		return entity.Rule{}, err
 	}
 
+	if err := s.validateSendChatAccount(ctx, r); err != nil {
+		s.obs.LogError(ctx, span, "validate rule failed", err, zap.String("event_type", r.EventType))
+		return entity.Rule{}, err
+	}
+
 	out, err := s.repo.CreateRule(ctx, r)
 	if err != nil {
 		s.obs.LogError(ctx, span, "create rule failed", err, zap.String("event_type", r.EventType))
@@ -117,6 +123,11 @@ func (s *Usecase) UpdateRule(ctx context.Context, id int64, r entity.Rule) (enti
 	defer span.End()
 
 	if err := ValidateRule(r); err != nil {
+		s.obs.LogError(ctx, span, "validate rule failed", err, zap.Int64("id", id))
+		return entity.Rule{}, err
+	}
+
+	if err := s.validateSendChatAccount(ctx, r); err != nil {
 		s.obs.LogError(ctx, span, "validate rule failed", err, zap.Int64("id", id))
 		return entity.Rule{}, err
 	}
@@ -157,4 +168,30 @@ func (s *Usecase) DeleteRule(ctx context.Context, id int64) error {
 	s.triggerRestart(ctx)
 
 	return nil
+}
+
+func (s *Usecase) validateSendChatAccount(ctx context.Context, r entity.Rule) error {
+	if r.ActionType != ActionSendChat {
+		return nil
+	}
+
+	aid, err := ParseSendChatAccountID(r.ActionSettings)
+	if err != nil {
+		return err
+	}
+
+	if aid <= 0 {
+		return nil
+	}
+
+	_, err = s.repo.GetTwitchAccountByID(ctx, aid)
+	if err == nil {
+		return nil
+	}
+
+	if errors.Is(err, entity.ErrTwitchAccountNotFound) {
+		return fmt.Errorf("send_chat: Twitch account is not linked in this app: %w", entity.ErrInvalidRule)
+	}
+
+	return err
 }

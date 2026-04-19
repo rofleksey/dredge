@@ -18,8 +18,11 @@ import {
   validateRuleForm,
 } from '../lib/ruleForm';
 import { notify } from '../lib/notify';
+import { useTwitchAccountsStore } from '../stores/twitchAccounts';
 
 defineOptions({ name: 'RuleEditorView' });
+
+const twitchAccountsStore = useTwitchAccountsStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -86,6 +89,7 @@ async function load(): Promise<void> {
 onMounted(() => {
   void load();
   void fetchTemplateVariables();
+  void twitchAccountsStore.fetch();
 });
 
 watch(
@@ -268,9 +272,18 @@ const pageTitle = computed(() => {
 
         <template v-else>
           <p class="muted small">
-            Message is sent to the same channel as the event. The server uses your linked bot OAuth account if present,
-            otherwise your first linked Twitch account.
+            Message is sent to the same channel as the event. Pick which linked Twitch account sends the message, or leave
+            the default (linked bot account if present, otherwise your first linked account).
           </p>
+          <label class="stack gap-setting">
+            <span>Send as account</span>
+            <select v-model.number="form.sendAccountId">
+              <option :value="0">Default (bot or first linked account)</option>
+              <option v-for="a in twitchAccountsStore.accounts" :key="a.id" :value="a.id">
+                @{{ a.username }} ({{ a.account_type }})
+              </option>
+            </select>
+          </label>
           <label class="stack gap-setting">
             <span class="label-with-hint">
               <span>Message (template)</span>
@@ -282,8 +295,6 @@ const pageTitle = computed(() => {
       </section>
 
       <footer class="rule-editor-footer">
-        <button type="button" class="btn-secondary" @click="cancel">Cancel</button>
-        <SubmitButton :loading="saving">Save</SubmitButton>
         <button
           v-if="!isNew"
           type="button"
@@ -293,6 +304,10 @@ const pageTitle = computed(() => {
         >
           Delete
         </button>
+        <div class="rule-editor-footer-actions">
+          <button type="button" class="btn-secondary" @click="cancel">Cancel</button>
+          <SubmitButton class="btn-primary" :loading="saving">Save</SubmitButton>
+        </div>
       </footer>
     </form>
   </div>
@@ -423,11 +438,27 @@ h2 {
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
-  margin-right: 0.5rem;
 
   &:hover {
     background: var(--bg-hover);
     border-color: var(--accent);
+  }
+}
+
+.btn-primary {
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.25rem;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:disabled,
+  &[aria-busy='true'] {
+    opacity: 0.65;
+    cursor: not-allowed;
   }
 }
 
@@ -455,9 +486,19 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-top: 1rem;
-  padding-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.rule-editor-footer-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 .mw-line {
