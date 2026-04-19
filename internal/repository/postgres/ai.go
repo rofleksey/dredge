@@ -18,7 +18,7 @@ func (r *Repository) GetAISettings(ctx context.Context) (entity.AISettings, erro
 	err := r.pool.QueryRow(ctx, `
 		SELECT base_url, model, COALESCE(api_token, ''), updated_at
 		FROM ai_settings WHERE id = 1
-	`).Scan(&s.BaseURL, &s.APIToken, &s.UpdatedAt)
+	`).Scan(&s.BaseURL, &s.Model, &s.APIToken, &s.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return entity.AISettings{}, nil
