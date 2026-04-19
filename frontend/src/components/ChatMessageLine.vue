@@ -28,6 +28,8 @@ const props = withDefaults(
     suspiciousTitle?: string;
     /** Twitch first message in channel (IRC) */
     firstMessage?: boolean;
+    /** Preserve newlines (e.g. AI chat code blocks / multiline replies). */
+    preserveLineBreaks?: boolean;
   }>(),
   {
     createdAt: undefined,
@@ -39,6 +41,7 @@ const props = withDefaults(
     userIsSus: false,
     suspiciousTitle: '',
     firstMessage: false,
+    preserveLineBreaks: false,
   },
 );
 
@@ -73,7 +76,7 @@ const timeLabel = computed(() => {
       :link-title="suspiciousTitle"
       variant="chat"
     />
-    <span class="txt">{{ message }}</span>
+    <span class="txt" :class="{ 'txt--multiline': preserveLineBreaks }">{{ message }}</span>
   </li>
 </template>
 
@@ -142,5 +145,9 @@ li {
 
 .txt {
   word-break: break-word;
+
+  &--multiline {
+    white-space: pre-wrap;
+  }
 }
 </style>

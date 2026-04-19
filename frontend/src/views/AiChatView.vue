@@ -19,6 +19,8 @@ const activeId = ref<number | null>(null);
 const messages = ref<AiMessage[]>([]);
 const draft = ref('');
 const sending = ref(false);
+/** Agent run in progress (after send / resume until done, error, or approval prompt). */
+const agentProcessing = ref(false);
 const pending = ref<{ tool_call_id: string; tool_name: string; arguments: string } | null>(null);
 const activityLog = ref<ActivityEntry[]>([]);
 const chatEl = ref<HTMLElement | null>(null);
@@ -33,6 +35,8 @@ function pushActivity(text: string, kind?: string): void {
   }
 }
 
+const showAgentSpinner = computed(() => sending.value || agentProcessing.value);
+
 function describeAgentEvent(ev: Record<string, unknown>): string {
   const k = String(ev.kind ?? '');
   if (k === 'tool_attempt') {
@@ -41,17 +45,11 @@ function describeAgentEvent(ev: Record<string, unknown>): string {
   if (k === 'error') {
     return `Agent error: ${String(ev.message ?? '')}${ev.phase ? ` (${String(ev.phase)})` : ''}`;
   }
-  if (k === 'llm_request') {
-    return 'Calling LLM…';
-  }
   if (k === 'needs_confirmation') {
     return `Needs approval: ${String(ev.tool_name ?? '')}`;
   }
   if (k === 'tool_result') {
     return `Tool finished: ${String(ev.tool_name ?? '')}`;
-  }
-  if (k === 'done') {
-    return `Run finished: ${String(ev.reason ?? '')}`;
   }
   return k || 'event';
 }
@@ -175,16 +173,27 @@ function onComposerKeydown(e: KeyboardEvent): void {
 
 async function onSend(): Promise<void> {
   const text = draft.value.trim();
-  const cid = resolvedActiveId();
-  if (!text || cid === null || sending.value) {
+  if (!text || sending.value) {
     return;
   }
   sending.value = true;
   try {
+    let cid = resolvedActiveId();
+    if (cid === null) {
+      const c = await DefaultService.createAiConversation({});
+      if (!validConversationId(c)) {
+        notify({ id: 'ai-new', type: 'error', title: 'AI', description: 'Invalid conversation from server.' });
+        return;
+      }
+      await loadConversations();
+      activeId.value = c.id;
+      cid = c.id;
+    }
     await DefaultService.createAiMessage({
       conversationId: cid,
       requestBody: { content: text },
     });
+    agentProcessing.value = true;
     draft.value = '';
     await loadMessages();
     await scrollChatToBottom();
@@ -223,6 +232,9 @@ async function onConfirm(approve: boolean): Promise<void> {
       requestBody: { tool_call_id: pending.value.tool_call_id, approve },
     });
     pending.value = null;
+    if (approve) {
+      agentProcessing.value = true;
+    }
     await loadMessages();
   } catch (e: unknown) {
     const msg =
@@ -233,9 +245,12 @@ async function onConfirm(approve: boolean): Promise<void> {
   }
 }
 
-watch(activeId, () => {
+watch(activeId, (newId, oldId) => {
   pending.value = null;
   activityLog.value = [];
+  if (oldId != null && newId !== oldId) {
+    agentProcessing.value = false;
+  }
   void loadMessages();
 });
 
@@ -254,7 +269,17 @@ watch(
     if (cur !== null && Number.isFinite(cid) && cid !== cur) {
       return;
     }
+    const forActiveConv = cur !== null && Number.isFinite(cid) && cid === cur;
     const kind = String(last.kind ?? '');
+    if (forActiveConv) {
+      if (kind === 'needs_confirmation') {
+        agentProcessing.value = false;
+      } else if (kind === 'done' || kind === 'error') {
+        agentProcessing.value = false;
+      } else if (kind === 'llm_request' || kind === 'tool_attempt' || kind === 'tool_result') {
+        agentProcessing.value = true;
+      }
+    }
     if (kind === 'needs_confirmation') {
       pending.value = {
         tool_call_id: String(last.tool_call_id ?? ''),
@@ -271,14 +296,9 @@ watch(
     ) {
       void loadMessages();
     }
-    if (
-      kind === 'tool_attempt' ||
-      kind === 'tool_result' ||
-      kind === 'llm_request' ||
-      kind === 'error' ||
-      kind === 'needs_confirmation' ||
-      kind === 'done'
-    ) {
+    const logKind =
+      kind === 'tool_attempt' || kind === 'tool_result' || kind === 'error' || kind === 'needs_confirmation';
+    if (logKind) {
       pushActivity(describeAgentEvent(last as Record<string, unknown>), kind);
     }
   },
@@ -288,11 +308,7 @@ watch(
 onMounted(async () => {
   try {
     await loadConversations();
-    if (conversations.value.length === 0) {
-      await onNewConversation();
-    } else {
-      await loadMessages();
-    }
+    await loadMessages();
     await scrollChatToBottom();
   } catch {
     notify({ id: 'ai-load', type: 'error', title: 'AI', description: 'Failed to load (admin only?).' });
@@ -350,11 +366,8 @@ function activityLineClass(kind?: string): string {
   if (kind === 'needs_confirmation') {
     return 'ai-agent-line ai-agent-line--confirm';
   }
-  if (kind === 'tool_result' || kind === 'done') {
+  if (kind === 'tool_result') {
     return 'ai-agent-line ai-agent-line--ok';
-  }
-  if (kind === 'llm_request') {
-    return 'ai-agent-line ai-agent-line--llm';
   }
   return 'ai-agent-line';
 }
@@ -385,7 +398,7 @@ function formatShortTime(ts: number): string {
             </button>
           </li>
         </ul>
-        <p v-if="!conversations.length" class="ai-sidebar-empty muted">No chats yet — one will be created for you.</p>
+        <p v-if="!conversations.length" class="ai-sidebar-empty muted">No chats yet — send a message or click New to start.</p>
         <button
           type="button"
           class="btn-danger-ghost ai-sidebar-del"
@@ -400,6 +413,12 @@ function formatShortTime(ts: number): string {
         <div class="pane-head ai-chat-head">
           <div class="ai-chat-head-main">
             <span class="ai-chat-title">AI assistant</span>
+            <span
+              v-if="showAgentSpinner"
+              class="ai-agent-spinner"
+              aria-label="Agent working"
+              role="status"
+            />
             <span v-if="resolvedActiveId() != null" class="ai-chat-session">#{{ resolvedActiveId() }}</span>
             <span v-else class="muted">—</span>
           </div>
@@ -424,6 +443,7 @@ function formatShortTime(ts: number): string {
               :badge-tags="[]"
               :show-timestamp="false"
               :created-at="row.message.created_at"
+              :preserve-line-breaks="true"
             />
             <li v-else :class="activityLineClass(row.entry.kind)">
               <span class="ts">{{ formatShortTime(row.entry.ts) }}</span>
@@ -465,7 +485,7 @@ function formatShortTime(ts: number): string {
             class="btn-send"
             native-type="submit"
             :loading="sending"
-            :disabled="!hasActiveConversation"
+            :disabled="!draft.trim() || sending"
           >
             {{ sending ? 'Sending…' : 'Send' }}
           </SubmitButton>
@@ -653,6 +673,22 @@ function formatShortTime(ts: number): string {
   min-width: 0;
 }
 
+.ai-agent-spinner {
+  flex-shrink: 0;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-top-color: var(--accent-bright);
+  border-radius: 50%;
+  animation: ai-agent-spin 0.65s linear infinite;
+}
+
+@keyframes ai-agent-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .ai-chat-title {
   flex-shrink: 0;
   line-height: 1.25;
@@ -727,11 +763,6 @@ function formatShortTime(ts: number): string {
     color: var(--text-muted);
     flex: 1 1 12rem;
     min-width: 0;
-  }
-
-  &--llm {
-    background: rgba(56, 189, 248, 0.06);
-    border-left: 2px solid rgba(56, 189, 248, 0.35);
   }
 
   &--ok {
