@@ -663,10 +663,8 @@ const filteredChannelBlacklist = computed(() => {
             <button type="button" class="btn-danger btn-inline-x" @click="deleteRule(r.id)">x</button>
             <div class="rule-row-main">
               <RouterLink class="rule-edit-link" :to="{ name: 'rule-edit', params: { id: String(r.id) } }">
+                <span class="muted small rule-id">#{{ r.id }}</span>
                 <span class="rule-name">{{ r.name }}</span>
-                <code>{{ r.event_type }} → {{ r.action_type }}</code>
-                <span class="muted small">#{{ r.id }}</span>
-                <span v-if="!r.enabled" class="muted small"> (disabled)</span>
               </RouterLink>
             </div>
           </li>
@@ -1081,9 +1079,10 @@ ul {
 
 .rule-edit-link {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
   color: var(--accent-bright);
   text-decoration: none;
   font-weight: 600;
@@ -1092,13 +1091,13 @@ ul {
     text-decoration: underline;
   }
 
-  .rule-name {
-    font-weight: 600;
+  .rule-id {
+    flex-shrink: 0;
   }
 
-  code {
-    color: inherit;
-    font-weight: 500;
+  .rule-name {
+    font-weight: 600;
+    min-width: 0;
   }
 }
 
