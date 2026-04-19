@@ -110,8 +110,10 @@ func fxOptions() fx.Option {
 				return &http.Server{Addr: cfg.Server.Address, Handler: obs.InstrumentHTTP(httpmw.WrapCORS(string(origin), mux))}, nil
 			},
 		),
-		fx.Invoke(registerRulesLifecycle),
+		// registerLifecycle must run first: RunMigrations runs in its OnStart before any
+		// code (e.g. rules Bootstrap listing rules) that depends on the current schema.
 		fx.Invoke(registerLifecycle),
+		fx.Invoke(registerRulesLifecycle),
 	)
 }
 
