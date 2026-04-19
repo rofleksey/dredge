@@ -432,7 +432,7 @@ func (r *Repository) ListTwitchUsersBrowse(ctx context.Context, f entity.TwitchU
 		}
 
 		var (
-			u entity.TwitchUser
+			u                entity.TwitchUser
 			susType, susDesc sql.NullString
 			profImg          sql.NullString
 			title, game      sql.NullString

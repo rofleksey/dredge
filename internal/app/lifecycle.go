@@ -16,7 +16,7 @@ import (
 	"github.com/rofleksey/dredge/internal/config"
 	"github.com/rofleksey/dredge/internal/observability"
 	"github.com/rofleksey/dredge/internal/repository/postgres"
-	twitchsvc "github.com/rofleksey/dredge/internal/service/twitch"
+	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 )
 
 type twitchRuntime struct {
@@ -35,7 +35,7 @@ func registerLifecycle(
 	lc fx.Lifecycle,
 	cfg config.Config,
 	pool *pgxpool.Pool,
-	twitchSvc *twitchsvc.Service,
+	twitchSvc *twitchuc.Service,
 	server *http.Server,
 	log *zap.Logger,
 	obs *observability.Stack,
@@ -56,7 +56,7 @@ func onAppStart(
 	ctx context.Context,
 	cfg config.Config,
 	pool *pgxpool.Pool,
-	twitchSvc *twitchsvc.Service,
+	twitchSvc *twitchuc.Service,
 	server *http.Server,
 	log *zap.Logger,
 	obs *observability.Stack,
@@ -135,7 +135,7 @@ func onAppStart(
 func onAppStop(
 	ctx context.Context,
 	pool *pgxpool.Pool,
-	twitchSvc *twitchsvc.Service,
+	twitchSvc *twitchuc.Service,
 	server *http.Server,
 	log *zap.Logger,
 	obs *observability.Stack,

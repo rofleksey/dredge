@@ -2,9 +2,10 @@ package httptransport
 
 import (
 	"github.com/rofleksey/dredge/internal/observability"
-	"github.com/rofleksey/dredge/internal/service/auth"
-	"github.com/rofleksey/dredge/internal/service/settings"
-	twitchsvc "github.com/rofleksey/dredge/internal/service/twitch"
+	twitchoauth "github.com/rofleksey/dredge/internal/service/twitch"
+	"github.com/rofleksey/dredge/internal/usecase/auth"
+	"github.com/rofleksey/dredge/internal/usecase/settings"
+	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 )
 
 type contextKey string
@@ -22,7 +23,7 @@ type Security struct {
 type Handler struct {
 	auth        *auth.Service
 	sett        *settings.Service
-	twitch      *twitchsvc.Service
-	twitchOAuth *twitchsvc.OAuth
+	twitch      *twitchuc.Service
+	twitchOAuth *twitchoauth.OAuth
 	obs         *observability.Stack
 }

@@ -10,15 +10,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/rofleksey/dredge/internal/observability"
-	"github.com/rofleksey/dredge/internal/service/settings"
-	twitchsvc "github.com/rofleksey/dredge/internal/service/twitch"
+	twitchoauth "github.com/rofleksey/dredge/internal/service/twitch"
+	"github.com/rofleksey/dredge/internal/usecase/settings"
 )
 
 // TwitchOAuthCallbackPath is registered on the root mux (not the SPA router) for Twitch's redirect.
 const TwitchOAuthCallbackPath = "/oauth/twitch/callback"
 
 // NewTwitchOAuthCallback handles GET /oauth/twitch/callback after Twitch redirects the browser.
-func NewTwitchOAuthCallback(oauth *twitchsvc.OAuth, sett *settings.Service, obs *observability.Stack) http.Handler {
+func NewTwitchOAuthCallback(oauth *twitchoauth.OAuth, sett *settings.Service, obs *observability.Stack) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -91,7 +91,7 @@ func NewTwitchOAuthCallback(oauth *twitchsvc.OAuth, sett *settings.Service, obs 
 	})
 }
 
-func twitchOAuthRedirectBase(oauth *twitchsvc.OAuth, spaReturn string) string {
+func twitchOAuthRedirectBase(oauth *twitchoauth.OAuth, spaReturn string) string {
 	if strings.TrimSpace(spaReturn) != "" {
 		return spaReturn
 	}

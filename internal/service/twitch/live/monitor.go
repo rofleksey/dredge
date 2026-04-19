@@ -126,16 +126,16 @@ func (r *Runtime) wirePrivateMessageHandlers(client *twitchirc.Client, compiled 
 		}
 
 		wsPayload := map[string]any{
-			"type":            "chat_message",
-			"channel":         ch,
-			"user":            chatterLogin,
-			"message":         msg.Message,
-			"keyword_match":   keyword,
-			"chatter_marked":  chatterMarked,
-			"chatter_is_sus":  chatterIsSus,
-			"first_message":   msg.FirstMessage,
-			"badge_tags":      badgeTags,
-			"created_at":      ts.Format(time.RFC3339Nano),
+			"type":           "chat_message",
+			"channel":        ch,
+			"user":           chatterLogin,
+			"message":        msg.Message,
+			"keyword_match":  keyword,
+			"chatter_marked": chatterMarked,
+			"chatter_is_sus": chatterIsSus,
+			"first_message":  msg.FirstMessage,
+			"badge_tags":     badgeTags,
+			"created_at":     ts.Format(time.RFC3339Nano),
 		}
 		if chatterID != nil {
 			wsPayload["user_twitch_id"] = *chatterID

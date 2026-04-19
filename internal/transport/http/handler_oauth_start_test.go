@@ -13,10 +13,11 @@ import (
 	"github.com/rofleksey/dredge/internal/config"
 	"github.com/rofleksey/dredge/internal/observability"
 	repomocks "github.com/rofleksey/dredge/internal/repository/mocks"
-	"github.com/rofleksey/dredge/internal/service/auth"
-	"github.com/rofleksey/dredge/internal/service/settings"
-	"github.com/rofleksey/dredge/internal/service/twitch"
+	twitchoauth "github.com/rofleksey/dredge/internal/service/twitch"
 	"github.com/rofleksey/dredge/internal/transport/http/gen"
+	"github.com/rofleksey/dredge/internal/usecase/auth"
+	"github.com/rofleksey/dredge/internal/usecase/settings"
+	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 )
 
 func TestHandler_StartTwitchOAuth(t *testing.T) {
@@ -35,7 +36,7 @@ func TestHandler_StartTwitchOAuth(t *testing.T) {
 	authSvc, err := auth.New(cfg, "12345678901234567890", time.Hour, obs)
 	require.NoError(t, err)
 
-	oauth := twitch.NewOAuth(
+	oauth := twitchoauth.NewOAuth(
 		"clientid",
 		"secret",
 		"http://127.0.0.1:8080/oauth/twitch/callback",
@@ -43,7 +44,7 @@ func TestHandler_StartTwitchOAuth(t *testing.T) {
 		"12345678901234567890123456789012",
 	)
 
-	twSvc := twitch.New(repo, noopBroadcaster{}, testTwitchServiceConfig("cid", "sec"), obs)
+	twSvc := twitchuc.New(repo, noopBroadcaster{}, testTwitchServiceConfig("cid", "sec"), obs)
 	setSvc := settings.New(repo, obs)
 
 	h := NewHandler(authSvc, setSvc, twSvc, oauth, obs)

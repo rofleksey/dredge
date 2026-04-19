@@ -53,4 +53,4 @@ tidy:
 	go mod tidy
 
 clean-generated:
-	rm -rf internal/transport/http/gen internal/service/auth/mocks internal/repository/mocks internal/gen
+	rm -rf internal/transport/http/gen internal/repository/mocks internal/gen

@@ -19,8 +19,9 @@ alwaysApply: true
 ## Layout
 
 - **HTTP API:** OpenAPI in `api/openapi.yaml`; **ogen** output in `internal/transport/http/gen` — do not hand-edit generated files.
-- **Handlers:** `internal/transport/http/server.go` (`Handler`, `Security`) — implement generated interfaces and return `gen.*` response types.
-- **Services:** `internal/service/{auth,settings,twitch}`; small interfaces in each `types.go`; mocks under `**/mocks/` (generated).
+- **Handlers:** `internal/transport/http` — one file per generated `Handler` / `SecurityHandler` method (plus `server.go` for wiring); implement interfaces and return `gen.*` response types.
+- **Use cases:** `internal/usecase/{auth,settings,twitch}` — application logic; each exported use-case method in its own file with an adjacent `*_test.go` where tested.
+- **External clients:** `internal/service/twitch` — Twitch Helix (`helix/`), GraphQL (`gql/`), IRC (`live/`), and OAuth (`oauth.go`); no orchestration layer here.
 - **DB:** `internal/repository/postgres`, SQL migrations in `migrations/`.
 - **WebSocket:** `internal/transport/ws`.
 - **Observability:** `internal/observability` (zap, tracing, metrics).
@@ -28,7 +29,7 @@ alwaysApply: true
 ## Regeneration (never edit outputs by hand)
 
 - OpenAPI → Go: `make gen` (or `make generate`).
-- Mocks: `make mocks` after changing `internal/service/*/types.go` interfaces.
+- Mocks: `make mocks` after changing `internal/repository/store.go` (repository mocks).
 
 ## Config
 

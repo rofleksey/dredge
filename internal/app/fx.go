@@ -14,12 +14,13 @@ import (
 	"github.com/rofleksey/dredge/internal/observability"
 	"github.com/rofleksey/dredge/internal/repository"
 	"github.com/rofleksey/dredge/internal/repository/postgres"
-	"github.com/rofleksey/dredge/internal/service/auth"
-	"github.com/rofleksey/dredge/internal/service/settings"
-	twitchsvc "github.com/rofleksey/dredge/internal/service/twitch"
+	twitchoauth "github.com/rofleksey/dredge/internal/service/twitch"
 	httptransport "github.com/rofleksey/dredge/internal/transport/http"
 	"github.com/rofleksey/dredge/internal/transport/http/gen"
 	"github.com/rofleksey/dredge/internal/transport/ws"
+	"github.com/rofleksey/dredge/internal/usecase/auth"
+	"github.com/rofleksey/dredge/internal/usecase/settings"
+	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 	"github.com/rofleksey/dredge/internal/webui"
 )
 
@@ -65,11 +66,11 @@ func fxOptions() fx.Option {
 			func(origin config.AllowedWebOrigin) (*ws.Hub, error) {
 				return ws.NewHub(string(origin)), nil
 			},
-			func(r repository.Store, hub *ws.Hub, cfg config.Config, obs *observability.Stack) *twitchsvc.Service {
-				return twitchsvc.New(r, hub, cfg, obs)
+			func(r repository.Store, hub *ws.Hub, cfg config.Config, obs *observability.Stack) *twitchuc.Service {
+				return twitchuc.New(r, hub, cfg, obs)
 			},
-			func(cfg config.Config) *twitchsvc.OAuth {
-				return twitchsvc.NewOAuth(
+			func(cfg config.Config) *twitchoauth.OAuth {
+				return twitchoauth.NewOAuth(
 					cfg.Twitch.ClientID,
 					cfg.Twitch.ClientSecret,
 					cfg.Twitch.OAuthRedirectURI,
@@ -89,7 +90,7 @@ func fxOptions() fx.Option {
 					gen.WithErrorHandler(httptransport.OgenErrorHandler()),
 				)
 			},
-			func(cfg config.Config, authSvc *auth.Service, srv *gen.Server, hub *ws.Hub, tw *twitchsvc.Service, oauth *twitchsvc.OAuth, sett *settings.Service, obs *observability.Stack, origin config.AllowedWebOrigin) (*http.Server, error) {
+			func(cfg config.Config, authSvc *auth.Service, srv *gen.Server, hub *ws.Hub, tw *twitchuc.Service, oauth *twitchoauth.OAuth, sett *settings.Service, obs *observability.Stack, origin config.AllowedWebOrigin) (*http.Server, error) {
 				mux := http.NewServeMux()
 				mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 					if r.Method != http.MethodGet {
