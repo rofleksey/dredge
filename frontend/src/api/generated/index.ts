@@ -9,12 +9,19 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { Account } from './models/Account';
 export type { ActivityTimelineSegment } from './models/ActivityTimelineSegment';
+export type { AiConversation } from './models/AiConversation';
+export { AiMessage } from './models/AiMessage';
+export type { AiRunAccepted } from './models/AiRunAccepted';
+export type { AiSettings } from './models/AiSettings';
 export type { ChannelBlacklistChange } from './models/ChannelBlacklistChange';
 export type { ChannelChatterEntry } from './models/ChannelChatterEntry';
 export type { ChannelLive } from './models/ChannelLive';
 export { ChatHistoryEntry } from './models/ChatHistoryEntry';
 export { ClientNotice } from './models/ClientNotice';
+export type { ConfirmAiToolRequest } from './models/ConfirmAiToolRequest';
 export type { CountResponse } from './models/CountResponse';
+export type { CreateAiConversationRequest } from './models/CreateAiConversationRequest';
+export type { CreateAiMessageRequest } from './models/CreateAiMessageRequest';
 export { CreateNotificationRequest } from './models/CreateNotificationRequest';
 export type { CreateRuleRequest } from './models/CreateRuleRequest';
 export { CreateTwitchAccountRequest } from './models/CreateTwitchAccountRequest';
@@ -33,6 +40,7 @@ export type { ListTwitchUserActivityRequest } from './models/ListTwitchUserActiv
 export type { LoginRequest } from './models/LoginRequest';
 export type { LoginResponse } from './models/LoginResponse';
 export { NotificationEntry } from './models/NotificationEntry';
+export type { PatchAiSettingsRequest } from './models/PatchAiSettingsRequest';
 export type { RecordedStream } from './models/RecordedStream';
 export type { Rule } from './models/Rule';
 export { RuleActionType } from './models/RuleActionType';

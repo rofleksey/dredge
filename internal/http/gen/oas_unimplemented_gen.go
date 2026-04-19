@@ -13,6 +13,13 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// ConfirmAiTool implements confirmAiTool operation.
+//
+// POST /ai/conversations/{conversationId}/confirm
+func (UnimplementedHandler) ConfirmAiTool(ctx context.Context, req *ConfirmAiToolRequest, params ConfirmAiToolParams) (r ConfirmAiToolRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CountRules implements countRules operation.
 //
 // GET /settings/rules/count
@@ -40,6 +47,20 @@ func (UnimplementedHandler) CountTwitchDirectoryUsers(ctx context.Context, param
 //
 // GET /twitch/messages/count
 func (UnimplementedHandler) CountTwitchMessages(ctx context.Context, params CountTwitchMessagesParams) (r *CountResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateAiConversation implements createAiConversation operation.
+//
+// POST /ai/conversations
+func (UnimplementedHandler) CreateAiConversation(ctx context.Context, req OptCreateAiConversationRequest) (r *AiConversation, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateAiMessage implements createAiMessage operation.
+//
+// POST /ai/conversations/{conversationId}/messages
+func (UnimplementedHandler) CreateAiMessage(ctx context.Context, req *CreateAiMessageRequest, params CreateAiMessageParams) (r CreateAiMessageRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -71,6 +92,13 @@ func (UnimplementedHandler) CreateTwitchUser(ctx context.Context, req *CreateTwi
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteAiConversation implements deleteAiConversation operation.
+//
+// DELETE /ai/conversations/{conversationId}
+func (UnimplementedHandler) DeleteAiConversation(ctx context.Context, params DeleteAiConversationParams) (r DeleteAiConversationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteNotification implements deleteNotification operation.
 //
 // POST /settings/notifications/delete
@@ -89,6 +117,13 @@ func (UnimplementedHandler) DeleteRule(ctx context.Context, req *DeleteByIDReque
 //
 // POST /settings/twitch-accounts/delete
 func (UnimplementedHandler) DeleteTwitchAccount(ctx context.Context, req *DeleteByIDRequest) (r DeleteTwitchAccountRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAiSettings implements getAiSettings operation.
+//
+// GET /ai/settings
+func (UnimplementedHandler) GetAiSettings(ctx context.Context) (r *AiSettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -152,6 +187,20 @@ func (UnimplementedHandler) GetTwitchUserProfile(ctx context.Context, req *GetTw
 //
 // GET /twitch/watch/hints
 func (UnimplementedHandler) GetWatchUiHints(ctx context.Context) (r *WatchUiHints, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListAiConversations implements listAiConversations operation.
+//
+// GET /ai/conversations
+func (UnimplementedHandler) ListAiConversations(ctx context.Context) (r []AiConversation, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListAiMessages implements listAiMessages operation.
+//
+// GET /ai/conversations/{conversationId}/messages
+func (UnimplementedHandler) ListAiMessages(ctx context.Context, params ListAiMessagesParams) (r ListAiMessagesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -279,6 +328,13 @@ func (UnimplementedHandler) Me(ctx context.Context) (r MeRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// PatchAiSettings implements patchAiSettings operation.
+//
+// PATCH /ai/settings
+func (UnimplementedHandler) PatchAiSettings(ctx context.Context, req *PatchAiSettingsRequest) (r *AiSettings, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SendMessage implements sendMessage operation.
 //
 // POST /twitch/send
@@ -299,6 +355,13 @@ func (UnimplementedHandler) SetChannelBlacklist(ctx context.Context, req *Channe
 //
 // POST /settings/twitch-accounts/oauth/start
 func (UnimplementedHandler) StartTwitchOAuth(ctx context.Context, req OptStartTwitchOAuthRequest) (r *StartTwitchOAuthResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StopAiAgent implements stopAiAgent operation.
+//
+// POST /ai/conversations/{conversationId}/stop
+func (UnimplementedHandler) StopAiAgent(ctx context.Context, params StopAiAgentParams) (r StopAiAgentRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

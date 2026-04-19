@@ -33,6 +33,6 @@ func TestNewHandler(t *testing.T) {
 	authSvc, err := auth.New(cfg, "12345678901234567890", time.Hour, obs)
 	require.NoError(t, err)
 
-	h := NewHandler(authSvc, nil, nil, nil, nil, obs)
+	h := NewHandler(authSvc, nil, nil, nil, nil, nil, obs)
 	require.NotNil(t, h)
 }

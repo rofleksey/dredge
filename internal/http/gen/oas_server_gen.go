@@ -8,6 +8,10 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// ConfirmAiTool implements confirmAiTool operation.
+	//
+	// POST /ai/conversations/{conversationId}/confirm
+	ConfirmAiTool(ctx context.Context, req *ConfirmAiToolRequest, params ConfirmAiToolParams) (ConfirmAiToolRes, error)
 	// CountRules implements countRules operation.
 	//
 	// GET /settings/rules/count
@@ -26,6 +30,14 @@ type Handler interface {
 	//
 	// GET /twitch/messages/count
 	CountTwitchMessages(ctx context.Context, params CountTwitchMessagesParams) (*CountResponse, error)
+	// CreateAiConversation implements createAiConversation operation.
+	//
+	// POST /ai/conversations
+	CreateAiConversation(ctx context.Context, req OptCreateAiConversationRequest) (*AiConversation, error)
+	// CreateAiMessage implements createAiMessage operation.
+	//
+	// POST /ai/conversations/{conversationId}/messages
+	CreateAiMessage(ctx context.Context, req *CreateAiMessageRequest, params CreateAiMessageParams) (CreateAiMessageRes, error)
 	// CreateNotification implements createNotification operation.
 	//
 	// POST /settings/notifications
@@ -42,6 +54,10 @@ type Handler interface {
 	//
 	// POST /settings/twitch-users
 	CreateTwitchUser(ctx context.Context, req *CreateTwitchUserRequest) (CreateTwitchUserRes, error)
+	// DeleteAiConversation implements deleteAiConversation operation.
+	//
+	// DELETE /ai/conversations/{conversationId}
+	DeleteAiConversation(ctx context.Context, params DeleteAiConversationParams) (DeleteAiConversationRes, error)
 	// DeleteNotification implements deleteNotification operation.
 	//
 	// POST /settings/notifications/delete
@@ -54,6 +70,10 @@ type Handler interface {
 	//
 	// POST /settings/twitch-accounts/delete
 	DeleteTwitchAccount(ctx context.Context, req *DeleteByIDRequest) (DeleteTwitchAccountRes, error)
+	// GetAiSettings implements getAiSettings operation.
+	//
+	// GET /ai/settings
+	GetAiSettings(ctx context.Context) (*AiSettings, error)
 	// GetChannelLive implements getChannelLive operation.
 	//
 	// POST /twitch/channels/live
@@ -90,6 +110,14 @@ type Handler interface {
 	//
 	// GET /twitch/watch/hints
 	GetWatchUiHints(ctx context.Context) (*WatchUiHints, error)
+	// ListAiConversations implements listAiConversations operation.
+	//
+	// GET /ai/conversations
+	ListAiConversations(ctx context.Context) ([]AiConversation, error)
+	// ListAiMessages implements listAiMessages operation.
+	//
+	// GET /ai/conversations/{conversationId}/messages
+	ListAiMessages(ctx context.Context, params ListAiMessagesParams) (ListAiMessagesRes, error)
 	// ListChannelBlacklist implements listChannelBlacklist operation.
 	//
 	// GET /settings/channel-blacklist
@@ -166,6 +194,10 @@ type Handler interface {
 	//
 	// GET /me
 	Me(ctx context.Context) (MeRes, error)
+	// PatchAiSettings implements patchAiSettings operation.
+	//
+	// PATCH /ai/settings
+	PatchAiSettings(ctx context.Context, req *PatchAiSettingsRequest) (*AiSettings, error)
 	// SendMessage implements sendMessage operation.
 	//
 	// POST /twitch/send
@@ -180,6 +212,10 @@ type Handler interface {
 	//
 	// POST /settings/twitch-accounts/oauth/start
 	StartTwitchOAuth(ctx context.Context, req OptStartTwitchOAuthRequest) (*StartTwitchOAuthResponse, error)
+	// StopAiAgent implements stopAiAgent operation.
+	//
+	// POST /ai/conversations/{conversationId}/stop
+	StopAiAgent(ctx context.Context, params StopAiAgentParams) (StopAiAgentRes, error)
 	// TestRuleRegex implements testRuleRegex operation.
 	//
 	// POST /settings/rules/test-regex

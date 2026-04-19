@@ -18,7 +18,9 @@ import (
 	"github.com/rofleksey/dredge/internal/repository"
 	"github.com/rofleksey/dredge/internal/repository/postgres"
 	twitchoauth "github.com/rofleksey/dredge/internal/service/twitch"
+	"github.com/rofleksey/dredge/internal/usecase/ai"
 	"github.com/rofleksey/dredge/internal/usecase/auth"
+	"github.com/rofleksey/dredge/internal/usecase/rules"
 	"github.com/rofleksey/dredge/internal/usecase/settings"
 	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 	"github.com/rofleksey/dredge/internal/webui"
@@ -80,6 +82,9 @@ func fxOptions() fx.Option {
 				)
 			},
 			newRulesServices,
+			func(r repository.Store, tw *twitchuc.Usecase, rulesSvc *rules.Usecase, sett *settings.Usecase, hub *ws.Hub, obs *observability.Stack) *ai.Usecase {
+				return ai.New(r, tw, rulesSvc, sett, hub, obs)
+			},
 			handler.NewHandler,
 			handler.NewSecurity,
 			func(cfg config.Config) *httpmw.LoginLimiter {

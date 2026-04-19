@@ -205,6 +205,21 @@ func (mr *MockStoreMockRecorder) CountTwitchUsersBrowse(ctx, f any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountTwitchUsersBrowse", reflect.TypeOf((*MockStore)(nil).CountTwitchUsersBrowse), ctx, f)
 }
 
+// CreateAIConversation mocks base method.
+func (m *MockStore) CreateAIConversation(ctx context.Context, title *string) (entity.AIConversation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateAIConversation", ctx, title)
+	ret0, _ := ret[0].(entity.AIConversation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateAIConversation indicates an expected call of CreateAIConversation.
+func (mr *MockStoreMockRecorder) CreateAIConversation(ctx, title any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAIConversation", reflect.TypeOf((*MockStore)(nil).CreateAIConversation), ctx, title)
+}
+
 // CreateNotificationEntry mocks base method.
 func (m *MockStore) CreateNotificationEntry(ctx context.Context, provider string, settings map[string]any, enabled bool) (entity.NotificationEntry, error) {
 	m.ctrl.T.Helper()
@@ -265,6 +280,20 @@ func (mr *MockStoreMockRecorder) CreateTwitchUser(ctx, id, username any) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTwitchUser", reflect.TypeOf((*MockStore)(nil).CreateTwitchUser), ctx, id, username)
 }
 
+// DeleteAIConversation mocks base method.
+func (m *MockStore) DeleteAIConversation(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAIConversation", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAIConversation indicates an expected call of DeleteAIConversation.
+func (mr *MockStoreMockRecorder) DeleteAIConversation(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAIConversation", reflect.TypeOf((*MockStore)(nil).DeleteAIConversation), ctx, id)
+}
+
 // DeleteChannelChatterPresence mocks base method.
 func (m *MockStore) DeleteChannelChatterPresence(ctx context.Context, channelTwitchUserID, chatterTwitchUserID int64) (time.Time, bool, error) {
 	m.ctrl.T.Helper()
@@ -321,6 +350,36 @@ func (m *MockStore) DeleteTwitchAccount(ctx context.Context, id int64) error {
 func (mr *MockStoreMockRecorder) DeleteTwitchAccount(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTwitchAccount", reflect.TypeOf((*MockStore)(nil).DeleteTwitchAccount), ctx, id)
+}
+
+// GetAIConversation mocks base method.
+func (m *MockStore) GetAIConversation(ctx context.Context, id int64) (entity.AIConversation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAIConversation", ctx, id)
+	ret0, _ := ret[0].(entity.AIConversation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAIConversation indicates an expected call of GetAIConversation.
+func (mr *MockStoreMockRecorder) GetAIConversation(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAIConversation", reflect.TypeOf((*MockStore)(nil).GetAIConversation), ctx, id)
+}
+
+// GetAISettings mocks base method.
+func (m *MockStore) GetAISettings(ctx context.Context) (entity.AISettings, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAISettings", ctx)
+	ret0, _ := ret[0].(entity.AISettings)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAISettings indicates an expected call of GetAISettings.
+func (mr *MockStoreMockRecorder) GetAISettings(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAISettings", reflect.TypeOf((*MockStore)(nil).GetAISettings), ctx)
 }
 
 // GetHelixMeta mocks base method.
@@ -445,6 +504,21 @@ func (mr *MockStoreMockRecorder) GetTwitchUserByID(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTwitchUserByID", reflect.TypeOf((*MockStore)(nil).GetTwitchUserByID), ctx, id)
 }
 
+// InsertAIMessage mocks base method.
+func (m_2 *MockStore) InsertAIMessage(ctx context.Context, m entity.AIMessage) (entity.AIMessage, error) {
+	m_2.ctrl.T.Helper()
+	ret := m_2.ctrl.Call(m_2, "InsertAIMessage", ctx, m)
+	ret0, _ := ret[0].(entity.AIMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InsertAIMessage indicates an expected call of InsertAIMessage.
+func (mr *MockStoreMockRecorder) InsertAIMessage(ctx, m any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertAIMessage", reflect.TypeOf((*MockStore)(nil).InsertAIMessage), ctx, m)
+}
+
 // InsertChatMessage mocks base method.
 func (m *MockStore) InsertChatMessage(ctx context.Context, channelTwitchUserID int64, chatterTwitchUserID *int64, chatterUsername, body string, keywordMatch bool, msgType string, badgeTags []string, firstMessage bool) (int64, error) {
 	m.ctrl.T.Helper()
@@ -532,6 +606,36 @@ func (m *MockStore) IsTwitchUserSuspicious(ctx context.Context, id int64) (bool,
 func (mr *MockStoreMockRecorder) IsTwitchUserSuspicious(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsTwitchUserSuspicious", reflect.TypeOf((*MockStore)(nil).IsTwitchUserSuspicious), ctx, id)
+}
+
+// ListAIConversations mocks base method.
+func (m *MockStore) ListAIConversations(ctx context.Context) ([]entity.AIConversation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAIConversations", ctx)
+	ret0, _ := ret[0].([]entity.AIConversation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAIConversations indicates an expected call of ListAIConversations.
+func (mr *MockStoreMockRecorder) ListAIConversations(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAIConversations", reflect.TypeOf((*MockStore)(nil).ListAIConversations), ctx)
+}
+
+// ListAIMessages mocks base method.
+func (m *MockStore) ListAIMessages(ctx context.Context, conversationID int64) ([]entity.AIMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAIMessages", ctx, conversationID)
+	ret0, _ := ret[0].([]entity.AIMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAIMessages indicates an expected call of ListAIMessages.
+func (mr *MockStoreMockRecorder) ListAIMessages(ctx, conversationID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAIMessages", reflect.TypeOf((*MockStore)(nil).ListAIMessages), ctx, conversationID)
 }
 
 // ListChannelBlacklist mocks base method.
@@ -967,6 +1071,34 @@ func (mr *MockStoreMockRecorder) ReplaceUserFollowedChannels(ctx, followerID, ro
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplaceUserFollowedChannels", reflect.TypeOf((*MockStore)(nil).ReplaceUserFollowedChannels), ctx, followerID, rows)
 }
 
+// SetAIMessageMetadata mocks base method.
+func (m *MockStore) SetAIMessageMetadata(ctx context.Context, messageID int64, metadata map[string]any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetAIMessageMetadata", ctx, messageID, metadata)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetAIMessageMetadata indicates an expected call of SetAIMessageMetadata.
+func (mr *MockStoreMockRecorder) SetAIMessageMetadata(ctx, messageID, metadata any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAIMessageMetadata", reflect.TypeOf((*MockStore)(nil).SetAIMessageMetadata), ctx, messageID, metadata)
+}
+
+// TouchAIConversation mocks base method.
+func (m *MockStore) TouchAIConversation(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TouchAIConversation", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// TouchAIConversation indicates an expected call of TouchAIConversation.
+func (mr *MockStoreMockRecorder) TouchAIConversation(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TouchAIConversation", reflect.TypeOf((*MockStore)(nil).TouchAIConversation), ctx, id)
+}
+
 // TruncateChannelChatters mocks base method.
 func (m *MockStore) TruncateChannelChatters(ctx context.Context) error {
 	m.ctrl.T.Helper()
@@ -1066,6 +1198,20 @@ func (m *MockStore) UpdateTwitchRefreshToken(ctx context.Context, id int64, refr
 func (mr *MockStoreMockRecorder) UpdateTwitchRefreshToken(ctx, id, refreshToken any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTwitchRefreshToken", reflect.TypeOf((*MockStore)(nil).UpdateTwitchRefreshToken), ctx, id, refreshToken)
+}
+
+// UpsertAISettings mocks base method.
+func (m *MockStore) UpsertAISettings(ctx context.Context, s entity.AISettings) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertAISettings", ctx, s)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertAISettings indicates an expected call of UpsertAISettings.
+func (mr *MockStoreMockRecorder) UpsertAISettings(ctx, s any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertAISettings", reflect.TypeOf((*MockStore)(nil).UpsertAISettings), ctx, s)
 }
 
 // UpsertChannelChatterPresence mocks base method.

@@ -67,11 +67,20 @@ function buildWsUrl(): string {
   return `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(tok)}`;
 }
 
+/** Backend agent activity (same WebSocket as live chat). */
+export type AiAgentWsPayload = Record<string, unknown> & {
+  type: 'ai_agent';
+  conversation_id?: number;
+  kind?: string;
+  receivedAt?: number;
+};
+
 export const useLiveSocketStore = defineStore('liveSocket', () => {
   const auth = useAuthStore();
   const connected = ref(false);
   const lastError = ref<string | null>(null);
   const events = ref<LiveEvent[]>([]);
+  const aiAgentEvents = ref<AiAgentWsPayload[]>([]);
   const suspicionByTwitchId = reactive<Record<number, SuspicionOverlayRow>>({});
 
   let ws: ReconnectingWebSocket | null = null;
@@ -121,6 +130,17 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
         receivedAt: ts,
         user_twitch_id: typeof uid === 'number' && Number.isFinite(uid) ? uid : undefined,
       });
+      return;
+    }
+    if (t === 'ai_agent') {
+      aiAgentEvents.value.push({
+        ...(o as Record<string, unknown>),
+        type: 'ai_agent',
+        receivedAt: ts,
+      } as AiAgentWsPayload);
+      if (aiAgentEvents.value.length > 300) {
+        aiAgentEvents.value = aiAgentEvents.value.slice(-300);
+      }
       return;
     }
     if (t === 'twitch_user_suspicion') {
@@ -217,6 +237,7 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
       } else {
         disconnect();
         events.value = [];
+        aiAgentEvents.value = [];
         clearSuspicionOverlay();
         lastError.value = null;
       }
@@ -228,6 +249,7 @@ export const useLiveSocketStore = defineStore('liveSocket', () => {
     connected,
     lastError,
     events,
+    aiAgentEvents,
     suspicionByTwitchId,
     connect,
     disconnect,

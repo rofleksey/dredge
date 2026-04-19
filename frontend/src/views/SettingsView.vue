@@ -11,6 +11,7 @@ import {
   TwitchAccount,
   UpdateTwitchAccountPostRequest,
 } from '../api/generated';
+import type { PatchAiSettingsRequest } from '../api/generated';
 import type { IrcMonitorSettings, IrcMonitorStatus } from '../api/generated';
 import type { SuspicionSettings } from '../api/generated';
 import type { Rule } from '../api/generated';
@@ -22,7 +23,7 @@ import { useChannelsStore } from '../stores/channels';
 import { useTwitchAccountsStore } from '../stores/twitchAccounts';
 import { useWatchPreferencesStore } from '../stores/watchPreferences';
 
-type SettingsTab = 'channels' | 'rules' | 'notifications' | 'twitch' | 'suspicion' | 'display';
+type SettingsTab = 'channels' | 'rules' | 'notifications' | 'twitch' | 'suspicion' | 'display' | 'ai';
 
 const route = useRoute();
 const router = useRouter();
@@ -40,6 +41,13 @@ const channelBlacklist = ref<string[]>([]);
 const newBlacklistLogin = ref('');
 const blacklistFilter = ref('');
 const blacklistSort = ref<'name-asc' | 'name-desc'>('name-asc');
+const aiBaseUrl = ref('');
+const aiModel = ref('');
+const aiTokenDraft = ref('');
+const aiHasToken = ref(false);
+const aiTokenLast4 = ref('');
+const savingAi = ref(false);
+
 const suspicionDraft = reactive<SuspicionSettings>({
   auto_check_account_age: true,
   account_age_sus_days: 14,
@@ -124,7 +132,7 @@ onBeforeUnmount(() => {
 });
 
 async function refresh(): Promise<void> {
-  const [rulesList, rCount, taCount, notifList, bl, sus, ircMon] = await Promise.all([
+  const [rulesList, rCount, taCount, notifList, bl, sus, ircMon, aiSt] = await Promise.all([
     DefaultService.listRules(),
     DefaultService.countRules(),
     DefaultService.countTwitchAccounts(),
@@ -132,6 +140,7 @@ async function refresh(): Promise<void> {
     DefaultService.listChannelBlacklist(),
     DefaultService.getSuspicionSettings(),
     DefaultService.getIrcMonitorSettings(),
+    DefaultService.getAiSettings(),
   ]);
   await Promise.all([channelsStore.fetch(), twitchStore.fetch()]);
   rules.value = rulesList;
@@ -141,6 +150,11 @@ async function refresh(): Promise<void> {
   channelBlacklist.value = bl;
   Object.assign(suspicionDraft, sus);
   applyIrcMonitorDraft(ircMon);
+  aiBaseUrl.value = aiSt.base_url ?? '';
+  aiModel.value = aiSt.model ?? '';
+  aiHasToken.value = Boolean(aiSt.has_token);
+  aiTokenLast4.value = aiSt.token_last4 ?? '';
+  aiTokenDraft.value = '';
 }
 
 function applyIrcMonitorDraft(s: IrcMonitorSettings): void {
@@ -202,7 +216,8 @@ function syncTabFromRoute(): void {
     t === 'notifications' ||
     t === 'twitch' ||
     t === 'suspicion' ||
-    t === 'display'
+    t === 'display' ||
+    t === 'ai'
   ) {
     tab.value = t;
   }
@@ -524,6 +539,36 @@ async function saveIrcMonitorSettings(): Promise<void> {
   }
 }
 
+async function saveAiSettings(): Promise<void> {
+  if (savingAi.value) {
+    return;
+  }
+  savingAi.value = true;
+  try {
+    const body: PatchAiSettingsRequest = {};
+    if (aiBaseUrl.value.trim()) {
+      body.base_url = aiBaseUrl.value.trim();
+    }
+    if (aiModel.value.trim()) {
+      body.model = aiModel.value.trim();
+    }
+    if (aiTokenDraft.value.trim()) {
+      body.api_token = aiTokenDraft.value.trim();
+    }
+    const s = await DefaultService.patchAiSettings({ requestBody: body });
+    aiBaseUrl.value = s.base_url ?? '';
+    aiModel.value = s.model ?? '';
+    aiHasToken.value = Boolean(s.has_token);
+    aiTokenLast4.value = s.token_last4 ?? '';
+    aiTokenDraft.value = '';
+    notify({ id: 'ai-settings', type: 'success', title: 'AI', description: 'Saved.' });
+  } catch {
+    notify({ id: 'ai-settings', type: 'error', title: 'AI', description: 'Could not save AI settings.' });
+  } finally {
+    savingAi.value = false;
+  }
+}
+
 async function saveSuspicionSettings(): Promise<void> {
   if (savingSuspicion.value) {
     return;
@@ -613,6 +658,7 @@ const filteredChannelBlacklist = computed(() => {
         </button>
         <button type="button" :class="{ active: tab === 'twitch' }" @click="setTab('twitch')">{{ twitchHeading }}</button>
         <button type="button" :class="{ active: tab === 'suspicion' }" @click="setTab('suspicion')">Suspicion</button>
+        <button type="button" :class="{ active: tab === 'ai' }" @click="setTab('ai')">AI</button>
         <button type="button" :class="{ active: tab === 'display' }" @click="setTab('display')">Display</button>
       </nav>
 
@@ -808,6 +854,31 @@ const filteredChannelBlacklist = computed(() => {
           </label>
           <p class="row-actions">
             <SubmitButton :loading="savingSuspicion">Save thresholds</SubmitButton>
+          </p>
+        </form>
+      </section>
+
+      <section v-show="tab === 'ai'" class="panel">
+        <h2>AI assistant</h2>
+        <p class="hint">
+          OpenAI-compatible API (e.g. <code>https://api.openai.com/v1</code>). Token is stored encrypted on the server.
+        </p>
+        <form class="stack gap-setting" @submit.prevent="saveAiSettings">
+          <label class="stack gap-setting">
+            <span>Base URL</span>
+            <input v-model="aiBaseUrl" type="url" autocomplete="off" placeholder="https://api.openai.com/v1" />
+          </label>
+          <label class="stack gap-setting">
+            <span>Model</span>
+            <input v-model="aiModel" type="text" autocomplete="off" placeholder="gpt-4o-mini" />
+          </label>
+          <label class="stack gap-setting">
+            <span>API token</span>
+            <input v-model="aiTokenDraft" type="password" autocomplete="off" placeholder="Leave blank to keep existing" />
+            <span v-if="aiHasToken" class="muted small">Stored token ends with …{{ aiTokenLast4 }}</span>
+          </label>
+          <p class="row-actions">
+            <SubmitButton :loading="savingAi">Save AI settings</SubmitButton>
           </p>
         </form>
       </section>

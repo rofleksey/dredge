@@ -1100,6 +1100,195 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
+  /ai/settings:
+    get:
+      operationId: getAiSettings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: AI provider settings (API token is never returned in full)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSettings"
+    patch:
+      operationId: patchAiSettings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchAiSettingsRequest"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSettings"
+  /ai/conversations:
+    get:
+      operationId: listAiConversations
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Conversations (newest activity first)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiConversation"
+    post:
+      operationId: createAiConversation
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAiConversationRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiConversation"
+  /ai/conversations/{conversationId}:
+    delete:
+      operationId: deleteAiConversation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /ai/conversations/{conversationId}/messages:
+    get:
+      operationId: listAiMessages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Messages in order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiMessage"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+    post:
+      operationId: createAiMessage
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAiMessageRequest"
+      responses:
+        "202":
+          description: Message stored; agent run started asynchronously
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiRunAccepted"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /ai/conversations/{conversationId}/confirm:
+    post:
+      operationId: confirmAiTool
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmAiToolRequest"
+      responses:
+        "202":
+          description: Confirmation recorded; agent resumes or rejects the tool call
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiRunAccepted"
+        "404":
+          description: Conversation or pending tool not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /ai/conversations/{conversationId}/stop:
+    post:
+      operationId: stopAiAgent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Stop requested (no-op if idle)
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
 components:
   securitySchemes:
     bearerAuth:
@@ -1114,6 +1303,96 @@ components:
         total:
           type: integer
           format: int64
+    AiSettings:
+      type: object
+      required: [base_url, model, has_token, updated_at]
+      properties:
+        base_url:
+          type: string
+          description: OpenAI-compatible API base URL (e.g. https://api.openai.com/v1)
+        model:
+          type: string
+        has_token:
+          type: boolean
+          description: Whether an API token is stored (value is never returned)
+        token_last4:
+          type: string
+          description: Last four characters of the stored token when present
+        updated_at:
+          type: string
+          format: date-time
+    PatchAiSettingsRequest:
+      type: object
+      properties:
+        base_url:
+          type: string
+        model:
+          type: string
+        api_token:
+          type: string
+          description: When set, replaces the stored token; omit to leave unchanged
+    AiConversation:
+      type: object
+      required: [id, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreateAiConversationRequest:
+      type: object
+      properties:
+        title:
+          type: string
+    AiMessage:
+      type: object
+      required: [id, conversation_id, role, content, metadata, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        conversation_id:
+          type: integer
+          format: int64
+        role:
+          type: string
+          enum: [user, assistant, tool]
+        content:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+    CreateAiMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+    ConfirmAiToolRequest:
+      type: object
+      required: [tool_call_id, approve]
+      properties:
+        tool_call_id:
+          type: string
+        approve:
+          type: boolean
+    AiRunAccepted:
+      type: object
+      required: [accepted]
+      properties:
+        accepted:
+          type: boolean
     RuleTemplateVariable:
       type: object
       required: [name, description]

@@ -38,7 +38,7 @@ func TestHandler_Me_ok(t *testing.T) {
 	require.NoError(t, err)
 
 	twSvc := twitchuc.New(twRepo, noopBroadcaster{}, testTwitchServiceConfig("c", "s"), obs)
-	h := NewHandler(authSvc, settings.New(nil, obs), nil, twSvc, nil, obs)
+	h := NewHandler(authSvc, settings.New(nil, obs), nil, twSvc, nil, nil, obs)
 
 	tok, err := authSvc.Login(context.Background(), "admin@example.com", "password123")
 	require.NoError(t, err)
@@ -74,7 +74,7 @@ func TestHandler_Me_unauthorized(t *testing.T) {
 	require.NoError(t, err)
 
 	twSvc := twitchuc.New(twRepo, noopBroadcaster{}, testTwitchServiceConfig("c", "s"), obs)
-	h := NewHandler(authSvc, settings.New(nil, obs), nil, twSvc, nil, obs)
+	h := NewHandler(authSvc, settings.New(nil, obs), nil, twSvc, nil, nil, obs)
 
 	res, err := h.Me(context.Background())
 	require.NoError(t, err)

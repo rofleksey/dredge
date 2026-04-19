@@ -59,7 +59,7 @@ func testHandler(t *testing.T) (*Handler, *gomock.Controller, *repomocks.MockSto
 
 	rulesSvc := rules.NewUsecase(repo, obs, nil, nil)
 
-	h := NewHandler(authSvc, setSvc, rulesSvc, twSvc, nil, obs)
+	h := NewHandler(authSvc, setSvc, rulesSvc, twSvc, nil, nil, obs)
 
 	return h, ctrl, repo
 }

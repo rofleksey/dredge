@@ -37,7 +37,7 @@ func TestHandler_Login_ok(t *testing.T) {
 	require.NoError(t, err)
 
 	twSvc := twitchuc.New(twRepo, noopBroadcaster{}, testTwitchServiceConfig("c", "s"), obs)
-	h := NewHandler(authSvc, settings.New(nil, obs), nil, twSvc, nil, obs)
+	h := NewHandler(authSvc, settings.New(nil, obs), nil, twSvc, nil, nil, obs)
 
 	res, err := h.Login(context.Background(), &gen.LoginRequest{Email: "admin@example.com", Password: "password123"})
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestHandler_Login_unauthorized(t *testing.T) {
 	require.NoError(t, err)
 
 	twSvc := twitchuc.New(twRepo, noopBroadcaster{}, testTwitchServiceConfig("c", "s"), obs)
-	h := NewHandler(authSvc, settings.New(nil, obs), nil, twSvc, nil, obs)
+	h := NewHandler(authSvc, settings.New(nil, obs), nil, twSvc, nil, nil, obs)
 
 	res, err := h.Login(context.Background(), &gen.LoginRequest{Email: "admin@example.com", Password: "wrong"})
 	require.NoError(t, err)

@@ -49,6 +49,12 @@ const router = createRouter({
           meta: { fillMainOutlet: true },
         },
         {
+          path: 'ai',
+          name: 'ai',
+          component: () => import('../views/AiChatView.vue'),
+          meta: { fillMainOutlet: true },
+        },
+        {
           path: 'messages',
           name: 'messages',
           component: () => import('../views/MessagesView.vue'),

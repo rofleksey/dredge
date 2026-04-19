@@ -58,6 +58,7 @@ function logout(): void {
         >
           Streams
         </RouterLink>
+        <RouterLink to="/ai" active-class="active">AI</RouterLink>
         <RouterLink to="/settings" active-class="active">Settings</RouterLink>
       </nav>
       <div class="user">

@@ -15,6 +15,71 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+// ConfirmAiToolParams is parameters of confirmAiTool operation.
+type ConfirmAiToolParams struct {
+	ConversationId int64
+}
+
+func unpackConfirmAiToolParams(packed middleware.Parameters) (params ConfirmAiToolParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "conversationId",
+			In:   "path",
+		}
+		params.ConversationId = packed[key].(int64)
+	}
+	return params
+}
+
+func decodeConfirmAiToolParams(args [1]string, argsEscaped bool, r *http.Request) (params ConfirmAiToolParams, _ error) {
+	// Decode path: conversationId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "conversationId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.ConversationId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "conversationId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // CountTwitchDirectoryUsersParams is parameters of countTwitchDirectoryUsers operation.
 type CountTwitchDirectoryUsersParams struct {
 	Username OptString `json:",omitempty,omitzero"`
@@ -455,6 +520,136 @@ func decodeCountTwitchMessagesParams(args [0]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
+// CreateAiMessageParams is parameters of createAiMessage operation.
+type CreateAiMessageParams struct {
+	ConversationId int64
+}
+
+func unpackCreateAiMessageParams(packed middleware.Parameters) (params CreateAiMessageParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "conversationId",
+			In:   "path",
+		}
+		params.ConversationId = packed[key].(int64)
+	}
+	return params
+}
+
+func decodeCreateAiMessageParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateAiMessageParams, _ error) {
+	// Decode path: conversationId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "conversationId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.ConversationId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "conversationId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DeleteAiConversationParams is parameters of deleteAiConversation operation.
+type DeleteAiConversationParams struct {
+	ConversationId int64
+}
+
+func unpackDeleteAiConversationParams(packed middleware.Parameters) (params DeleteAiConversationParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "conversationId",
+			In:   "path",
+		}
+		params.ConversationId = packed[key].(int64)
+	}
+	return params
+}
+
+func decodeDeleteAiConversationParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteAiConversationParams, _ error) {
+	// Decode path: conversationId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "conversationId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.ConversationId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "conversationId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetRecordedStreamParams is parameters of getRecordedStream operation.
 type GetRecordedStreamParams struct {
 	StreamId int64
@@ -698,6 +893,71 @@ func decodeGetRecordedStreamLeaderboardParams(args [1]string, argsEscaped bool, 
 		return params, &ogenerrors.DecodeParamError{
 			Name: "q",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListAiMessagesParams is parameters of listAiMessages operation.
+type ListAiMessagesParams struct {
+	ConversationId int64
+}
+
+func unpackListAiMessagesParams(packed middleware.Parameters) (params ListAiMessagesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "conversationId",
+			In:   "path",
+		}
+		params.ConversationId = packed[key].(int64)
+	}
+	return params
+}
+
+func decodeListAiMessagesParams(args [1]string, argsEscaped bool, r *http.Request) (params ListAiMessagesParams, _ error) {
+	// Decode path: conversationId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "conversationId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.ConversationId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "conversationId",
+			In:   "path",
 			Err:  err,
 		}
 	}
@@ -2570,6 +2830,71 @@ func decodeListTwitchUsersParams(args [0]string, argsEscaped bool, r *http.Reque
 		return params, &ogenerrors.DecodeParamError{
 			Name: "monitored_only",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// StopAiAgentParams is parameters of stopAiAgent operation.
+type StopAiAgentParams struct {
+	ConversationId int64
+}
+
+func unpackStopAiAgentParams(packed middleware.Parameters) (params StopAiAgentParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "conversationId",
+			In:   "path",
+		}
+		params.ConversationId = packed[key].(int64)
+	}
+	return params
+}
+
+func decodeStopAiAgentParams(args [1]string, argsEscaped bool, r *http.Request) (params StopAiAgentParams, _ error) {
+	// Decode path: conversationId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "conversationId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.ConversationId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "conversationId",
+			In:   "path",
 			Err:  err,
 		}
 	}

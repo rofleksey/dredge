@@ -4,11 +4,18 @@
 /* eslint-disable */
 import type { Account } from '../models/Account';
 import type { ActivityTimelineSegment } from '../models/ActivityTimelineSegment';
+import type { AiConversation } from '../models/AiConversation';
+import type { AiMessage } from '../models/AiMessage';
+import type { AiRunAccepted } from '../models/AiRunAccepted';
+import type { AiSettings } from '../models/AiSettings';
 import type { ChannelBlacklistChange } from '../models/ChannelBlacklistChange';
 import type { ChannelChatterEntry } from '../models/ChannelChatterEntry';
 import type { ChannelLive } from '../models/ChannelLive';
 import type { ChatHistoryEntry } from '../models/ChatHistoryEntry';
+import type { ConfirmAiToolRequest } from '../models/ConfirmAiToolRequest';
 import type { CountResponse } from '../models/CountResponse';
+import type { CreateAiConversationRequest } from '../models/CreateAiConversationRequest';
+import type { CreateAiMessageRequest } from '../models/CreateAiMessageRequest';
 import type { CreateNotificationRequest } from '../models/CreateNotificationRequest';
 import type { CreateRuleRequest } from '../models/CreateRuleRequest';
 import type { CreateTwitchAccountRequest } from '../models/CreateTwitchAccountRequest';
@@ -24,6 +31,7 @@ import type { ListTwitchUserActivityRequest } from '../models/ListTwitchUserActi
 import type { LoginRequest } from '../models/LoginRequest';
 import type { LoginResponse } from '../models/LoginResponse';
 import type { NotificationEntry } from '../models/NotificationEntry';
+import type { PatchAiSettingsRequest } from '../models/PatchAiSettingsRequest';
 import type { RecordedStream } from '../models/RecordedStream';
 import type { Rule } from '../models/Rule';
 import type { RuleTemplateVariablesResponse } from '../models/RuleTemplateVariablesResponse';
@@ -941,6 +949,166 @@ export class DefaultService {
             mediaType: 'application/json',
             errors: {
                 404: `User not found`,
+            },
+        });
+    }
+    /**
+     * @returns AiSettings AI provider settings (API token is never returned in full)
+     * @throws ApiError
+     */
+    public static getAiSettings(): CancelablePromise<AiSettings> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/ai/settings',
+        });
+    }
+    /**
+     * @returns AiSettings Updated settings
+     * @throws ApiError
+     */
+    public static patchAiSettings({
+        requestBody,
+    }: {
+        requestBody: PatchAiSettingsRequest,
+    }): CancelablePromise<AiSettings> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/ai/settings',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns AiConversation Conversations (newest activity first)
+     * @throws ApiError
+     */
+    public static listAiConversations(): CancelablePromise<Array<AiConversation>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/ai/conversations',
+        });
+    }
+    /**
+     * @returns AiConversation Created
+     * @throws ApiError
+     */
+    public static createAiConversation({
+        requestBody,
+    }: {
+        requestBody?: CreateAiConversationRequest,
+    }): CancelablePromise<AiConversation> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/ai/conversations',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static deleteAiConversation({
+        conversationId,
+    }: {
+        conversationId: number,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/ai/conversations/{conversationId}',
+            path: {
+                'conversationId': conversationId,
+            },
+            errors: {
+                404: `Not found`,
+            },
+        });
+    }
+    /**
+     * @returns AiMessage Messages in order
+     * @throws ApiError
+     */
+    public static listAiMessages({
+        conversationId,
+    }: {
+        conversationId: number,
+    }): CancelablePromise<Array<AiMessage>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/ai/conversations/{conversationId}/messages',
+            path: {
+                'conversationId': conversationId,
+            },
+            errors: {
+                404: `Conversation not found`,
+            },
+        });
+    }
+    /**
+     * @returns AiRunAccepted Message stored; agent run started asynchronously
+     * @throws ApiError
+     */
+    public static createAiMessage({
+        conversationId,
+        requestBody,
+    }: {
+        conversationId: number,
+        requestBody: CreateAiMessageRequest,
+    }): CancelablePromise<AiRunAccepted> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/ai/conversations/{conversationId}/messages',
+            path: {
+                'conversationId': conversationId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                404: `Conversation not found`,
+            },
+        });
+    }
+    /**
+     * @returns AiRunAccepted Confirmation recorded; agent resumes or rejects the tool call
+     * @throws ApiError
+     */
+    public static confirmAiTool({
+        conversationId,
+        requestBody,
+    }: {
+        conversationId: number,
+        requestBody: ConfirmAiToolRequest,
+    }): CancelablePromise<AiRunAccepted> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/ai/conversations/{conversationId}/confirm',
+            path: {
+                'conversationId': conversationId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                404: `Conversation or pending tool not found`,
+            },
+        });
+    }
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static stopAiAgent({
+        conversationId,
+    }: {
+        conversationId: number,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/ai/conversations/{conversationId}/stop',
+            path: {
+                'conversationId': conversationId,
+            },
+            errors: {
+                404: `Conversation not found`,
             },
         });
     }

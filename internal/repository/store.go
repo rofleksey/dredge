@@ -91,4 +91,15 @@ type Store interface {
 	GetIrcMonitorSettings(ctx context.Context) (entity.IrcMonitorSettings, error)
 	UpdateIrcMonitorSettings(ctx context.Context, s entity.IrcMonitorSettings) error
 	ListLinkedTwitchAccountUserIDs(ctx context.Context) ([]int64, error)
+
+	GetAISettings(ctx context.Context) (entity.AISettings, error)
+	UpsertAISettings(ctx context.Context, s entity.AISettings) error
+	ListAIConversations(ctx context.Context) ([]entity.AIConversation, error)
+	CreateAIConversation(ctx context.Context, title *string) (entity.AIConversation, error)
+	GetAIConversation(ctx context.Context, id int64) (entity.AIConversation, error)
+	DeleteAIConversation(ctx context.Context, id int64) error
+	TouchAIConversation(ctx context.Context, id int64) error
+	ListAIMessages(ctx context.Context, conversationID int64) ([]entity.AIMessage, error)
+	InsertAIMessage(ctx context.Context, m entity.AIMessage) (entity.AIMessage, error)
+	SetAIMessageMetadata(ctx context.Context, messageID int64, metadata map[string]any) error
 }

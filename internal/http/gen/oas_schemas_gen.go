@@ -96,6 +96,263 @@ func (s *ActivityTimelineSegment) SetEnd(val time.Time) {
 	s.End = val
 }
 
+// Ref: #/components/schemas/AiConversation
+type AiConversation struct {
+	ID        int64        `json:"id"`
+	Title     OptNilString `json:"title"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *AiConversation) GetID() int64 {
+	return s.ID
+}
+
+// GetTitle returns the value of Title.
+func (s *AiConversation) GetTitle() OptNilString {
+	return s.Title
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *AiConversation) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *AiConversation) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *AiConversation) SetID(val int64) {
+	s.ID = val
+}
+
+// SetTitle sets the value of Title.
+func (s *AiConversation) SetTitle(val OptNilString) {
+	s.Title = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *AiConversation) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *AiConversation) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// Ref: #/components/schemas/AiMessage
+type AiMessage struct {
+	ID             int64             `json:"id"`
+	ConversationID int64             `json:"conversation_id"`
+	Role           AiMessageRole     `json:"role"`
+	Content        string            `json:"content"`
+	Metadata       AiMessageMetadata `json:"metadata"`
+	CreatedAt      time.Time         `json:"created_at"`
+}
+
+// GetID returns the value of ID.
+func (s *AiMessage) GetID() int64 {
+	return s.ID
+}
+
+// GetConversationID returns the value of ConversationID.
+func (s *AiMessage) GetConversationID() int64 {
+	return s.ConversationID
+}
+
+// GetRole returns the value of Role.
+func (s *AiMessage) GetRole() AiMessageRole {
+	return s.Role
+}
+
+// GetContent returns the value of Content.
+func (s *AiMessage) GetContent() string {
+	return s.Content
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *AiMessage) GetMetadata() AiMessageMetadata {
+	return s.Metadata
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *AiMessage) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *AiMessage) SetID(val int64) {
+	s.ID = val
+}
+
+// SetConversationID sets the value of ConversationID.
+func (s *AiMessage) SetConversationID(val int64) {
+	s.ConversationID = val
+}
+
+// SetRole sets the value of Role.
+func (s *AiMessage) SetRole(val AiMessageRole) {
+	s.Role = val
+}
+
+// SetContent sets the value of Content.
+func (s *AiMessage) SetContent(val string) {
+	s.Content = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *AiMessage) SetMetadata(val AiMessageMetadata) {
+	s.Metadata = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *AiMessage) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+type AiMessageMetadata map[string]jx.Raw
+
+func (s *AiMessageMetadata) init() AiMessageMetadata {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type AiMessageRole string
+
+const (
+	AiMessageRoleUser      AiMessageRole = "user"
+	AiMessageRoleAssistant AiMessageRole = "assistant"
+	AiMessageRoleTool      AiMessageRole = "tool"
+)
+
+// AllValues returns all AiMessageRole values.
+func (AiMessageRole) AllValues() []AiMessageRole {
+	return []AiMessageRole{
+		AiMessageRoleUser,
+		AiMessageRoleAssistant,
+		AiMessageRoleTool,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AiMessageRole) MarshalText() ([]byte, error) {
+	switch s {
+	case AiMessageRoleUser:
+		return []byte(s), nil
+	case AiMessageRoleAssistant:
+		return []byte(s), nil
+	case AiMessageRoleTool:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AiMessageRole) UnmarshalText(data []byte) error {
+	switch AiMessageRole(data) {
+	case AiMessageRoleUser:
+		*s = AiMessageRoleUser
+		return nil
+	case AiMessageRoleAssistant:
+		*s = AiMessageRoleAssistant
+		return nil
+	case AiMessageRoleTool:
+		*s = AiMessageRoleTool
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AiRunAccepted
+type AiRunAccepted struct {
+	Accepted bool `json:"accepted"`
+}
+
+// GetAccepted returns the value of Accepted.
+func (s *AiRunAccepted) GetAccepted() bool {
+	return s.Accepted
+}
+
+// SetAccepted sets the value of Accepted.
+func (s *AiRunAccepted) SetAccepted(val bool) {
+	s.Accepted = val
+}
+
+func (*AiRunAccepted) confirmAiToolRes()   {}
+func (*AiRunAccepted) createAiMessageRes() {}
+
+// Ref: #/components/schemas/AiSettings
+type AiSettings struct {
+	// OpenAI-compatible API base URL (e.g. https://api.openai.com/v1).
+	BaseURL string `json:"base_url"`
+	Model   string `json:"model"`
+	// Whether an API token is stored (value is never returned).
+	HasToken bool `json:"has_token"`
+	// Last four characters of the stored token when present.
+	TokenLast4 OptString `json:"token_last4"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+// GetBaseURL returns the value of BaseURL.
+func (s *AiSettings) GetBaseURL() string {
+	return s.BaseURL
+}
+
+// GetModel returns the value of Model.
+func (s *AiSettings) GetModel() string {
+	return s.Model
+}
+
+// GetHasToken returns the value of HasToken.
+func (s *AiSettings) GetHasToken() bool {
+	return s.HasToken
+}
+
+// GetTokenLast4 returns the value of TokenLast4.
+func (s *AiSettings) GetTokenLast4() OptString {
+	return s.TokenLast4
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *AiSettings) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetBaseURL sets the value of BaseURL.
+func (s *AiSettings) SetBaseURL(val string) {
+	s.BaseURL = val
+}
+
+// SetModel sets the value of Model.
+func (s *AiSettings) SetModel(val string) {
+	s.Model = val
+}
+
+// SetHasToken sets the value of HasToken.
+func (s *AiSettings) SetHasToken(val bool) {
+	s.HasToken = val
+}
+
+// SetTokenLast4 sets the value of TokenLast4.
+func (s *AiSettings) SetTokenLast4(val OptString) {
+	s.TokenLast4 = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *AiSettings) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
 type BearerAuth struct {
 	Token string
 	Roles []string
@@ -669,6 +926,32 @@ func (s *ClientNoticeSeverity) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/ConfirmAiToolRequest
+type ConfirmAiToolRequest struct {
+	ToolCallID string `json:"tool_call_id"`
+	Approve    bool   `json:"approve"`
+}
+
+// GetToolCallID returns the value of ToolCallID.
+func (s *ConfirmAiToolRequest) GetToolCallID() string {
+	return s.ToolCallID
+}
+
+// GetApprove returns the value of Approve.
+func (s *ConfirmAiToolRequest) GetApprove() bool {
+	return s.Approve
+}
+
+// SetToolCallID sets the value of ToolCallID.
+func (s *ConfirmAiToolRequest) SetToolCallID(val string) {
+	s.ToolCallID = val
+}
+
+// SetApprove sets the value of Approve.
+func (s *ConfirmAiToolRequest) SetApprove(val bool) {
+	s.Approve = val
+}
+
 // Ref: #/components/schemas/CountResponse
 type CountResponse struct {
 	Total int64 `json:"total"`
@@ -682,6 +965,36 @@ func (s *CountResponse) GetTotal() int64 {
 // SetTotal sets the value of Total.
 func (s *CountResponse) SetTotal(val int64) {
 	s.Total = val
+}
+
+// Ref: #/components/schemas/CreateAiConversationRequest
+type CreateAiConversationRequest struct {
+	Title OptString `json:"title"`
+}
+
+// GetTitle returns the value of Title.
+func (s *CreateAiConversationRequest) GetTitle() OptString {
+	return s.Title
+}
+
+// SetTitle sets the value of Title.
+func (s *CreateAiConversationRequest) SetTitle(val OptString) {
+	s.Title = val
+}
+
+// Ref: #/components/schemas/CreateAiMessageRequest
+type CreateAiMessageRequest struct {
+	Content string `json:"content"`
+}
+
+// GetContent returns the value of Content.
+func (s *CreateAiMessageRequest) GetContent() string {
+	return s.Content
+}
+
+// SetContent sets the value of Content.
+func (s *CreateAiMessageRequest) SetContent(val string) {
+	s.Content = val
 }
 
 // Ref: #/components/schemas/CreateNotificationRequest
@@ -994,6 +1307,11 @@ func (s *CreateTwitchUserRequest) SetName(val string) {
 	s.Name = val
 }
 
+// DeleteAiConversationNoContent is response for DeleteAiConversation operation.
+type DeleteAiConversationNoContent struct{}
+
+func (*DeleteAiConversationNoContent) deleteAiConversationRes() {}
+
 // Ref: #/components/schemas/DeleteByIDRequest
 type DeleteByIDRequest struct {
 	ID int64 `json:"id"`
@@ -1039,7 +1357,10 @@ func (s *ErrorMessage) SetMessage(val string) {
 	s.Message = val
 }
 
+func (*ErrorMessage) confirmAiToolRes()                 {}
+func (*ErrorMessage) createAiMessageRes()               {}
 func (*ErrorMessage) createTwitchUserRes()              {}
+func (*ErrorMessage) deleteAiConversationRes()          {}
 func (*ErrorMessage) deleteNotificationRes()            {}
 func (*ErrorMessage) deleteRuleRes()                    {}
 func (*ErrorMessage) deleteTwitchAccountRes()           {}
@@ -1048,12 +1369,14 @@ func (*ErrorMessage) getRecordedStreamLeaderboardRes()  {}
 func (*ErrorMessage) getRecordedStreamRes()             {}
 func (*ErrorMessage) getTwitchUserActivityTimelineRes() {}
 func (*ErrorMessage) getTwitchUserProfileRes()          {}
+func (*ErrorMessage) listAiMessagesRes()                {}
 func (*ErrorMessage) listChannelChattersRes()           {}
 func (*ErrorMessage) listChatHistoryRes()               {}
 func (*ErrorMessage) listRecordedStreamActivityRes()    {}
 func (*ErrorMessage) listRecordedStreamMessagesRes()    {}
 func (*ErrorMessage) listTwitchUserActivityRes()        {}
 func (*ErrorMessage) setChannelBlacklistRes()           {}
+func (*ErrorMessage) stopAiAgentRes()                   {}
 func (*ErrorMessage) updateNotificationRes()            {}
 func (*ErrorMessage) updateRuleRes()                    {}
 func (*ErrorMessage) updateTwitchAccountRes()           {}
@@ -1302,6 +1625,10 @@ func (s *IrcMonitorStatusChannelsItem) SetLogin(val string) {
 func (s *IrcMonitorStatusChannelsItem) SetIrcOk(val bool) {
 	s.IrcOk = val
 }
+
+type ListAiMessagesOKApplicationJSON []AiMessage
+
+func (*ListAiMessagesOKApplicationJSON) listAiMessagesRes() {}
 
 type ListChannelChattersOKApplicationJSON []ChannelChatterEntry
 
@@ -1709,6 +2036,52 @@ func (o OptClientNoticeDetails) Get() (v ClientNoticeDetails, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptClientNoticeDetails) Or(d ClientNoticeDetails) ClientNoticeDetails {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptCreateAiConversationRequest returns new OptCreateAiConversationRequest with value set to v.
+func NewOptCreateAiConversationRequest(v CreateAiConversationRequest) OptCreateAiConversationRequest {
+	return OptCreateAiConversationRequest{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptCreateAiConversationRequest is optional CreateAiConversationRequest.
+type OptCreateAiConversationRequest struct {
+	Value CreateAiConversationRequest
+	Set   bool
+}
+
+// IsSet returns true if OptCreateAiConversationRequest was set.
+func (o OptCreateAiConversationRequest) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptCreateAiConversationRequest) Reset() {
+	var v CreateAiConversationRequest
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptCreateAiConversationRequest) SetTo(v CreateAiConversationRequest) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptCreateAiConversationRequest) Get() (v CreateAiConversationRequest, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptCreateAiConversationRequest) Or(d CreateAiConversationRequest) CreateAiConversationRequest {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -2444,6 +2817,44 @@ func (o OptUpdateNotificationPostRequestSettings) Or(d UpdateNotificationPostReq
 	return d
 }
 
+// Ref: #/components/schemas/PatchAiSettingsRequest
+type PatchAiSettingsRequest struct {
+	BaseURL OptString `json:"base_url"`
+	Model   OptString `json:"model"`
+	// When set, replaces the stored token; omit to leave unchanged.
+	APIToken OptString `json:"api_token"`
+}
+
+// GetBaseURL returns the value of BaseURL.
+func (s *PatchAiSettingsRequest) GetBaseURL() OptString {
+	return s.BaseURL
+}
+
+// GetModel returns the value of Model.
+func (s *PatchAiSettingsRequest) GetModel() OptString {
+	return s.Model
+}
+
+// GetAPIToken returns the value of APIToken.
+func (s *PatchAiSettingsRequest) GetAPIToken() OptString {
+	return s.APIToken
+}
+
+// SetBaseURL sets the value of BaseURL.
+func (s *PatchAiSettingsRequest) SetBaseURL(val OptString) {
+	s.BaseURL = val
+}
+
+// SetModel sets the value of Model.
+func (s *PatchAiSettingsRequest) SetModel(val OptString) {
+	s.Model = val
+}
+
+// SetAPIToken sets the value of APIToken.
+func (s *PatchAiSettingsRequest) SetAPIToken(val OptString) {
+	s.APIToken = val
+}
+
 // Ref: #/components/schemas/RecordedStream
 type RecordedStream struct {
 	ID int64 `json:"id"`
@@ -2982,6 +3393,11 @@ func (s *StartTwitchOAuthResponse) GetAuthorizeURL() string {
 func (s *StartTwitchOAuthResponse) SetAuthorizeURL(val string) {
 	s.AuthorizeURL = val
 }
+
+// StopAiAgentNoContent is response for StopAiAgent operation.
+type StopAiAgentNoContent struct{}
+
+func (*StopAiAgentNoContent) stopAiAgentRes() {}
 
 // Ref: #/components/schemas/StreamLeaderboardEntry
 type StreamLeaderboardEntry struct {

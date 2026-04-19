@@ -9,6 +9,42 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+func (s *AiMessage) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Role.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "role",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s AiMessageRole) Validate() error {
+	switch s {
+	case "user":
+		return nil
+	case "assistant":
+		return nil
+	case "tool":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *ChatHistoryEntry) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -305,6 +341,31 @@ func (s *IrcMonitorStatus) Validate() error {
 			Name:  "channels",
 			Error: err,
 		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s ListAiMessagesOKApplicationJSON) Validate() error {
+	alias := ([]AiMessage)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
