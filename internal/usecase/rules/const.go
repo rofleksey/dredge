@@ -23,5 +23,8 @@ const (
 	ActionSendChat = "send_chat"
 )
 
+// defaultNotifyTextTemplate is used when a notify rule has no action_settings.text (chat-style events).
+const defaultNotifyTextTemplate = "[$CHANNEL] $USERNAME: $TEXT"
+
 // maxRegexRunes limits regex input size (ReDoS mitigation), same idea as live.rule_match.
 const maxRegexRunes = 4000

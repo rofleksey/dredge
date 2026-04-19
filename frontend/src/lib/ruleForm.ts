@@ -192,7 +192,7 @@ export function defaultRuleForm(): RuleFormState {
     intervalChannel: '',
     middlewares: [defaultMiddlewareRow('match_regex')],
     actionType: AT.NOTIFY,
-    notifyText: '',
+    notifyText: '[$CHANNEL] $USERNAME: $TEXT',
     sendAccountId: '',
     sendChannel: '',
     sendMessage: '',

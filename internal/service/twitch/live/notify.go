@@ -15,7 +15,7 @@ import (
 )
 
 // NotifyChatKeyword sends keyword-style notifications to all enabled providers (rules engine).
-// When textTemplate is empty, uses the legacy default Telegram line "[%s] %s: %s".
+// When textTemplate is empty, uses the default Telegram line matching [$CHANNEL] $USERNAME: $TEXT.
 func (r *Runtime) NotifyChatKeyword(ctx context.Context, channel, user, message, textTemplate string) {
 	_ = ctx
 

@@ -186,8 +186,15 @@ func (e *Engine) execAction(ctx context.Context, rule entity.Rule, p EvalPayload
 	switch rule.ActionType {
 	case ActionNotify:
 		tpl, _ := rule.ActionSettings["text"].(string)
-		if tpl == "" && p.Event == EventInterval {
-			tpl = "[interval] #$CHANNEL"
+		if tpl == "" {
+			switch p.Event {
+			case EventInterval:
+				tpl = "[interval] #$CHANNEL"
+			case EventStreamStart, EventStreamEnd:
+				// Empty: live notify uses provider-specific defaults.
+			default:
+				tpl = defaultNotifyTextTemplate
+			}
 		}
 
 		vars := TemplateVars(rule.ID, p.Channel, p.Username, p.Text, p.Title)
