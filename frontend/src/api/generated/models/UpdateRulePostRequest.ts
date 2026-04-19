@@ -7,6 +7,10 @@ import type { RuleEventType } from './RuleEventType';
 import type { RuleMiddleware } from './RuleMiddleware';
 export type UpdateRulePostRequest = {
     id: number;
+    /**
+     * Display name for this rule (non-empty).
+     */
+    name: string;
     enabled: boolean;
     event_type: RuleEventType;
     event_settings: Record<string, any>;

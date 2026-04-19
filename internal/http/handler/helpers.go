@@ -61,6 +61,7 @@ func chatHistoryEntityToGen(m entity.ChatHistoryMessage) gen.ChatHistoryEntry {
 func ruleEntityToGen(r entity.Rule) gen.Rule {
 	return gen.Rule{
 		ID:             r.ID,
+		Name:           r.Name,
 		Enabled:        r.Enabled,
 		EventType:      gen.RuleEventType(r.EventType),
 		EventSettings:  anyMapToRuleEventSettings(r.EventSettings),
@@ -111,6 +112,7 @@ func anyMapToMiddlewareSettings(m map[string]any) gen.RuleMiddlewareSettings {
 
 func createRuleReqToEntity(req *gen.CreateRuleRequest) entity.Rule {
 	return entity.Rule{
+		Name:           req.Name,
 		Enabled:        req.Enabled.Or(true),
 		EventType:      string(req.EventType),
 		EventSettings:  rawSettingsToMap(req.EventSettings),
@@ -136,6 +138,7 @@ func middlewaresGenToEntity(in []gen.RuleMiddleware) []entity.RuleMiddleware {
 
 func updateRulePostReqToEntity(req *gen.UpdateRulePostRequest) entity.Rule {
 	return entity.Rule{
+		Name:           req.Name,
 		Enabled:        req.Enabled,
 		EventType:      string(req.EventType),
 		EventSettings:  rawSettingsToMap(req.EventSettings),

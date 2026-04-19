@@ -18,6 +18,27 @@ import (
 
 const sendMessageTimeout = 45 * time.Second
 
+// defaultSendAccountID picks an OAuth account for automated sends (e.g. rules send_chat with no stored account_id).
+// Prefers account_type "bot", otherwise the first linked account (same ordering as list APIs).
+func (r *Runtime) defaultSendAccountID(ctx context.Context) (int64, error) {
+	accs, err := r.repo.ListTwitchAccounts(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	if len(accs) == 0 {
+		return 0, entity.ErrTwitchAccountNotFound
+	}
+
+	for _, a := range accs {
+		if a.AccountType == "bot" {
+			return a.ID, nil
+		}
+	}
+
+	return accs[0].ID, nil
+}
+
 type streamStartNotify struct {
 	login string
 	title string
@@ -552,14 +573,25 @@ func (r *Runtime) ReconcileIRCJoins(ctx context.Context) {
 }
 
 // SendMessage sends a chat line using a linked OAuth account (Helix Send Chat Message).
+// accountID 0 means use defaultSendAccountID (bot account if linked, else first account).
 func (r *Runtime) SendMessage(ctx context.Context, accountID int64, channel, message string) error {
 	ctx, span := r.obs.StartSpan(ctx, "service.twitch.send_message")
 	defer span.End()
 
-	r.obs.Logger.Debug("send twitch message", zap.Int64("account_id", accountID), zap.String("channel", channel))
-
 	sendCtx, cancel := context.WithTimeout(ctx, sendMessageTimeout)
 	defer cancel()
+
+	if accountID == 0 {
+		var err error
+
+		accountID, err = r.defaultSendAccountID(sendCtx)
+		if err != nil {
+			r.obs.LogError(sendCtx, span, "resolve default send account failed", err)
+			return err
+		}
+	}
+
+	r.obs.Logger.Debug("send twitch message", zap.Int64("account_id", accountID), zap.String("channel", channel))
 
 	acc, err := r.repo.GetTwitchAccountByID(sendCtx, accountID)
 	if err != nil {

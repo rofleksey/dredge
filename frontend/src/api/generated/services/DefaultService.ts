@@ -26,6 +26,7 @@ import type { LoginResponse } from '../models/LoginResponse';
 import type { NotificationEntry } from '../models/NotificationEntry';
 import type { RecordedStream } from '../models/RecordedStream';
 import type { Rule } from '../models/Rule';
+import type { RuleTemplateVariablesResponse } from '../models/RuleTemplateVariablesResponse';
 import type { SendMessageRequest } from '../models/SendMessageRequest';
 import type { StartTwitchOAuthRequest } from '../models/StartTwitchOAuthRequest';
 import type { StartTwitchOAuthResponse } from '../models/StartTwitchOAuthResponse';
@@ -253,6 +254,19 @@ export class DefaultService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/settings/rules/count',
+        });
+    }
+    /**
+     * List rule message template placeholders
+     * Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
+     *
+     * @returns RuleTemplateVariablesResponse Placeholder metadata
+     * @throws ApiError
+     */
+    public static listRuleTemplateVariables(): CancelablePromise<RuleTemplateVariablesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/settings/rules/template-variables',
         });
     }
     /**

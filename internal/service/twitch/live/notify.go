@@ -60,6 +60,50 @@ func (r *Runtime) NotifyChatKeyword(ctx context.Context, channel, user, message,
 	}
 }
 
+// NotifyRuleText sends a rules-engine notification with only channel and rendered text (e.g. interval rules).
+func (r *Runtime) NotifyRuleText(ctx context.Context, channel, text string) {
+	_ = ctx
+
+	if strings.TrimSpace(text) == "" {
+		return
+	}
+
+	entries, err := r.repo.ListEnabledNotificationEntries(r.persistContext())
+	if err != nil || len(entries) == 0 {
+		return
+	}
+
+	payload := map[string]any{
+		"type":    "rule_text",
+		"channel": channel,
+		"text":    text,
+	}
+
+	body, _ := json.Marshal(payload)
+
+	for _, e := range entries {
+		e := e
+
+		go func() {
+			r.notifySem <- struct{}{}
+
+			defer func() { <-r.notifySem }()
+
+			nctx, cancel := context.WithTimeout(r.persistContext(), 15*time.Second)
+			defer cancel()
+
+			switch e.Provider {
+			case "telegram":
+				r.sendTelegramRuleText(nctx, e.Settings, text)
+			case "webhook":
+				r.postWebhook(nctx, e.Settings, body)
+			default:
+				r.obs.Logger.Debug("unknown notification provider", zap.String("provider", e.Provider))
+			}
+		}()
+	}
+}
+
 // NotifyStreamStart sends stream go-live notifications (rules engine).
 // When textTemplate is empty, uses the legacy default Telegram line for stream start.
 func (r *Runtime) NotifyStreamStart(ctx context.Context, channelLogin, title, textTemplate string) {
@@ -223,6 +267,44 @@ func (r *Runtime) sendTelegramStreamEnd(ctx context.Context, settings map[string
 	resp, err := r.helix.HTTPClient.Do(req)
 	if err != nil {
 		r.obs.Logger.Debug("telegram send failed", zap.Error(err))
+		return
+	}
+
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		b, _ := io.ReadAll(resp.Body)
+		r.obs.Logger.Debug("telegram send rejected", zap.Int("status", resp.StatusCode), zap.ByteString("body", b))
+	}
+}
+
+func (r *Runtime) sendTelegramRuleText(ctx context.Context, settings map[string]any, text string) {
+	tok, _ := settings["bot_token"].(string)
+
+	chatID, _ := settings["chat_id"].(string)
+	if tok == "" || chatID == "" {
+		r.obs.Logger.Debug("telegram notification missing bot_token or chat_id")
+
+		return
+	}
+
+	form := url.Values{}
+	form.Set("chat_id", chatID)
+	form.Set("text", text)
+
+	u := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tok)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, strings.NewReader(form.Encode()))
+	if err != nil {
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := r.helix.HTTPClient.Do(req)
+	if err != nil {
+		r.obs.Logger.Debug("telegram send failed", zap.Error(err))
+
 		return
 	}
 

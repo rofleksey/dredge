@@ -61,6 +61,7 @@ var operationRolesBearerAuth = map[string][]string{
 	ListRecordedStreamActivityOperation:    []string{},
 	ListRecordedStreamMessagesOperation:    []string{},
 	ListRecordedStreamsOperation:           []string{},
+	ListRuleTemplateVariablesOperation:     []string{},
 	ListRulesOperation:                     []string{},
 	ListTwitchAccountsOperation:            []string{},
 	ListTwitchDirectoryUsersOperation:      []string{},

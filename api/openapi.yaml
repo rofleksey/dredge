@@ -249,6 +249,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CountResponse"
+  /settings/rules/template-variables:
+    get:
+      operationId: listRuleTemplateVariables
+      security:
+        - bearerAuth: []
+      summary: List rule message template placeholders
+      description: |
+        Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
+      responses:
+        "200":
+          description: Placeholder metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RuleTemplateVariablesResponse"
   /settings/rules/update:
     post:
       operationId: updateRule
@@ -1099,6 +1114,23 @@ components:
         total:
           type: integer
           format: int64
+    RuleTemplateVariable:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+          description: Placeholder key without leading $ (e.g. CHANNEL); use as $CHANNEL in templates.
+        description:
+          type: string
+    RuleTemplateVariablesResponse:
+      type: object
+      required: [variables]
+      properties:
+        variables:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuleTemplateVariable"
     DeleteByIDRequest:
       type: object
       required: [id]
@@ -1138,6 +1170,7 @@ components:
       type: object
       required:
         - id
+        - name
         - enabled
         - event_type
         - event_settings
@@ -1149,6 +1182,9 @@ components:
         id:
           type: integer
           format: int64
+        name:
+          type: string
+          description: Display name for this rule (non-empty).
         enabled:
           type: boolean
         event_type:
@@ -1700,6 +1736,10 @@ components:
       enum: [chat_message, stream_start, stream_end, interval]
     RuleActionType:
       type: string
+      description: |
+        notify — deliver `action_settings.text` via notification providers.
+        send_chat — post to the event channel via Helix; `action_settings` requires `message` (template).
+        OAuth account is chosen server-side (bot account if linked, else first linked account).
       enum: [notify, send_chat]
     RuleMiddleware:
       type: object
@@ -1716,6 +1756,7 @@ components:
       type: object
       required:
         - id
+        - name
         - enabled
         - event_type
         - event_settings
@@ -1729,6 +1770,9 @@ components:
         id:
           type: integer
           format: int64
+        name:
+          type: string
+          description: Display name for this rule.
         enabled:
           type: boolean
         event_type:
@@ -1756,12 +1800,16 @@ components:
     CreateRuleRequest:
       type: object
       required:
+        - name
         - event_type
         - event_settings
         - middlewares
         - action_type
         - action_settings
       properties:
+        name:
+          type: string
+          description: Display name for this rule (required; non-empty).
         enabled:
           type: boolean
           default: true
@@ -1785,6 +1833,7 @@ components:
     UpdateRuleRequest:
       type: object
       required:
+        - name
         - enabled
         - event_type
         - event_settings
@@ -1793,6 +1842,8 @@ components:
         - action_settings
         - use_shared_pool
       properties:
+        name:
+          type: string
         enabled:
           type: boolean
         event_type:

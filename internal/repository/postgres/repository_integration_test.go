@@ -106,6 +106,7 @@ func TestRepository_integration(t *testing.T) {
 	assert.GreaterOrEqual(t, nAcc, int64(1))
 
 	rule, err := repo.CreateRule(ctx, entity.Rule{
+		Name:          "integration rule",
 		Enabled:       true,
 		EventType:     "chat_message",
 		EventSettings: map[string]any{},
@@ -127,6 +128,7 @@ func TestRepository_integration(t *testing.T) {
 	assert.GreaterOrEqual(t, nRules, int64(1))
 
 	_, err = repo.UpdateRule(ctx, rule.ID, entity.Rule{
+		Name:          "integration rule",
 		Enabled:       true,
 		EventType:     "chat_message",
 		EventSettings: map[string]any{},
@@ -346,7 +348,7 @@ func TestRepository_integration(t *testing.T) {
 	assert.ErrorIs(t, err, entity.ErrRuleNotFound)
 
 	_, err = repo.UpdateRule(ctx, 888_888, entity.Rule{
-		Enabled: true, EventType: "chat_message", EventSettings: map[string]any{},
+		Name: "x", Enabled: true, EventType: "chat_message", EventSettings: map[string]any{},
 		Middlewares: nil, ActionType: "notify", ActionSettings: map[string]any{}, UseSharedPool: true,
 	})
 	assert.ErrorIs(t, err, entity.ErrRuleNotFound)

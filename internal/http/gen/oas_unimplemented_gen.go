@@ -210,6 +210,15 @@ func (UnimplementedHandler) ListRecordedStreams(ctx context.Context, params List
 	return r, ht.ErrNotImplemented
 }
 
+// ListRuleTemplateVariables implements listRuleTemplateVariables operation.
+//
+// Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
+//
+// GET /settings/rules/template-variables
+func (UnimplementedHandler) ListRuleTemplateVariables(ctx context.Context) (r *RuleTemplateVariablesResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListRules implements listRules operation.
 //
 // GET /settings/rules

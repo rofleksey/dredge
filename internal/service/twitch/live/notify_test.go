@@ -73,3 +73,25 @@ func TestDispatchRuleHitNotifications_webhook(t *testing.T) {
 
 	time.Sleep(150 * time.Millisecond)
 }
+
+func TestNotifyRuleText_webhook(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer srv.Close()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := repomocks.NewMockStore(ctrl)
+	r := testRuntime(t, repo)
+	r.helix.HTTPClient = srv.Client()
+
+	repo.EXPECT().ListEnabledNotificationEntries(gomock.Any()).Return([]entity.NotificationEntry{
+		{Provider: "webhook", Settings: map[string]any{"url": srv.URL}},
+	}, nil)
+
+	r.NotifyRuleText(context.Background(), "ch", "hello interval")
+
+	time.Sleep(150 * time.Millisecond)
+}

@@ -170,6 +170,7 @@ function apiRowToForm(mw: RuleMiddleware): MiddlewareFormRow {
 }
 
 export type RuleFormState = {
+  name: string;
   enabled: boolean;
   useSharedPool: boolean;
   eventType: RuleEventType;
@@ -178,13 +179,12 @@ export type RuleFormState = {
   middlewares: MiddlewareFormRow[];
   actionType: RuleActionType;
   notifyText: string;
-  sendAccountId: string;
-  sendChannel: string;
   sendMessage: string;
 };
 
 export function defaultRuleForm(): RuleFormState {
   return {
+    name: '',
     enabled: true,
     useSharedPool: true,
     eventType: ET.CHAT_MESSAGE,
@@ -193,14 +193,13 @@ export function defaultRuleForm(): RuleFormState {
     middlewares: [defaultMiddlewareRow('match_regex')],
     actionType: AT.NOTIFY,
     notifyText: '[$CHANNEL] $USERNAME: $TEXT',
-    sendAccountId: '',
-    sendChannel: '',
     sendMessage: '',
   };
 }
 
 export function ruleToFormState(r: Rule): RuleFormState {
   const st = defaultRuleForm();
+  st.name = typeof r.name === 'string' ? r.name : '';
   st.enabled = r.enabled;
   st.useSharedPool = r.use_shared_pool;
   st.eventType = r.event_type;
@@ -214,20 +213,13 @@ export function ruleToFormState(r: Rule): RuleFormState {
     }
     st.intervalChannel = typeof es.channel === 'string' ? es.channel : '';
   }
-  st.middlewares = r.middlewares?.length ? r.middlewares.map(apiRowToForm) : [defaultMiddlewareRow()];
+  st.middlewares = r.middlewares?.length ? r.middlewares.map(apiRowToForm) : [];
   st.actionType = r.action_type;
   const as = r.action_settings ?? {};
   if (r.action_type === AT.NOTIFY) {
     st.notifyText = typeof as.text === 'string' ? as.text : '';
   }
   if (r.action_type === AT.SEND_CHAT) {
-    const aid = as.account_id;
-    if (typeof aid === 'number') {
-      st.sendAccountId = String(aid);
-    } else if (typeof aid === 'string') {
-      st.sendAccountId = aid;
-    }
-    st.sendChannel = typeof as.channel === 'string' ? as.channel : '';
     st.sendMessage = typeof as.message === 'string' ? as.message : '';
   }
   return st;
@@ -249,10 +241,7 @@ function buildActionSettings(st: RuleFormState): Record<string, unknown> {
     const t = st.notifyText.trim();
     return t ? { text: t } : {};
   }
-  const aid = Number.parseInt(st.sendAccountId.trim(), 10);
   return {
-    account_id: Number.isFinite(aid) ? aid : 0,
-    channel: st.sendChannel.trim(),
     message: st.sendMessage,
   };
 }
@@ -260,6 +249,7 @@ function buildActionSettings(st: RuleFormState): Record<string, unknown> {
 export function formStateToCreateRequest(st: RuleFormState): CreateRuleRequest {
   const middlewares = st.middlewares.map(middlewareRowToApi);
   return {
+    name: st.name.trim(),
     enabled: st.enabled,
     event_type: st.eventType,
     event_settings: buildEventSettings(st),
@@ -274,6 +264,7 @@ export function formStateToUpdateRequest(id: number, st: RuleFormState): UpdateR
   const middlewares = st.middlewares.map(middlewareRowToApi);
   return {
     id,
+    name: st.name.trim(),
     enabled: st.enabled,
     event_type: st.eventType,
     event_settings: buildEventSettings(st),
@@ -285,6 +276,10 @@ export function formStateToUpdateRequest(id: number, st: RuleFormState): UpdateR
 }
 
 export function validateRuleForm(st: RuleFormState): string | null {
+  if (!st.name.trim()) {
+    return 'Enter a name for this rule.';
+  }
+
   if (st.eventType === ET.INTERVAL) {
     const sec = Number.parseFloat(st.intervalSeconds);
     if (!Number.isFinite(sec) || sec <= 0) {
@@ -296,13 +291,6 @@ export function validateRuleForm(st: RuleFormState): string | null {
   }
 
   if (st.actionType === AT.SEND_CHAT) {
-    const aid = Number.parseInt(st.sendAccountId.trim(), 10);
-    if (!Number.isFinite(aid) || aid <= 0) {
-      return 'send_chat requires a positive Twitch account id.';
-    }
-    if (!st.sendChannel.trim()) {
-      return 'send_chat requires a channel template.';
-    }
     if (!st.sendMessage.trim()) {
       return 'send_chat requires a message template.';
     }

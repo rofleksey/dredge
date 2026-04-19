@@ -91,6 +91,7 @@ type TwitchUser struct {
 // Rule is an automation: event + ordered middlewares + action (see api RuleEventType / middleware types).
 type Rule struct {
 	ID             int64
+	Name           string
 	Enabled        bool
 	EventType      string
 	EventSettings  map[string]any

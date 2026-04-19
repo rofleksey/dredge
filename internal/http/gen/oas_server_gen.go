@@ -124,6 +124,12 @@ type Handler interface {
 	//
 	// GET /twitch/streams
 	ListRecordedStreams(ctx context.Context, params ListRecordedStreamsParams) ([]RecordedStream, error)
+	// ListRuleTemplateVariables implements listRuleTemplateVariables operation.
+	//
+	// Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
+	//
+	// GET /settings/rules/template-variables
+	ListRuleTemplateVariables(ctx context.Context) (*RuleTemplateVariablesResponse, error)
 	// ListRules implements listRules operation.
 	//
 	// GET /settings/rules

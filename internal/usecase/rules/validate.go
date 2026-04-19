@@ -10,6 +10,10 @@ import (
 
 // ValidateRule checks event, middlewares, and action shape.
 func ValidateRule(r entity.Rule) error {
+	if strings.TrimSpace(r.Name) == "" {
+		return fmt.Errorf("name required: %w", entity.ErrInvalidRule)
+	}
+
 	if r.EventType == "" {
 		return fmt.Errorf("event_type required: %w", entity.ErrInvalidRule)
 	}
@@ -37,16 +41,6 @@ func ValidateRule(r entity.Rule) error {
 	switch r.ActionType {
 	case ActionNotify:
 	case ActionSendChat:
-		aid, ok := numFromMap(r.ActionSettings, "account_id")
-		if !ok || aid <= 0 {
-			return fmt.Errorf("send_chat requires positive account_id: %w", entity.ErrInvalidRule)
-		}
-
-		ch, _ := r.ActionSettings["channel"].(string)
-		if ch == "" {
-			return fmt.Errorf("send_chat requires channel: %w", entity.ErrInvalidRule)
-		}
-
 		msg, _ := r.ActionSettings["message"].(string)
 		if msg == "" {
 			return fmt.Errorf("send_chat requires message template: %w", entity.ErrInvalidRule)

@@ -4,7 +4,9 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ApiError, DefaultService } from '../api/generated';
 import { RuleActionType } from '../api/generated/models/RuleActionType';
 import { RuleEventType } from '../api/generated/models/RuleEventType';
+import type { RuleTemplateVariable } from '../api/generated/models/RuleTemplateVariable';
 import RuleMiddlewareRow from '../components/RuleMiddlewareRow.vue';
+import RuleTemplateVariablesHint from '../components/RuleTemplateVariablesHint.vue';
 import SubmitButton from '../components/SubmitButton.vue';
 import {
   defaultMiddlewareRow,
@@ -16,13 +18,11 @@ import {
   validateRuleForm,
 } from '../lib/ruleForm';
 import { notify } from '../lib/notify';
-import { useTwitchAccountsStore } from '../stores/twitchAccounts';
 
 defineOptions({ name: 'RuleEditorView' });
 
 const route = useRoute();
 const router = useRouter();
-const twitchStore = useTwitchAccountsStore();
 
 const isNew = computed(() => route.name === 'rule-new');
 const ruleId = computed(() => Number.parseInt(String(route.params.id), 10));
@@ -33,6 +33,17 @@ const deleting = ref(false);
 
 const form = ref<RuleFormState>(defaultRuleForm());
 const loadedRuleId = ref<number | null>(null);
+/** null = loading; empty after failed fetch */
+const templateVariables = ref<RuleTemplateVariable[] | null>(null);
+
+async function fetchTemplateVariables(): Promise<void> {
+  try {
+    const res = await DefaultService.listRuleTemplateVariables();
+    templateVariables.value = res.variables;
+  } catch {
+    templateVariables.value = [];
+  }
+}
 
 function notifyErr(e: unknown, id: string, title: string): void {
   const msg =
@@ -45,7 +56,6 @@ function notifyErr(e: unknown, id: string, title: string): void {
 async function load(): Promise<void> {
   loading.value = true;
   try {
-    await twitchStore.fetch();
     if (isNew.value) {
       form.value = defaultRuleForm();
       loadedRuleId.value = null;
@@ -75,6 +85,7 @@ async function load(): Promise<void> {
 
 onMounted(() => {
   void load();
+  void fetchTemplateVariables();
 });
 
 watch(
@@ -89,17 +100,7 @@ function addMiddleware(): void {
 }
 
 function removeMiddleware(i: number): void {
-  if (form.value.middlewares.length <= 1) {
-    return;
-  }
   form.value.middlewares.splice(i, 1);
-}
-
-function onPickAccount(ev: Event): void {
-  const v = (ev.target as HTMLSelectElement).value;
-  if (v) {
-    form.value.sendAccountId = v;
-  }
 }
 
 async function save(): Promise<void> {
@@ -141,7 +142,8 @@ async function removeRule(): Promise<void> {
   if (!Number.isFinite(id)) {
     return;
   }
-  if (!window.confirm(`Delete rule #${id}? This cannot be undone.`)) {
+  const label = form.value.name.trim() || `#${id}`;
+  if (!window.confirm(`Delete rule “${label}” (#${id})? This cannot be undone.`)) {
     return;
   }
   if (deleting.value) {
@@ -163,16 +165,14 @@ function cancel(): void {
   void router.push({ name: 'settings', query: { tab: 'rules' } });
 }
 
-const pageTitle = computed(() => (isNew.value ? 'New rule' : `Edit rule #${ruleId.value}`));
-
-const accountPickValue = computed(() => {
-  const id = form.value.sendAccountId.trim();
-  if (!id) {
-    return '';
+const pageTitle = computed(() => {
+  if (isNew.value) {
+    return 'New rule';
   }
-  const n = twitchStore.accounts.some((a) => String(a.id) === id);
-  return n ? id : '';
+  const n = form.value.name.trim();
+  return n ? `Edit: ${n}` : `Edit rule #${ruleId.value}`;
 });
+
 </script>
 
 <template>
@@ -191,6 +191,10 @@ const accountPickValue = computed(() => {
 
       <section class="panel">
         <h2>General</h2>
+        <label class="stack gap-setting">
+          <span>Name</span>
+          <input v-model="form.name" type="text" autocomplete="off" placeholder="Short label" />
+        </label>
         <label class="row-inline">
           <input v-model="form.enabled" type="checkbox" />
           <span>Enabled</span>
@@ -230,7 +234,6 @@ const accountPickValue = computed(() => {
         <div v-for="(mw, i) in form.middlewares" :key="mw.key" class="mw-line">
           <RuleMiddlewareRow v-model="form.middlewares[i]!" />
           <button
-            v-if="form.middlewares.length > 1"
             type="button"
             class="btn-remove-mw"
             @click="removeMiddleware(i)"
@@ -255,31 +258,24 @@ const accountPickValue = computed(() => {
 
         <template v-if="form.actionType === RuleActionType.NOTIFY">
           <label class="stack gap-setting">
-            <span>Message template (optional; uses <code>$CHANNEL</code> <code>$USERNAME</code> <code>$TEXT</code> <code>$TITLE</code> <code>$RULE_ID</code>)</span>
+            <span class="label-with-hint">
+              <span>Message template (optional)</span>
+              <RuleTemplateVariablesHint :variables="templateVariables" />
+            </span>
             <textarea v-model="form.notifyText" rows="4" spellcheck="false" placeholder="Empty uses defaults for some events." />
           </label>
         </template>
 
         <template v-else>
+          <p class="muted small">
+            Message is sent to the same channel as the event. The server uses your linked bot OAuth account if present,
+            otherwise your first linked Twitch account.
+          </p>
           <label class="stack gap-setting">
-            <span>Linked Twitch account</span>
-            <select :value="accountPickValue" @change="onPickAccount">
-              <option value="">— Pick account (Settings → Twitch) —</option>
-              <option v-for="a in twitchStore.accounts" :key="a.id" :value="String(a.id)">
-                {{ a.username }} ({{ a.account_type }}) · id {{ a.id }}
-              </option>
-            </select>
-          </label>
-          <label class="stack gap-setting">
-            <span>Account id</span>
-            <input v-model="form.sendAccountId" type="number" min="1" step="1" autocomplete="off" />
-          </label>
-          <label class="stack gap-setting">
-            <span>Channel (template)</span>
-            <input v-model="form.sendChannel" type="text" autocomplete="off" placeholder="$CHANNEL" />
-          </label>
-          <label class="stack gap-setting">
-            <span>Message (template)</span>
+            <span class="label-with-hint">
+              <span>Message (template)</span>
+              <RuleTemplateVariablesHint :variables="templateVariables" />
+            </span>
             <textarea v-model="form.sendMessage" rows="3" spellcheck="false" autocomplete="off" />
           </label>
         </template>
@@ -356,6 +352,15 @@ h2 {
   font-size: 1rem;
   margin: 0 0 0.5rem;
   color: var(--accent-bright);
+}
+
+.label-with-hint {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
 }
 
 .stack.gap-setting {

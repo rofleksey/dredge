@@ -600,6 +600,29 @@ func (s RuleEventType) Validate() error {
 	}
 }
 
+func (s *RuleTemplateVariablesResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Variables == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "variables",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *SendMessageBadGateway) Validate() error {
 	alias := (*ClientNotice)(s)
 	if err := alias.Validate(); err != nil {

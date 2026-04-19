@@ -1767,6 +1767,10 @@ func (s *CreateRuleRequest) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *CreateRuleRequest) encodeFields(e *jx.Encoder) {
 	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
 		if s.Enabled.Set {
 			e.FieldStart("enabled")
 			s.Enabled.Encode(e)
@@ -1804,14 +1808,15 @@ func (s *CreateRuleRequest) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfCreateRuleRequest = [7]string{
-	0: "enabled",
-	1: "event_type",
-	2: "event_settings",
-	3: "middlewares",
-	4: "action_type",
-	5: "action_settings",
-	6: "use_shared_pool",
+var jsonFieldsNameOfCreateRuleRequest = [8]string{
+	0: "name",
+	1: "enabled",
+	2: "event_type",
+	3: "event_settings",
+	4: "middlewares",
+	5: "action_type",
+	6: "action_settings",
+	7: "use_shared_pool",
 }
 
 // Decode decodes CreateRuleRequest from json.
@@ -1824,6 +1829,18 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
 		case "enabled":
 			if err := func() error {
 				s.Enabled.Reset()
@@ -1835,7 +1852,7 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"enabled\"")
 			}
 		case "event_type":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.EventType.Decode(d); err != nil {
 					return err
@@ -1845,7 +1862,7 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"event_type\"")
 			}
 		case "event_settings":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.EventSettings.Decode(d); err != nil {
 					return err
@@ -1855,7 +1872,7 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"event_settings\"")
 			}
 		case "middlewares":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				s.Middlewares = make([]RuleMiddleware, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -1873,7 +1890,7 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"middlewares\"")
 			}
 		case "action_type":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.ActionType.Decode(d); err != nil {
 					return err
@@ -1883,7 +1900,7 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"action_type\"")
 			}
 		case "action_settings":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.ActionSettings.Decode(d); err != nil {
 					return err
@@ -1912,7 +1929,7 @@ func (s *CreateRuleRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111110,
+		0b01111101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -5478,6 +5495,10 @@ func (s *Rule) encodeFields(e *jx.Encoder) {
 		e.Int64(s.ID)
 	}
 	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
 		e.FieldStart("enabled")
 		e.Bool(s.Enabled)
 	}
@@ -5519,17 +5540,18 @@ func (s *Rule) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfRule = [10]string{
-	0: "id",
-	1: "enabled",
-	2: "event_type",
-	3: "event_settings",
-	4: "middlewares",
-	5: "action_type",
-	6: "action_settings",
-	7: "use_shared_pool",
-	8: "created_at",
-	9: "updated_at",
+var jsonFieldsNameOfRule = [11]string{
+	0:  "id",
+	1:  "name",
+	2:  "enabled",
+	3:  "event_type",
+	4:  "event_settings",
+	5:  "middlewares",
+	6:  "action_type",
+	7:  "action_settings",
+	8:  "use_shared_pool",
+	9:  "created_at",
+	10: "updated_at",
 }
 
 // Decode decodes Rule from json.
@@ -5553,8 +5575,20 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"id\"")
 			}
-		case "enabled":
+		case "name":
 			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "enabled":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Bool()
 				s.Enabled = bool(v)
@@ -5566,7 +5600,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"enabled\"")
 			}
 		case "event_type":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.EventType.Decode(d); err != nil {
 					return err
@@ -5576,7 +5610,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"event_type\"")
 			}
 		case "event_settings":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.EventSettings.Decode(d); err != nil {
 					return err
@@ -5586,7 +5620,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"event_settings\"")
 			}
 		case "middlewares":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				s.Middlewares = make([]RuleMiddleware, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -5604,7 +5638,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"middlewares\"")
 			}
 		case "action_type":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.ActionType.Decode(d); err != nil {
 					return err
@@ -5614,7 +5648,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"action_type\"")
 			}
 		case "action_settings":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.ActionSettings.Decode(d); err != nil {
 					return err
@@ -5624,7 +5658,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"action_settings\"")
 			}
 		case "use_shared_pool":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Bool()
 				s.UseSharedPool = bool(v)
@@ -5636,7 +5670,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"use_shared_pool\"")
 			}
 		case "created_at":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -5648,7 +5682,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"created_at\"")
 			}
 		case "updated_at":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.UpdatedAt = v
@@ -5670,7 +5704,7 @@ func (s *Rule) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00000011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -6081,6 +6115,225 @@ func (s RuleMiddlewareSettings) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RuleMiddlewareSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RuleTemplateVariable) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RuleTemplateVariable) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("description")
+		e.Str(s.Description)
+	}
+}
+
+var jsonFieldsNameOfRuleTemplateVariable = [2]string{
+	0: "name",
+	1: "description",
+}
+
+// Decode decodes RuleTemplateVariable from json.
+func (s *RuleTemplateVariable) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RuleTemplateVariable to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Description = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RuleTemplateVariable")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRuleTemplateVariable) {
+					name = jsonFieldsNameOfRuleTemplateVariable[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RuleTemplateVariable) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RuleTemplateVariable) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RuleTemplateVariablesResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RuleTemplateVariablesResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("variables")
+		e.ArrStart()
+		for _, elem := range s.Variables {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfRuleTemplateVariablesResponse = [1]string{
+	0: "variables",
+}
+
+// Decode decodes RuleTemplateVariablesResponse from json.
+func (s *RuleTemplateVariablesResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RuleTemplateVariablesResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "variables":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Variables = make([]RuleTemplateVariable, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem RuleTemplateVariable
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Variables = append(s.Variables, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"variables\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RuleTemplateVariablesResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRuleTemplateVariablesResponse) {
+					name = jsonFieldsNameOfRuleTemplateVariablesResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RuleTemplateVariablesResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RuleTemplateVariablesResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -8280,6 +8533,10 @@ func (s *UpdateRulePostRequest) encodeFields(e *jx.Encoder) {
 		e.Int64(s.ID)
 	}
 	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
 		e.FieldStart("enabled")
 		e.Bool(s.Enabled)
 	}
@@ -8313,15 +8570,16 @@ func (s *UpdateRulePostRequest) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUpdateRulePostRequest = [8]string{
+var jsonFieldsNameOfUpdateRulePostRequest = [9]string{
 	0: "id",
-	1: "enabled",
-	2: "event_type",
-	3: "event_settings",
-	4: "middlewares",
-	5: "action_type",
-	6: "action_settings",
-	7: "use_shared_pool",
+	1: "name",
+	2: "enabled",
+	3: "event_type",
+	4: "event_settings",
+	5: "middlewares",
+	6: "action_type",
+	7: "action_settings",
+	8: "use_shared_pool",
 }
 
 // Decode decodes UpdateRulePostRequest from json.
@@ -8329,7 +8587,7 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UpdateRulePostRequest to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -8345,8 +8603,20 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"id\"")
 			}
-		case "enabled":
+		case "name":
 			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "enabled":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Bool()
 				s.Enabled = bool(v)
@@ -8358,7 +8628,7 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"enabled\"")
 			}
 		case "event_type":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.EventType.Decode(d); err != nil {
 					return err
@@ -8368,7 +8638,7 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"event_type\"")
 			}
 		case "event_settings":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.EventSettings.Decode(d); err != nil {
 					return err
@@ -8378,7 +8648,7 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"event_settings\"")
 			}
 		case "middlewares":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				s.Middlewares = make([]RuleMiddleware, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -8396,7 +8666,7 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"middlewares\"")
 			}
 		case "action_type":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.ActionType.Decode(d); err != nil {
 					return err
@@ -8406,7 +8676,7 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"action_type\"")
 			}
 		case "action_settings":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.ActionSettings.Decode(d); err != nil {
 					return err
@@ -8416,7 +8686,7 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"action_settings\"")
 			}
 		case "use_shared_pool":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Bool()
 				s.UseSharedPool = bool(v)
@@ -8436,8 +8706,9 @@ func (s *UpdateRulePostRequest) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b11111111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

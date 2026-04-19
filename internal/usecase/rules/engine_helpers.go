@@ -208,21 +208,26 @@ func (e *Engine) execAction(ctx context.Context, rule entity.Rule, p EvalPayload
 		case EventStreamEnd:
 			e.notify.NotifyStreamEnd(ctx, p.Channel, out)
 		case EventInterval:
-			e.notify.NotifyChatKeyword(ctx, p.Channel, "", "", out)
+			e.notify.NotifyRuleText(ctx, p.Channel, out)
 		default:
 			e.notify.NotifyChatKeyword(ctx, p.Channel, p.Username, p.Text, out)
 		}
 	case ActionSendChat:
-		aidF, _ := numFromMap(rule.ActionSettings, "account_id")
-		aid := int64(aidF)
-		chTpl, _ := rule.ActionSettings["channel"].(string)
 		msgTpl, _ := rule.ActionSettings["message"].(string)
 
 		vars := TemplateVars(rule.ID, p.Channel, p.Username, p.Text, p.Title)
-		ch := ExpandTemplate(chTpl, vars)
+		ch := trimLower(p.Channel)
 		msg := ExpandTemplate(msgTpl, vars)
 
-		err := e.send.SendMessage(ctx, aid, ch, msg)
+		if ch == "" {
+			if e.obs != nil {
+				e.obs.Logger.Debug("rules send_chat skipped: empty event channel", zap.Int64("rule_id", rule.ID))
+			}
+
+			return
+		}
+
+		err := e.send.SendMessage(ctx, 0, ch, msg)
 		if err != nil {
 			if e.obs != nil {
 				e.obs.Logger.Debug("rules send_chat failed", zap.Error(err), zap.Int64("rule_id", rule.ID))

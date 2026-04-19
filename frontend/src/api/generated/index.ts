@@ -38,6 +38,8 @@ export type { Rule } from './models/Rule';
 export { RuleActionType } from './models/RuleActionType';
 export { RuleEventType } from './models/RuleEventType';
 export type { RuleMiddleware } from './models/RuleMiddleware';
+export type { RuleTemplateVariable } from './models/RuleTemplateVariable';
+export type { RuleTemplateVariablesResponse } from './models/RuleTemplateVariablesResponse';
 export type { SendMessageRequest } from './models/SendMessageRequest';
 export type { StartTwitchOAuthRequest } from './models/StartTwitchOAuthRequest';
 export type { StartTwitchOAuthResponse } from './models/StartTwitchOAuthResponse';

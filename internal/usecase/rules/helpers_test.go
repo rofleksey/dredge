@@ -13,6 +13,20 @@ func TestExpandTemplate(t *testing.T) {
 	require.Equal(t, "hello foo", out)
 }
 
+func TestRuleTemplateVariables_matchesTemplateVarsKeys(t *testing.T) {
+	t.Parallel()
+
+	tv := TemplateVars(42, "ch", "u", "txt", "ttl")
+	list := RuleTemplateVariables()
+	require.Len(t, list, len(tv))
+
+	for _, x := range list {
+		_, ok := tv[x.Name]
+		require.True(t, ok, "missing key %q in TemplateVars", x.Name)
+		require.NotEmpty(t, x.Description)
+	}
+}
+
 func TestMwContainsWordCaseInsensitive(t *testing.T) {
 	t.Parallel()
 

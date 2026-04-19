@@ -775,6 +775,8 @@ func (s *CreateNotificationRequestSettings) init() CreateNotificationRequestSett
 
 // Ref: #/components/schemas/CreateRuleRequest
 type CreateRuleRequest struct {
+	// Display name for this rule (required; non-empty).
+	Name           string                          `json:"name"`
 	Enabled        OptBool                         `json:"enabled"`
 	EventType      RuleEventType                   `json:"event_type"`
 	EventSettings  CreateRuleRequestEventSettings  `json:"event_settings"`
@@ -782,6 +784,11 @@ type CreateRuleRequest struct {
 	ActionType     RuleActionType                  `json:"action_type"`
 	ActionSettings CreateRuleRequestActionSettings `json:"action_settings"`
 	UseSharedPool  OptBool                         `json:"use_shared_pool"`
+}
+
+// GetName returns the value of Name.
+func (s *CreateRuleRequest) GetName() string {
+	return s.Name
 }
 
 // GetEnabled returns the value of Enabled.
@@ -817,6 +824,11 @@ func (s *CreateRuleRequest) GetActionSettings() CreateRuleRequestActionSettings 
 // GetUseSharedPool returns the value of UseSharedPool.
 func (s *CreateRuleRequest) GetUseSharedPool() OptBool {
 	return s.UseSharedPool
+}
+
+// SetName sets the value of Name.
+func (s *CreateRuleRequest) SetName(val string) {
+	s.Name = val
 }
 
 // SetEnabled sets the value of Enabled.
@@ -2541,7 +2553,9 @@ func (*RecordedStream) getRecordedStreamRes() {}
 
 // Ref: #/components/schemas/Rule
 type Rule struct {
-	ID             int64              `json:"id"`
+	ID int64 `json:"id"`
+	// Display name for this rule.
+	Name           string             `json:"name"`
 	Enabled        bool               `json:"enabled"`
 	EventType      RuleEventType      `json:"event_type"`
 	EventSettings  RuleEventSettings  `json:"event_settings"`
@@ -2556,6 +2570,11 @@ type Rule struct {
 // GetID returns the value of ID.
 func (s *Rule) GetID() int64 {
 	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *Rule) GetName() string {
+	return s.Name
 }
 
 // GetEnabled returns the value of Enabled.
@@ -2606,6 +2625,11 @@ func (s *Rule) GetUpdatedAt() time.Time {
 // SetID sets the value of ID.
 func (s *Rule) SetID(val int64) {
 	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *Rule) SetName(val string) {
+	s.Name = val
 }
 
 // SetEnabled sets the value of Enabled.
@@ -2666,6 +2690,9 @@ func (s *RuleActionSettings) init() RuleActionSettings {
 	return m
 }
 
+// Notify — deliver `action_settings.text` via notification providers.
+// send_chat — post to the event channel via Helix; `action_settings` requires `message` (template).
+// OAuth account is chosen server-side (bot account if linked, else first linked account).
 // Ref: #/components/schemas/RuleActionType
 type RuleActionType string
 
@@ -2813,6 +2840,48 @@ func (s *RuleMiddlewareSettings) init() RuleMiddlewareSettings {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/RuleTemplateVariable
+type RuleTemplateVariable struct {
+	// Placeholder key without leading $ (e.g. CHANNEL); use as $CHANNEL in templates.
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+// GetName returns the value of Name.
+func (s *RuleTemplateVariable) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *RuleTemplateVariable) GetDescription() string {
+	return s.Description
+}
+
+// SetName sets the value of Name.
+func (s *RuleTemplateVariable) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *RuleTemplateVariable) SetDescription(val string) {
+	s.Description = val
+}
+
+// Ref: #/components/schemas/RuleTemplateVariablesResponse
+type RuleTemplateVariablesResponse struct {
+	Variables []RuleTemplateVariable `json:"variables"`
+}
+
+// GetVariables returns the value of Variables.
+func (s *RuleTemplateVariablesResponse) GetVariables() []RuleTemplateVariable {
+	return s.Variables
+}
+
+// SetVariables sets the value of Variables.
+func (s *RuleTemplateVariablesResponse) SetVariables(val []RuleTemplateVariable) {
+	s.Variables = val
 }
 
 // SendMessageAccepted is response for SendMessage operation.
@@ -3756,7 +3825,9 @@ func (s *UpdateNotificationPostRequestSettings) init() UpdateNotificationPostReq
 
 // Ref: #/components/schemas/UpdateRulePostRequest
 type UpdateRulePostRequest struct {
-	ID             int64                               `json:"id"`
+	ID int64 `json:"id"`
+	// Display name for this rule (non-empty).
+	Name           string                              `json:"name"`
 	Enabled        bool                                `json:"enabled"`
 	EventType      RuleEventType                       `json:"event_type"`
 	EventSettings  UpdateRulePostRequestEventSettings  `json:"event_settings"`
@@ -3769,6 +3840,11 @@ type UpdateRulePostRequest struct {
 // GetID returns the value of ID.
 func (s *UpdateRulePostRequest) GetID() int64 {
 	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *UpdateRulePostRequest) GetName() string {
+	return s.Name
 }
 
 // GetEnabled returns the value of Enabled.
@@ -3809,6 +3885,11 @@ func (s *UpdateRulePostRequest) GetUseSharedPool() bool {
 // SetID sets the value of ID.
 func (s *UpdateRulePostRequest) SetID(val int64) {
 	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *UpdateRulePostRequest) SetName(val string) {
+	s.Name = val
 }
 
 // SetEnabled sets the value of Enabled.

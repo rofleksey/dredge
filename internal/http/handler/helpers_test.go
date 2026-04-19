@@ -120,6 +120,7 @@ func TestCreateRuleReqToEntity_defaults(t *testing.T) {
 	t.Parallel()
 
 	req := &gen.CreateRuleRequest{
+		Name:           "my rule",
 		EventType:      gen.RuleEventTypeChatMessage,
 		ActionType:     gen.RuleActionTypeNotify,
 		EventSettings:  gen.CreateRuleRequestEventSettings{},
@@ -127,6 +128,7 @@ func TestCreateRuleReqToEntity_defaults(t *testing.T) {
 		ActionSettings: gen.CreateRuleRequestActionSettings{},
 	}
 	ent := createRuleReqToEntity(req)
+	assert.Equal(t, "my rule", ent.Name)
 	assert.True(t, ent.Enabled)
 	assert.Equal(t, "chat_message", ent.EventType)
 	assert.Equal(t, "notify", ent.ActionType)
@@ -138,6 +140,7 @@ func TestRuleEntityToGen(t *testing.T) {
 
 	r := entity.Rule{
 		ID:             3,
+		Name:           "n",
 		Enabled:        true,
 		EventType:      "chat_message",
 		EventSettings:  map[string]any{},
@@ -150,6 +153,7 @@ func TestRuleEntityToGen(t *testing.T) {
 	}
 	g := ruleEntityToGen(r)
 	assert.Equal(t, int64(3), g.ID)
+	assert.Equal(t, "n", g.Name)
 	assert.Equal(t, gen.RuleEventTypeChatMessage, g.EventType)
 }
 
@@ -240,6 +244,7 @@ func TestUpdateRulePostReqToEntity(t *testing.T) {
 
 	req := &gen.UpdateRulePostRequest{
 		ID:             1,
+		Name:           "upd",
 		Enabled:        true,
 		EventType:      gen.RuleEventTypeChatMessage,
 		EventSettings:  gen.UpdateRulePostRequestEventSettings{},
@@ -250,6 +255,7 @@ func TestUpdateRulePostReqToEntity(t *testing.T) {
 	}
 
 	ent := updateRulePostReqToEntity(req)
+	assert.Equal(t, "upd", ent.Name)
 	assert.Equal(t, "chat_message", ent.EventType)
 }
 

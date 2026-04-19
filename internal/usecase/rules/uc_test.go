@@ -40,7 +40,7 @@ func TestUsecase_ListRules(t *testing.T) {
 	obs := &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")}
 	uc := NewUsecase(repo, obs, nil, nil)
 
-	want := []entity.Rule{{ID: 1, EventType: EventChatMessage}}
+	want := []entity.Rule{{ID: 1, Name: "n", EventType: EventChatMessage}}
 	repo.EXPECT().ListRules(gomock.Any()).Return(want, nil)
 
 	out, err := uc.ListRules(context.Background())

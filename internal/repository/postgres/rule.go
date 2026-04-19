@@ -15,7 +15,7 @@ func (r *Repository) ListRules(ctx context.Context) ([]entity.Rule, error) {
 	defer span.End()
 
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, enabled, event_type, event_settings, middlewares, action_type, action_settings,
+		SELECT id, name, enabled, event_type, event_settings, middlewares, action_type, action_settings,
 			use_shared_pool, created_at, updated_at
 		FROM rules ORDER BY id
 	`)
@@ -57,6 +57,7 @@ func scanRule(row interface {
 
 	err := row.Scan(
 		&rr.ID,
+		&rr.Name,
 		&rr.Enabled,
 		&rr.EventType,
 		&eventJSON,
@@ -133,12 +134,13 @@ func (r *Repository) CreateRule(ctx context.Context, rr entity.Rule) (entity.Rul
 	}
 
 	err = r.pool.QueryRow(ctx, `
-		INSERT INTO rules (enabled, event_type, event_settings, middlewares, action_type, action_settings, use_shared_pool)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, enabled, event_type, event_settings, middlewares, action_type, action_settings,
+		INSERT INTO rules (name, enabled, event_type, event_settings, middlewares, action_type, action_settings, use_shared_pool)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id, name, enabled, event_type, event_settings, middlewares, action_type, action_settings,
 			use_shared_pool, created_at, updated_at
-	`, rr.Enabled, rr.EventType, eventJSON, mwJSON, rr.ActionType, actionJSON, rr.UseSharedPool).Scan(
+	`, rr.Name, rr.Enabled, rr.EventType, eventJSON, mwJSON, rr.ActionType, actionJSON, rr.UseSharedPool).Scan(
 		&rr.ID,
+		&rr.Name,
 		&rr.Enabled,
 		&rr.EventType,
 		&eventJSON,
@@ -210,19 +212,21 @@ func (r *Repository) UpdateRule(ctx context.Context, id int64, rr entity.Rule) (
 
 	err = r.pool.QueryRow(ctx, `
 		UPDATE rules SET
-			enabled = $2,
-			event_type = $3,
-			event_settings = $4,
-			middlewares = $5,
-			action_type = $6,
-			action_settings = $7,
-			use_shared_pool = $8,
+			name = $2,
+			enabled = $3,
+			event_type = $4,
+			event_settings = $5,
+			middlewares = $6,
+			action_type = $7,
+			action_settings = $8,
+			use_shared_pool = $9,
 			updated_at = NOW()
 		WHERE id = $1
-		RETURNING id, enabled, event_type, event_settings, middlewares, action_type, action_settings,
+		RETURNING id, name, enabled, event_type, event_settings, middlewares, action_type, action_settings,
 			use_shared_pool, created_at, updated_at
-	`, id, rr.Enabled, rr.EventType, eventJSON, mwJSON, rr.ActionType, actionJSON, rr.UseSharedPool).Scan(
+	`, id, rr.Name, rr.Enabled, rr.EventType, eventJSON, mwJSON, rr.ActionType, actionJSON, rr.UseSharedPool).Scan(
 		&rr.ID,
+		&rr.Name,
 		&rr.Enabled,
 		&rr.EventType,
 		&eventJSON,

@@ -6,6 +6,10 @@ import type { RuleActionType } from './RuleActionType';
 import type { RuleEventType } from './RuleEventType';
 import type { RuleMiddleware } from './RuleMiddleware';
 export type CreateRuleRequest = {
+    /**
+     * Display name for this rule (required; non-empty).
+     */
+    name: string;
     enabled?: boolean;
     event_type: RuleEventType;
     event_settings: Record<string, any>;

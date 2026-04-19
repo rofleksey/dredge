@@ -40,6 +40,23 @@ func TemplateVars(ruleID int64, channel, username, text, title string) map[strin
 	}
 }
 
+// RuleTemplateVariable describes one $NAME placeholder for notify and send_chat templates.
+type RuleTemplateVariable struct {
+	Name        string
+	Description string
+}
+
+// RuleTemplateVariables returns metadata for the API and UI (keys match TemplateVars).
+func RuleTemplateVariables() []RuleTemplateVariable {
+	return []RuleTemplateVariable{
+		{Name: "RULE_ID", Description: "Numeric id of this rule."},
+		{Name: "CHANNEL", Description: "Channel login for the event (lowercase)."},
+		{Name: "USERNAME", Description: "Chatter login for chat events; empty when not applicable."},
+		{Name: "TEXT", Description: "Chat message body for chat_message; empty when not applicable."},
+		{Name: "TITLE", Description: "Stream title for stream_start; empty when not applicable."},
+	}
+}
+
 type evalDeps struct {
 	Repo  repository.Store
 	Helix *helix.Client
