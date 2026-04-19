@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"regexp"
 	"strconv"
 	"strings"
@@ -54,6 +55,54 @@ func (u *Usecase) ExecTool(ctx context.Context, name, argumentsJSON string) (str
 		return u.toolDeleteRule(ctx, argumentsJSON)
 	case ToolSendTwitchMessage:
 		return u.toolSendTwitchMessage(ctx, argumentsJSON)
+	case ToolCountTwitchMessages:
+		return u.toolCountTwitchMessages(ctx, argumentsJSON)
+	case ToolCountTwitchDirectoryUsers:
+		return u.toolCountTwitchDirectoryUsers(ctx, argumentsJSON)
+	case ToolGetChannelLive:
+		return u.toolGetChannelLive(ctx, argumentsJSON)
+	case ToolListChannelChatters:
+		return u.toolListChannelChatters(ctx, argumentsJSON)
+	case ToolGetIrcMonitorStatus:
+		return u.toolGetIrcMonitorStatus(ctx)
+	case ToolGetWatchUiHints:
+		return u.toolGetWatchUiHints()
+	case ToolListMonitoredStreams:
+		return u.toolListMonitoredStreams(ctx, argumentsJSON)
+	case ToolGetMonitoredStream:
+		return u.toolGetMonitoredStream(ctx, argumentsJSON)
+	case ToolListStreamMessages:
+		return u.toolListStreamMessages(ctx, argumentsJSON)
+	case ToolListStreamActivity:
+		return u.toolListStreamActivity(ctx, argumentsJSON)
+	case ToolGetStreamLeaderboard:
+		return u.toolGetStreamLeaderboard(ctx, argumentsJSON)
+	case ToolGetTwitchUser:
+		return u.toolGetTwitchUser(ctx, argumentsJSON)
+	case ToolCountRules:
+		return u.toolCountRules(ctx)
+	case ToolCreateNotification:
+		return u.toolCreateNotification(ctx, argumentsJSON)
+	case ToolUpdateNotification:
+		return u.toolUpdateNotification(ctx, argumentsJSON)
+	case ToolDeleteNotification:
+		return u.toolDeleteNotification(ctx, argumentsJSON)
+	case ToolSetChannelBlacklist:
+		return u.toolSetChannelBlacklist(ctx, argumentsJSON)
+	case ToolUpdateSuspicionSettings:
+		return u.toolUpdateSuspicionSettings(ctx, argumentsJSON)
+	case ToolUpdateIrcMonitorSettings:
+		return u.toolUpdateIrcMonitorSettings(ctx, argumentsJSON)
+	case ToolCreateTwitchUser:
+		return u.toolCreateTwitchUser(ctx, argumentsJSON)
+	case ToolPatchTwitchUser:
+		return u.toolPatchTwitchUser(ctx, argumentsJSON)
+	case ToolCreateTwitchAccount:
+		return u.toolCreateTwitchAccount(ctx, argumentsJSON)
+	case ToolPatchTwitchAccount:
+		return u.toolPatchTwitchAccount(ctx, argumentsJSON)
+	case ToolDeleteTwitchAccount:
+		return u.toolDeleteTwitchAccount(ctx, argumentsJSON)
 	default:
 		b, _ := json.Marshal(map[string]string{"error": "unknown tool: " + name})
 		return string(b), fmt.Errorf("unknown tool %q", name)
@@ -358,21 +407,105 @@ func (u *Usecase) toolUpdateRule(ctx context.Context, args string) (string, erro
 	if err != nil {
 		return mustJSON(map[string]string{"error": err.Error()}), err
 	}
-	r := entity.Rule{
-		Name:           stringField(raw, "name"),
-		Enabled:        boolField(raw, "enabled", true),
-		EventType:      stringField(raw, "event_type"),
-		EventSettings:  mapField(raw, "event_settings"),
-		Middlewares:    middlewaresFromRaw(raw["middlewares"]),
-		ActionType:     stringField(raw, "action_type"),
-		ActionSettings: mapField(raw, "action_settings"),
-		UseSharedPool:  boolField(raw, "use_shared_pool", true),
+	existing, err := u.findRuleByID(ctx, id)
+	if err != nil {
+		return mustJSON(map[string]string{"error": err.Error()}), err
 	}
-	out, err := u.rules.UpdateRule(ctx, id, r)
+	merged := mergeRulePatch(existing, raw)
+	out, err := u.rules.UpdateRule(ctx, id, merged)
 	if err != nil {
 		return mustJSON(map[string]string{"error": err.Error()}), err
 	}
 	return mustJSON(out), nil
+}
+
+func (u *Usecase) findRuleByID(ctx context.Context, id int64) (entity.Rule, error) {
+	list, err := u.rules.ListRules(ctx)
+	if err != nil {
+		return entity.Rule{}, err
+	}
+	for _, r := range list {
+		if r.ID == id {
+			return r, nil
+		}
+	}
+	return entity.Rule{}, entity.ErrRuleNotFound
+}
+
+func cloneStringMap(m map[string]any) map[string]any {
+	if m == nil {
+		return nil
+	}
+	return maps.Clone(m)
+}
+
+func mergeStringMaps(base, patch map[string]any) map[string]any {
+	out := map[string]any{}
+	if base != nil {
+		out = maps.Clone(base)
+	}
+	for k, v := range patch {
+		out[k] = v
+	}
+	return out
+}
+
+func copyRuleForMerge(r entity.Rule) entity.Rule {
+	out := r
+	out.EventSettings = cloneStringMap(r.EventSettings)
+	out.ActionSettings = cloneStringMap(r.ActionSettings)
+	if len(r.Middlewares) > 0 {
+		out.Middlewares = make([]entity.RuleMiddleware, len(r.Middlewares))
+		for i := range r.Middlewares {
+			out.Middlewares[i].Type = r.Middlewares[i].Type
+			out.Middlewares[i].Settings = cloneStringMap(r.Middlewares[i].Settings)
+		}
+	}
+	return out
+}
+
+// mergeRulePatch overlays JSON keys present in raw onto a copy of existing (patch semantics).
+func mergeRulePatch(existing entity.Rule, raw map[string]any) entity.Rule {
+	r := copyRuleForMerge(existing)
+	if _, ok := raw["name"]; ok {
+		r.Name = stringField(raw, "name")
+	}
+	if _, ok := raw["enabled"]; ok {
+		if v, ok := raw["enabled"].(bool); ok {
+			r.Enabled = v
+		}
+	}
+	if _, ok := raw["use_shared_pool"]; ok {
+		if v, ok := raw["use_shared_pool"].(bool); ok {
+			r.UseSharedPool = v
+		}
+	}
+	if _, ok := raw["event_type"]; ok {
+		r.EventType = stringField(raw, "event_type")
+	}
+	if _, ok := raw["action_type"]; ok {
+		r.ActionType = stringField(raw, "action_type")
+	}
+	if _, ok := raw["event_settings"]; ok {
+		patch := mapField(raw, "event_settings")
+		base := r.EventSettings
+		if base == nil {
+			base = map[string]any{}
+		}
+		r.EventSettings = mergeStringMaps(base, patch)
+	}
+	if _, ok := raw["action_settings"]; ok {
+		patch := mapField(raw, "action_settings")
+		base := r.ActionSettings
+		if base == nil {
+			base = map[string]any{}
+		}
+		r.ActionSettings = mergeStringMaps(base, patch)
+	}
+	if _, ok := raw["middlewares"]; ok {
+		r.Middlewares = middlewaresFromRaw(raw["middlewares"])
+	}
+	return r
 }
 
 func (u *Usecase) toolDeleteRule(ctx context.Context, args string) (string, error) {

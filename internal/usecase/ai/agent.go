@@ -16,9 +16,14 @@ const (
 	agentSystemPrompt = `You are the Dredge admin assistant for a single-operator Twitch monitoring app.
 Use the provided tools to inspect persisted chat, user activity, and automation rules.
 Prefer read-only tools. Mutating tools require explicit user confirmation in the UI before they run.
+Before creating or changing rules, call list_rules and rule_template_variables so you use valid event_type, action_type, middleware types, and message placeholders.
 When creating interval rules, use event_type "interval" with event_settings containing interval_seconds (positive integer) and channel (login).`
 
 	maxAgentIterations = 24
+
+	defaultChatMaxTokens   = 8192
+	defaultChatTemperature = float32(1.0)
+	emptyCompletionRetries = 3
 )
 
 func (u *Usecase) waitRunStopped(convID int64, max time.Duration) {
@@ -125,20 +130,40 @@ iterLoop:
 		}
 
 		req := openai.ChatCompletionRequest{
-			Model:    model,
-			Messages: msgs,
-			Tools:    tools,
+			Model:       model,
+			Messages:    msgs,
+			Tools:       tools,
+			MaxTokens:   defaultChatMaxTokens,
+			Temperature: defaultChatTemperature,
 		}
 
 		u.broadcast(convID, "llm_request", map[string]any{"iteration": iter})
 
-		resp, err := client.CreateChatCompletion(ctx, req)
-		if err != nil {
-			u.agentErr(ctx, convID, err, "llm request")
-			return
+		var resp openai.ChatCompletionResponse
+		var err error
+		for attempt := 0; attempt < emptyCompletionRetries; attempt++ {
+			resp, err = client.CreateChatCompletion(ctx, req)
+			if err != nil {
+				u.agentErr(ctx, convID, err, "llm request")
+				return
+			}
+			if len(resp.Choices) > 0 {
+				break
+			}
+			if u.obs != nil && u.obs.Logger != nil {
+				u.obs.Logger.Warn("ai chat completion returned no choices",
+					zap.String("model", model),
+					zap.Int("agent_iteration", iter),
+					zap.Int("retry", attempt),
+					zap.String("response_id", resp.ID),
+				)
+			}
+			if attempt < emptyCompletionRetries-1 {
+				time.Sleep(time.Duration(200*(attempt+1)) * time.Millisecond)
+			}
 		}
 		if len(resp.Choices) == 0 {
-			u.agentErr(ctx, convID, errors.New("empty completion"), "llm")
+			u.agentErr(ctx, convID, errors.New("empty completion after retries (check model/provider compatibility with tools)"), "llm")
 			return
 		}
 
