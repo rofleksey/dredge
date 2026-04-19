@@ -31,6 +31,18 @@ const router = createRouter({
           meta: { fillMainOutlet: false },
         },
         {
+          path: 'settings/rules/new',
+          name: 'rule-new',
+          component: () => import('../views/RuleEditorView.vue'),
+          meta: { fillMainOutlet: true },
+        },
+        {
+          path: 'settings/rules/:id/edit',
+          name: 'rule-edit',
+          component: () => import('../views/RuleEditorView.vue'),
+          meta: { fillMainOutlet: true },
+        },
+        {
           path: 'settings',
           name: 'settings',
           component: () => import('../views/SettingsView.vue'),

@@ -13,7 +13,7 @@ import {
 } from '../api/generated';
 import type { IrcMonitorSettings, IrcMonitorStatus } from '../api/generated';
 import type { SuspicionSettings } from '../api/generated';
-import type { CreateRuleRequest, Rule } from '../api/generated';
+import type { Rule } from '../api/generated';
 import AppModal from '../components/AppModal.vue';
 import SubmitButton from '../components/SubmitButton.vue';
 import { isChannelJoinedOnIrc } from '../lib/ircMonitorJoined';
@@ -53,30 +53,12 @@ const newChannel = reactive({ name: '' });
 const channelsFilter = ref('');
 const channelsSort = ref<'name-asc' | 'name-desc' | 'id-desc' | 'id-asc'>('name-asc');
 
-const ruleModalOpen = ref(false);
 const regexTestModalOpen = ref(false);
 const regexTestPattern = ref('');
 const regexTestSample = ref('');
 const regexTestCaseInsensitive = ref(false);
 const regexTestMatches = ref<boolean | null>(null);
 const regexTestCompileError = ref<string | null>(null);
-
-const defaultRuleJson = `{
-  "enabled": true,
-  "event_type": "chat_message",
-  "event_settings": {},
-  "middlewares": [
-    {
-      "type": "match_regex",
-      "settings": { "pattern": "keyword", "case_insensitive": false }
-    }
-  ],
-  "action_type": "notify",
-  "action_settings": {},
-  "use_shared_pool": true
-}`;
-
-const ruleJsonText = ref(defaultRuleJson);
 
 const notifModalOpen = ref(false);
 const notifDraft = reactive({
@@ -88,7 +70,6 @@ const notifDraft = reactive({
 });
 
 const addingChannel = ref(false);
-const savingRule = ref(false);
 const savingNotif = ref(false);
 const savingBlacklist = ref(false);
 const savingSuspicion = ref(false);
@@ -314,47 +295,6 @@ function openRegexTestModal(): void {
   regexTestCompileError.value = null;
   regexTestModalOpen.value = true;
   void runRegexTestDebounced();
-}
-
-function openRuleModal(): void {
-  ruleJsonText.value = defaultRuleJson;
-  ruleModalOpen.value = true;
-}
-
-async function saveRuleModal(): Promise<void> {
-  if (savingRule.value) {
-    return;
-  }
-  savingRule.value = true;
-  try {
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(ruleJsonText.value) as Record<string, unknown>;
-    } catch {
-      notify({
-        id: 'settings-add-rule',
-        type: 'error',
-        title: 'Rules',
-        description: 'Invalid JSON in rule editor.',
-      });
-      return;
-    }
-    await DefaultService.createRule({
-      requestBody: body as CreateRuleRequest,
-    });
-    ruleModalOpen.value = false;
-    notify({ id: 'settings-add-rule', type: 'success', title: 'Rules', description: 'Rule added.' });
-    await refresh();
-  } catch {
-    notify({
-      id: 'settings-add-rule',
-      type: 'error',
-      title: 'Rules',
-      description: 'Could not add rule (validation failed?).',
-    });
-  } finally {
-    savingRule.value = false;
-  }
 }
 
 async function deleteRule(id: number): Promise<void> {
@@ -721,15 +661,17 @@ const filteredChannelBlacklist = computed(() => {
         <ul class="rule-list">
           <li v-for="r in rules" :key="r.id" class="rule-row">
             <button type="button" class="btn-danger btn-inline-x" @click="deleteRule(r.id)">x</button>
-            <div>
-              <code>{{ r.event_type }} → {{ r.action_type }}</code>
-              <span class="muted small">#{{ r.id }}</span>
-              <span v-if="!r.enabled" class="muted small"> (disabled)</span>
+            <div class="rule-row-main">
+              <RouterLink class="rule-edit-link" :to="{ name: 'rule-edit', params: { id: String(r.id) } }">
+                <code>{{ r.event_type }} → {{ r.action_type }}</code>
+                <span class="muted small">#{{ r.id }}</span>
+                <span v-if="!r.enabled" class="muted small"> (disabled)</span>
+              </RouterLink>
             </div>
           </li>
         </ul>
         <p class="row-actions">
-          <button type="button" class="btn-secondary" @click="openRuleModal">Add rule</button>
+          <RouterLink class="btn-secondary btn-link" :to="{ name: 'rule-new' }">Add rule</RouterLink>
           <button type="button" class="btn-secondary" @click="openRegexTestModal">Test regex</button>
         </p>
       </section>
@@ -912,23 +854,6 @@ const filteredChannelBlacklist = computed(() => {
       </div>
     </AppModal>
 
-    <AppModal :open="ruleModalOpen" title="New rule" @close="ruleModalOpen = false">
-      <form class="stack modal-form" autocomplete="off" @submit.prevent="saveRuleModal">
-        <p class="muted small">
-          JSON body for <code>POST /settings/rules</code>: <code>event_type</code>, <code>middlewares</code>,
-          <code>action_type</code>, etc.
-        </p>
-        <label class="stack">
-          <span>Rule (JSON)</span>
-          <textarea v-model="ruleJsonText" name="dredge_rule_json" rows="18" class="rule-json" spellcheck="false" />
-        </label>
-        <footer class="modal-actions">
-          <button type="button" class="btn-secondary" @click="ruleModalOpen = false">Cancel</button>
-          <SubmitButton :loading="savingRule">Save</SubmitButton>
-        </footer>
-      </form>
-    </AppModal>
-
     <AppModal :open="notifModalOpen" title="New notification" @close="notifModalOpen = false">
       <form class="stack modal-form" @submit.prevent="saveNotifModal">
         <label>
@@ -1047,13 +972,6 @@ h2 {
   color: var(--text-muted);
 }
 
-.rule-json {
-  width: 100%;
-  font-family: ui-monospace, monospace;
-  font-size: 0.82rem;
-  line-height: 1.35;
-}
-
 .small {
   font-size: 0.78rem;
 }
@@ -1153,6 +1071,31 @@ ul {
   justify-content: flex-start;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.rule-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.rule-edit-link {
+  color: var(--accent-bright);
+  text-decoration: none;
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  code {
+    color: inherit;
+  }
+}
+
+a.btn-link {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
 }
 
 .rule-meta {
