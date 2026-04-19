@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, watch } from 'vue';
+import { nextTick, onUnmounted, ref, watch } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -15,6 +15,56 @@ const props = withDefaults(
 
 const emit = defineEmits<{ close: [] }>();
 
+const panelRef = ref<HTMLElement | null>(null);
+let previousFocus: HTMLElement | null = null;
+
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function focusableIn(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => el.offsetParent !== null || el === document.activeElement,
+  );
+}
+
+function focusFirstInPanel(): void {
+  const panel = panelRef.value;
+  if (!panel) {
+    return;
+  }
+  const list = focusableIn(panel);
+  if (list.length) {
+    list[0].focus();
+  } else {
+    if (!panel.hasAttribute('tabindex')) {
+      panel.setAttribute('tabindex', '-1');
+    }
+    panel.focus();
+  }
+}
+
+function onPanelKeydown(e: KeyboardEvent): void {
+  if (e.key !== 'Tab' || !panelRef.value) {
+    return;
+  }
+  const list = focusableIn(panelRef.value);
+  if (list.length < 2) {
+    return;
+  }
+  const first = list[0];
+  const last = list[list.length - 1];
+  const active = document.activeElement as HTMLElement | null;
+  if (e.shiftKey) {
+    if (active === first) {
+      e.preventDefault();
+      last.focus();
+    }
+  } else if (active === last) {
+    e.preventDefault();
+    first.focus();
+  }
+}
+
 function onDocKeydown(e: KeyboardEvent): void {
   if (e.key === 'Escape') {
     emit('close');
@@ -23,11 +73,16 @@ function onDocKeydown(e: KeyboardEvent): void {
 
 watch(
   () => props.open,
-  (v) => {
+  async (v) => {
     if (v) {
+      previousFocus = document.activeElement as HTMLElement | null;
       document.addEventListener('keydown', onDocKeydown);
+      await nextTick();
+      focusFirstInPanel();
     } else {
       document.removeEventListener('keydown', onDocKeydown);
+      previousFocus?.focus?.();
+      previousFocus = null;
     }
   },
   { immediate: true },
@@ -43,10 +98,13 @@ onUnmounted(() => {
     <div v-if="open" class="modal-root">
       <div class="modal-backdrop" aria-hidden="true" @click="emit('close')" />
       <div
+        ref="panelRef"
         class="modal-panel"
         :class="{ 'modal-panel--wide': wide, 'modal-panel--extra-wide': extraWide }"
         role="dialog"
+        aria-modal="true"
         :aria-label="title || 'Dialog'"
+        @keydown="onPanelKeydown"
       >
         <header class="modal-head">
           <h2 class="modal-title">

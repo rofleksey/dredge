@@ -10,9 +10,7 @@ const route = useRoute();
 const live = useLiveSocketStore();
 const { connected: liveConnected, lastError: liveError } = storeToRefs(live);
 
-const fillOutlet = computed(() =>
-  ['settings', 'messages', 'users', 'user', 'streams', 'stream'].includes(String(route.name)),
-);
+const fillOutlet = computed(() => Boolean(route.meta.fillMainOutlet));
 </script>
 
 <template>
