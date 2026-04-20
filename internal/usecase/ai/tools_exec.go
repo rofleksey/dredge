@@ -110,11 +110,63 @@ func (u *Usecase) ExecTool(ctx context.Context, name, argumentsJSON string) (str
 }
 
 func mustJSON(v any) string {
-	b, err := json.Marshal(v)
+	normalized := normalizeToolOutputJSON(v)
+	b, err := json.Marshal(normalized)
 	if err != nil {
 		return `{"error":"marshal failed"}`
 	}
 	return string(b)
+}
+
+var (
+	snakeKeyBoundary1 = regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`)
+	snakeKeyBoundary2 = regexp.MustCompile(`([a-z0-9])([A-Z])`)
+)
+
+func normalizeToolOutputJSON(v any) any {
+	// Marshal/unmarshal first so custom MarshalJSON logic (time.Time, etc.) is preserved.
+	b, err := json.Marshal(v)
+	if err != nil {
+		return v
+	}
+
+	var decoded any
+	if err := json.Unmarshal(b, &decoded); err != nil {
+		return v
+	}
+
+	return normalizeJSONKeys(decoded)
+}
+
+func normalizeJSONKeys(v any) any {
+	switch t := v.(type) {
+	case map[string]any:
+		out := make(map[string]any, len(t))
+		for k, vv := range t {
+			out[toSnakeCaseKey(k)] = normalizeJSONKeys(vv)
+		}
+		return out
+	case []any:
+		out := make([]any, len(t))
+		for i := range t {
+			out[i] = normalizeJSONKeys(t[i])
+		}
+		return out
+	default:
+		return v
+	}
+}
+
+func toSnakeCaseKey(s string) string {
+	if s == "" {
+		return s
+	}
+	if strings.Contains(s, "_") {
+		return strings.ToLower(s)
+	}
+	k := snakeKeyBoundary1.ReplaceAllString(s, `${1}_${2}`)
+	k = snakeKeyBoundary2.ReplaceAllString(k, `${1}_${2}`)
+	return strings.ToLower(k)
 }
 
 func (u *Usecase) toolListTwitchMessages(ctx context.Context, args string) (string, error) {
