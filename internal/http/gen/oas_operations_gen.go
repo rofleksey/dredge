@@ -42,6 +42,7 @@ const (
 	ListRecordedStreamMessagesOperation    OperationName = "ListRecordedStreamMessages"
 	ListRecordedStreamsOperation           OperationName = "ListRecordedStreams"
 	ListRuleTemplateVariablesOperation     OperationName = "ListRuleTemplateVariables"
+	ListRuleTriggersOperation              OperationName = "ListRuleTriggers"
 	ListRulesOperation                     OperationName = "ListRules"
 	ListTwitchAccountsOperation            OperationName = "ListTwitchAccounts"
 	ListTwitchDirectoryUsersOperation      OperationName = "ListTwitchDirectoryUsers"

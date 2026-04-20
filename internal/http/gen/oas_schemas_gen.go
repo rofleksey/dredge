@@ -3325,6 +3325,87 @@ func (s *RuleTemplateVariablesResponse) SetVariables(val []RuleTemplateVariable)
 	s.Variables = val
 }
 
+// Ref: #/components/schemas/RuleTrigger
+type RuleTrigger struct {
+	ID           int64       `json:"id"`
+	CreatedAt    time.Time   `json:"created_at"`
+	RuleID       OptNilInt64 `json:"rule_id"`
+	RuleName     string      `json:"rule_name"`
+	TriggerEvent string      `json:"trigger_event"`
+	ActionType   string      `json:"action_type"`
+	DisplayText  string      `json:"display_text"`
+}
+
+// GetID returns the value of ID.
+func (s *RuleTrigger) GetID() int64 {
+	return s.ID
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *RuleTrigger) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetRuleID returns the value of RuleID.
+func (s *RuleTrigger) GetRuleID() OptNilInt64 {
+	return s.RuleID
+}
+
+// GetRuleName returns the value of RuleName.
+func (s *RuleTrigger) GetRuleName() string {
+	return s.RuleName
+}
+
+// GetTriggerEvent returns the value of TriggerEvent.
+func (s *RuleTrigger) GetTriggerEvent() string {
+	return s.TriggerEvent
+}
+
+// GetActionType returns the value of ActionType.
+func (s *RuleTrigger) GetActionType() string {
+	return s.ActionType
+}
+
+// GetDisplayText returns the value of DisplayText.
+func (s *RuleTrigger) GetDisplayText() string {
+	return s.DisplayText
+}
+
+// SetID sets the value of ID.
+func (s *RuleTrigger) SetID(val int64) {
+	s.ID = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *RuleTrigger) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetRuleID sets the value of RuleID.
+func (s *RuleTrigger) SetRuleID(val OptNilInt64) {
+	s.RuleID = val
+}
+
+// SetRuleName sets the value of RuleName.
+func (s *RuleTrigger) SetRuleName(val string) {
+	s.RuleName = val
+}
+
+// SetTriggerEvent sets the value of TriggerEvent.
+func (s *RuleTrigger) SetTriggerEvent(val string) {
+	s.TriggerEvent = val
+}
+
+// SetActionType sets the value of ActionType.
+func (s *RuleTrigger) SetActionType(val string) {
+	s.ActionType = val
+}
+
+// SetDisplayText sets the value of DisplayText.
+func (s *RuleTrigger) SetDisplayText(val string) {
+	s.DisplayText = val
+}
+
 // SendMessageAccepted is response for SendMessage operation.
 type SendMessageAccepted struct{}
 

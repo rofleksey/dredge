@@ -21,7 +21,7 @@ func TestListMigrationFiles(t *testing.T) {
 
 	names, err := listMigrationFiles()
 	require.NoError(t, err)
-	require.Len(t, names, 9)
+	require.Len(t, names, 10)
 	assert.Equal(t, "0001_init.sql", names[0])
 	assert.Equal(t, "0002_streams_viewer_count.sql", names[1])
 	assert.Equal(t, "0003_enrichment_cooldown.sql", names[2])
@@ -31,6 +31,7 @@ func TestListMigrationFiles(t *testing.T) {
 	assert.Equal(t, "0007_rule_name.sql", names[6])
 	assert.Equal(t, "0008_ai.sql", names[7])
 	assert.Equal(t, "0009_irc_joined_samples.sql", names[8])
+	assert.Equal(t, "0010_rule_trigger_events.sql", names[9])
 
 	for _, n := range names {
 		assert.True(t, strings.HasSuffix(n, ".sql"), n)

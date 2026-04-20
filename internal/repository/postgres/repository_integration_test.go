@@ -372,6 +372,15 @@ func TestRepository_integration(t *testing.T) {
 	})
 	assert.ErrorIs(t, err, entity.ErrRuleNotFound)
 
+	require.NoError(t, repo.InsertRuleTriggerEvent(ctx, rule.ID, rule.Name, "chat_message", "notify", "[c] u: hello"))
+	rtEvents, err := repo.ListRuleTriggerEvents(ctx, entity.RuleTriggerListFilter{Limit: 10})
+	require.NoError(t, err)
+	require.NotEmpty(t, rtEvents)
+	assert.Equal(t, "[c] u: hello", rtEvents[0].DisplayText)
+	assert.Equal(t, "notify", rtEvents[0].ActionType)
+	require.NotNil(t, rtEvents[0].RuleID)
+	assert.Equal(t, rule.ID, *rtEvents[0].RuleID)
+
 	require.NoError(t, repo.DeleteRule(ctx, rule.ID))
 
 	_, err = repo.UpdateNotificationEntry(ctx, 888_888, nil, map[string]any{}, entity.ToPointer(true))

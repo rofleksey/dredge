@@ -1,29 +1,18 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { ApiError, DefaultService } from '../api/generated';
-import type { NotificationEntry } from '../api/generated';
+import type { RuleTrigger } from '../api/generated';
 import { notify } from '../lib/notify';
 
-defineOptions({ name: 'NotificationsView' });
+defineOptions({ name: 'RuleTriggersView' });
 
 const pageSize = 50;
 const loading = ref(false);
 const loadingMore = ref(false);
 const hasMore = ref(true);
-const entries = ref<NotificationEntry[]>([]);
+const entries = ref<RuleTrigger[]>([]);
 
 const totalLoadedLabel = computed(() => `${entries.value.length.toLocaleString()} loaded`);
-
-function settingPreview(e: NotificationEntry): string {
-  const raw = JSON.stringify(e.settings ?? {});
-  if (!raw) {
-    return '{}';
-  }
-  if (raw.length <= 220) {
-    return raw;
-  }
-  return `${raw.slice(0, 217)}...`;
-}
 
 function createdAtLabel(ts: string): string {
   const d = new Date(ts);
@@ -33,10 +22,17 @@ function createdAtLabel(ts: string): string {
   return d.toLocaleString();
 }
 
+function ruleIdLabel(e: RuleTrigger): string {
+  if (e.rule_id != null && e.rule_id !== undefined) {
+    return `#${e.rule_id}`;
+  }
+  return '—';
+}
+
 async function fetchFirst(): Promise<void> {
   loading.value = true;
   try {
-    const list = await DefaultService.listNotifications({ limit: pageSize });
+    const list = await DefaultService.listRuleTriggers({ limit: pageSize });
     entries.value = list;
     hasMore.value = list.length === pageSize;
   } catch (e) {
@@ -45,11 +41,11 @@ async function fetchFirst(): Promise<void> {
     const msg =
       e instanceof ApiError && e.body && typeof e.body.message === 'string'
         ? e.body.message
-        : 'Could not load notifications.';
+        : 'Could not load rule triggers.';
     notify({
-      id: 'notifications-load',
+      id: 'rule-triggers-load',
       type: 'error',
-      title: 'Notifications',
+      title: 'Rule triggers',
       description: msg,
     });
   } finally {
@@ -65,7 +61,7 @@ async function fetchMore(): Promise<void> {
   loadingMore.value = true;
   try {
     const last = entries.value[entries.value.length - 1];
-    const next = await DefaultService.listNotifications({
+    const next = await DefaultService.listRuleTriggers({
       limit: pageSize,
       cursorCreatedAt: last.created_at,
       cursorId: last.id,
@@ -79,10 +75,10 @@ async function fetchMore(): Promise<void> {
     hasMore.value = next.length === pageSize;
   } catch {
     notify({
-      id: 'notifications-more',
+      id: 'rule-triggers-more',
       type: 'error',
-      title: 'Notifications',
-      description: 'Could not load more notifications.',
+      title: 'Rule triggers',
+      description: 'Could not load more.',
     });
   } finally {
     loadingMore.value = false;
@@ -97,27 +93,30 @@ onMounted(() => {
 <template>
   <div class="page">
     <header class="head">
-      <h1>Notifications</h1>
+      <h1>Rule triggers</h1>
       <span class="muted small">{{ totalLoadedLabel }}</span>
     </header>
 
     <p v-if="loading" class="muted">Loading...</p>
-    <p v-else-if="entries.length === 0" class="muted">No notifications.</p>
+    <p v-else-if="entries.length === 0" class="muted">No rule triggers yet.</p>
 
     <ul v-else class="list">
       <li v-for="e in entries" :key="e.id" class="item">
         <div class="item-top">
-          <span class="tag">{{ e.provider }}</span>
-          <span class="status" :class="{ 'status-off': !e.enabled }">{{ e.enabled ? 'enabled' : 'disabled' }}</span>
+          <span class="tag">{{ e.action_type }}</span>
+          <span class="tag tag-muted">{{ e.trigger_event }}</span>
         </div>
-        <p class="meta">#{{ e.id }} · {{ createdAtLabel(e.created_at) }}</p>
-        <p class="settings">{{ settingPreview(e) }}</p>
+        <p class="meta">
+          #{{ e.id }} · {{ createdAtLabel(e.created_at) }} · rule {{ ruleIdLabel(e) }}
+          <template v-if="e.rule_name"> · {{ e.rule_name }}</template>
+        </p>
+        <p class="body">{{ e.display_text }}</p>
       </li>
     </ul>
 
     <div v-if="!loading && entries.length > 0" class="more-row">
       <button type="button" class="btn-more" :disabled="loadingMore || !hasMore" @click="fetchMore">
-        {{ loadingMore ? 'Loading...' : hasMore ? 'Show more' : 'No more notifications' }}
+        {{ loadingMore ? 'Loading...' : hasMore ? 'Show more' : 'No more' }}
       </button>
     </div>
   </div>
@@ -163,7 +162,8 @@ h1 {
 .item-top {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .tag {
@@ -173,13 +173,10 @@ h1 {
   color: var(--accent-bright);
 }
 
-.status {
-  font-size: 0.78rem;
-  color: #2ecc71;
-}
-
-.status-off {
+.tag-muted {
   color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .meta {
@@ -188,10 +185,10 @@ h1 {
   color: var(--text-muted);
 }
 
-.settings {
+.body {
   margin: 0.35rem 0 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--text);
   white-space: pre-wrap;
   word-break: break-word;

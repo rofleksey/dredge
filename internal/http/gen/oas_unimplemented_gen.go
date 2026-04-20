@@ -279,6 +279,15 @@ func (UnimplementedHandler) ListRuleTemplateVariables(ctx context.Context) (r *R
 	return r, ht.ErrNotImplemented
 }
 
+// ListRuleTriggers implements listRuleTriggers operation.
+//
+// List rule trigger events (newest first) with cursor-based incremental loading.
+//
+// GET /settings/rule-triggers
+func (UnimplementedHandler) ListRuleTriggers(ctx context.Context, params ListRuleTriggersParams) (r []RuleTrigger, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListRules implements listRules operation.
 //
 // GET /settings/rules

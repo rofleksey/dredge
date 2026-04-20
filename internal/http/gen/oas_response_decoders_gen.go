@@ -2204,6 +2204,64 @@ func decodeListRuleTemplateVariablesResponse(resp *http.Response) (res *RuleTemp
 	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
+func decodeListRuleTriggersResponse(resp *http.Response) (res []RuleTrigger, _ error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response []RuleTrigger
+			if err := func() error {
+				response = make([]RuleTrigger, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem RuleTrigger
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					response = append(response, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			// Validate response.
+			if err := func() error {
+				if response == nil {
+					return errors.New("nil is invalid value")
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "validate")
+			}
+			return response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
+}
+
 func decodeListRulesResponse(resp *http.Response) (res []Rule, _ error) {
 	switch resp.StatusCode {
 	case 200:

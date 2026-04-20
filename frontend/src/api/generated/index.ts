@@ -49,6 +49,7 @@ export { RuleEventType } from './models/RuleEventType';
 export type { RuleMiddleware } from './models/RuleMiddleware';
 export type { RuleTemplateVariable } from './models/RuleTemplateVariable';
 export type { RuleTemplateVariablesResponse } from './models/RuleTemplateVariablesResponse';
+export type { RuleTrigger } from './models/RuleTrigger';
 export type { SendMessageRequest } from './models/SendMessageRequest';
 export type { StartTwitchOAuthRequest } from './models/StartTwitchOAuthRequest';
 export type { StartTwitchOAuthResponse } from './models/StartTwitchOAuthResponse';

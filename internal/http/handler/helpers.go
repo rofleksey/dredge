@@ -149,6 +149,25 @@ func updateRulePostReqToEntity(req *gen.UpdateRulePostRequest) entity.Rule {
 	}
 }
 
+func ruleTriggerEntityToGen(e entity.RuleTriggerEvent) gen.RuleTrigger {
+	out := gen.RuleTrigger{
+		ID:           e.ID,
+		CreatedAt:    e.CreatedAt,
+		RuleName:     e.RuleName,
+		TriggerEvent: e.TriggerEvent,
+		ActionType:   e.ActionType,
+		DisplayText:  e.DisplayText,
+	}
+
+	if e.RuleID != nil {
+		out.RuleID.SetTo(*e.RuleID)
+	} else {
+		out.RuleID.SetToNull()
+	}
+
+	return out
+}
+
 func notificationEntityToGen(e entity.NotificationEntry) gen.NotificationEntry {
 	settings := gen.NotificationEntrySettings{}
 

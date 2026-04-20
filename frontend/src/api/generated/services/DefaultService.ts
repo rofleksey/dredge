@@ -36,6 +36,7 @@ import type { PatchAiSettingsRequest } from '../models/PatchAiSettingsRequest';
 import type { RecordedStream } from '../models/RecordedStream';
 import type { Rule } from '../models/Rule';
 import type { RuleTemplateVariablesResponse } from '../models/RuleTemplateVariablesResponse';
+import type { RuleTrigger } from '../models/RuleTrigger';
 import type { SendMessageRequest } from '../models/SendMessageRequest';
 import type { StartTwitchOAuthRequest } from '../models/StartTwitchOAuthRequest';
 import type { StartTwitchOAuthResponse } from '../models/StartTwitchOAuthResponse';
@@ -330,6 +331,33 @@ export class DefaultService {
             url: '/settings/rules/test-regex',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * List rule trigger events (newest first) with cursor-based incremental loading.
+     * @returns RuleTrigger Rule trigger events
+     * @throws ApiError
+     */
+    public static listRuleTriggers({
+        limit = 50,
+        cursorCreatedAt,
+        cursorId,
+    }: {
+        limit?: number,
+        /**
+         * Keyset cursor; use with cursor_id from the last entry of the previous batch.
+         */
+        cursorCreatedAt?: string,
+        cursorId?: number,
+    }): CancelablePromise<Array<RuleTrigger>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/settings/rule-triggers',
+            query: {
+                'limit': limit,
+                'cursor_created_at': cursorCreatedAt,
+                'cursor_id': cursorId,
+            },
         });
     }
     /**

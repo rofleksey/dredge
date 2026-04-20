@@ -174,6 +174,29 @@ func TestNotificationEntityToGen(t *testing.T) {
 	assert.Equal(t, gen.NotificationEntryProviderWebhook, g2.Provider)
 }
 
+func TestRuleTriggerEntityToGen(t *testing.T) {
+	t.Parallel()
+
+	rid := int64(7)
+	e := entity.RuleTriggerEvent{
+		ID:           2,
+		CreatedAt:    time.Unix(10, 0).UTC(),
+		RuleID:       &rid,
+		RuleName:     "n",
+		TriggerEvent: "interval",
+		ActionType:   "notify",
+		DisplayText:  "hello",
+	}
+	g := ruleTriggerEntityToGen(e)
+	v, ok := g.RuleID.Get()
+	assert.True(t, ok)
+	assert.Equal(t, int64(7), v)
+
+	e.RuleID = nil
+	g2 := ruleTriggerEntityToGen(e)
+	assert.True(t, g2.RuleID.IsNull())
+}
+
 func TestRawSettingsToMap(t *testing.T) {
 	t.Parallel()
 

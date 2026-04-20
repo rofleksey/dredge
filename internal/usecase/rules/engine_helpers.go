@@ -2,6 +2,7 @@ package rules
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"go.uber.org/zap"
@@ -199,6 +200,7 @@ func (e *Engine) execAction(ctx context.Context, rule entity.Rule, p EvalPayload
 
 		vars := TemplateVars(rule.ID, p.Channel, p.Username, p.Text, p.Title)
 		out := ExpandTemplate(tpl, vars)
+		display := notifyDisplayTextForLog(p, out)
 
 		switch p.Event {
 		case EventChatMessage:
@@ -212,6 +214,8 @@ func (e *Engine) execAction(ctx context.Context, rule entity.Rule, p EvalPayload
 		default:
 			e.notify.NotifyChatKeyword(ctx, p.Channel, p.Username, p.Text, out)
 		}
+
+		e.recordRuleTrigger(ctx, rule, p, ActionNotify, display)
 	case ActionSendChat:
 		msgTpl, _ := rule.ActionSettings["message"].(string)
 
@@ -244,11 +248,29 @@ func (e *Engine) execAction(ctx context.Context, rule entity.Rule, p EvalPayload
 
 			return
 		}
+
+		display := fmt.Sprintf("#%s › %s", ch, msg)
+		e.recordRuleTrigger(ctx, rule, p, ActionSendChat, display)
 	default:
 		return
 	}
 
 	if markCooldown {
 		e.cooldown.mark(rule.ID, time.Now())
+	}
+}
+
+func (e *Engine) recordRuleTrigger(ctx context.Context, rule entity.Rule, p EvalPayload, actionType, displayText string) {
+	if e.deps.Repo == nil {
+		return
+	}
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	err := e.deps.Repo.InsertRuleTriggerEvent(ctx, rule.ID, rule.Name, p.Event, actionType, displayText)
+	if err != nil && e.obs != nil {
+		e.obs.Logger.Warn("insert rule trigger event failed", zap.Error(err), zap.Int64("rule_id", rule.ID))
 	}
 }

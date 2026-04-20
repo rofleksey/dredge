@@ -326,6 +326,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TestRuleRegexResponse"
+  /settings/rule-triggers:
+    get:
+      operationId: listRuleTriggers
+      security:
+        - bearerAuth: []
+      description: List rule trigger events (newest first) with cursor-based incremental loading.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor_created_at
+          in: query
+          description: Keyset cursor; use with cursor_id from the last entry of the previous batch.
+          schema:
+            type: string
+            format: date-time
+        - name: cursor_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Rule trigger events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RuleTrigger"
   /settings/notifications:
     get:
       operationId: listNotifications
@@ -2215,6 +2249,28 @@ components:
         created_at:
           type: string
           format: date-time
+    RuleTrigger:
+      type: object
+      required: [id, created_at, rule_name, trigger_event, action_type, display_text]
+      properties:
+        id:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+        rule_id:
+          type: integer
+          format: int64
+          nullable: true
+        rule_name:
+          type: string
+        trigger_event:
+          type: string
+        action_type:
+          type: string
+        display_text:
+          type: string
     CreateNotificationRequest:
       type: object
       required: [provider, settings]

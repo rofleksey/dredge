@@ -239,6 +239,24 @@ type NotificationListFilter struct {
 	CursorID        *int64
 }
 
+// RuleTriggerEvent is one executed rule action (notify or send_chat) for the bell feed.
+type RuleTriggerEvent struct {
+	ID           int64
+	CreatedAt    time.Time
+	RuleID       *int64
+	RuleName     string
+	TriggerEvent string
+	ActionType   string
+	DisplayText  string
+}
+
+// RuleTriggerListFilter paginates rule trigger events (newest first).
+type RuleTriggerListFilter struct {
+	Limit           int
+	CursorCreatedAt *time.Time
+	CursorID        *int64
+}
+
 // Stream is one recorded broadcast session for a monitored channel (Helix stream id).
 type Stream struct {
 	ID                  int64

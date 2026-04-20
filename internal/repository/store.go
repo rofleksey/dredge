@@ -16,6 +16,7 @@ type Store interface {
 	ListMonitoredOrMarkedTwitchUserIDs(ctx context.Context) ([]int64, error)
 
 	ListRules(ctx context.Context) ([]entity.Rule, error)
+	ListRuleTriggerEvents(ctx context.Context, f entity.RuleTriggerListFilter) ([]entity.RuleTriggerEvent, error)
 	CountRules(ctx context.Context) (int64, error)
 	CreateRule(ctx context.Context, r entity.Rule) (entity.Rule, error)
 	UpdateRule(ctx context.Context, id int64, r entity.Rule) (entity.Rule, error)
@@ -91,6 +92,7 @@ type Store interface {
 	GetIrcMonitorSettings(ctx context.Context) (entity.IrcMonitorSettings, error)
 	UpdateIrcMonitorSettings(ctx context.Context, s entity.IrcMonitorSettings) error
 	InsertIrcJoinedSample(ctx context.Context, joinedCount int) error
+	InsertRuleTriggerEvent(ctx context.Context, ruleID int64, ruleName, triggerEvent, actionType, displayText string) error
 	ListIrcJoinedSamples(ctx context.Context, from, to time.Time) ([]entity.IrcJoinedSample, error)
 	ListLinkedTwitchAccountUserIDs(ctx context.Context) ([]int64, error)
 

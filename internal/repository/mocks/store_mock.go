@@ -563,6 +563,20 @@ func (mr *MockStoreMockRecorder) InsertIrcJoinedSample(ctx, joinedCount any) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertIrcJoinedSample", reflect.TypeOf((*MockStore)(nil).InsertIrcJoinedSample), ctx, joinedCount)
 }
 
+// InsertRuleTriggerEvent mocks base method.
+func (m *MockStore) InsertRuleTriggerEvent(ctx context.Context, ruleID int64, ruleName, triggerEvent, actionType, displayText string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertRuleTriggerEvent", ctx, ruleID, ruleName, triggerEvent, actionType, displayText)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertRuleTriggerEvent indicates an expected call of InsertRuleTriggerEvent.
+func (mr *MockStoreMockRecorder) InsertRuleTriggerEvent(ctx, ruleID, ruleName, triggerEvent, actionType, displayText any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertRuleTriggerEvent", reflect.TypeOf((*MockStore)(nil).InsertRuleTriggerEvent), ctx, ruleID, ruleName, triggerEvent, actionType, displayText)
+}
+
 // InsertUserActivityEvent mocks base method.
 func (m *MockStore) InsertUserActivityEvent(ctx context.Context, chatterID int64, eventType string, channelTwitchUserID *int64, details map[string]any) error {
 	m.ctrl.T.Helper()
@@ -875,6 +889,21 @@ func (m *MockStore) ListNotificationEntries(ctx context.Context, f entity.Notifi
 func (mr *MockStoreMockRecorder) ListNotificationEntries(ctx, f any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNotificationEntries", reflect.TypeOf((*MockStore)(nil).ListNotificationEntries), ctx, f)
+}
+
+// ListRuleTriggerEvents mocks base method.
+func (m *MockStore) ListRuleTriggerEvents(ctx context.Context, f entity.RuleTriggerListFilter) ([]entity.RuleTriggerEvent, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListRuleTriggerEvents", ctx, f)
+	ret0, _ := ret[0].([]entity.RuleTriggerEvent)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListRuleTriggerEvents indicates an expected call of ListRuleTriggerEvents.
+func (mr *MockStoreMockRecorder) ListRuleTriggerEvents(ctx, f any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRuleTriggerEvents", reflect.TypeOf((*MockStore)(nil).ListRuleTriggerEvents), ctx, f)
 }
 
 // ListRules mocks base method.

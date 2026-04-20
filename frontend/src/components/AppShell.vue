@@ -63,11 +63,11 @@ function logout(): void {
       </nav>
       <div class="user">
         <RouterLink
-          to="/notifications"
+          to="/rule-triggers"
           class="icon-link"
-          :class="{ active: route.name === 'notifications' }"
-          aria-label="Notifications"
-          title="Notifications"
+          :class="{ active: route.name === 'rule-triggers' }"
+          aria-label="Rule triggers"
+          title="Rule triggers"
         >
           &#128276;
         </RouterLink>

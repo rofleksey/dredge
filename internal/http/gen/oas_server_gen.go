@@ -166,6 +166,12 @@ type Handler interface {
 	//
 	// GET /settings/rules/template-variables
 	ListRuleTemplateVariables(ctx context.Context) (*RuleTemplateVariablesResponse, error)
+	// ListRuleTriggers implements listRuleTriggers operation.
+	//
+	// List rule trigger events (newest first) with cursor-based incremental loading.
+	//
+	// GET /settings/rule-triggers
+	ListRuleTriggers(ctx context.Context, params ListRuleTriggersParams) ([]RuleTrigger, error)
 	// ListRules implements listRules operation.
 	//
 	// GET /settings/rules

@@ -62,8 +62,12 @@ const router = createRouter({
         },
         {
           path: 'notifications',
-          name: 'notifications',
-          component: () => import('../views/NotificationsView.vue'),
+          redirect: { name: 'rule-triggers' },
+        },
+        {
+          path: 'rule-triggers',
+          name: 'rule-triggers',
+          component: () => import('../views/RuleTriggersView.vue'),
           meta: { fillMainOutlet: true },
         },
         {
