@@ -21,9 +21,10 @@ func TestService_ListNotifications(t *testing.T) {
 	repo := repomocks.NewMockStore(ctrl)
 	svc := New(repo, &observability.Stack{Logger: zap.NewNop(), Tracer: otel.Tracer("test")})
 
-	repo.EXPECT().ListNotificationEntries(gomock.Any()).Return([]entity.NotificationEntry{{ID: 1}}, nil)
+	f := entity.NotificationListFilter{Limit: 25}
+	repo.EXPECT().ListNotificationEntries(gomock.Any(), f).Return([]entity.NotificationEntry{{ID: 1}}, nil)
 
-	list, err := svc.ListNotifications(context.Background())
+	list, err := svc.ListNotifications(context.Background(), f)
 	require.NoError(t, err)
 	require.Len(t, list, 1)
 }

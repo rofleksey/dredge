@@ -62,6 +62,15 @@ function logout(): void {
         <RouterLink to="/settings" active-class="active">Settings</RouterLink>
       </nav>
       <div class="user">
+        <RouterLink
+          to="/notifications"
+          class="icon-link"
+          :class="{ active: route.name === 'notifications' }"
+          aria-label="Notifications"
+          title="Notifications"
+        >
+          &#128276;
+        </RouterLink>
         <span
           class="live-dot"
           :class="{
@@ -147,6 +156,26 @@ function logout(): void {
   align-items: center;
   gap: 0.5rem;
   margin-left: auto;
+}
+
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 1rem;
+  line-height: 1;
+
+  &:hover,
+  &.active {
+    color: var(--text);
+    background: var(--bg-hover);
+  }
 }
 
 .live-dot {

@@ -136,7 +136,7 @@ async function refresh(): Promise<void> {
     DefaultService.listRules(),
     DefaultService.countRules(),
     DefaultService.countTwitchAccounts(),
-    DefaultService.listNotifications(),
+    DefaultService.listNotifications({}),
     DefaultService.listChannelBlacklist(),
     DefaultService.getSuspicionSettings(),
     DefaultService.getIrcMonitorSettings(),

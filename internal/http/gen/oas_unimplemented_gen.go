@@ -227,8 +227,10 @@ func (UnimplementedHandler) ListChatHistory(ctx context.Context, params ListChat
 
 // ListNotifications implements listNotifications operation.
 //
+// List notification entries (newest first) with cursor-based incremental loading.
+//
 // GET /settings/notifications
-func (UnimplementedHandler) ListNotifications(ctx context.Context) (r []NotificationEntry, _ error) {
+func (UnimplementedHandler) ListNotifications(ctx context.Context, params ListNotificationsParams) (r []NotificationEntry, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

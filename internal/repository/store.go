@@ -21,7 +21,7 @@ type Store interface {
 	UpdateRule(ctx context.Context, id int64, r entity.Rule) (entity.Rule, error)
 	DeleteRule(ctx context.Context, id int64) error
 
-	ListNotificationEntries(ctx context.Context) ([]entity.NotificationEntry, error)
+	ListNotificationEntries(ctx context.Context, f entity.NotificationListFilter) ([]entity.NotificationEntry, error)
 	ListEnabledNotificationEntries(ctx context.Context) ([]entity.NotificationEntry, error)
 	CreateNotificationEntry(ctx context.Context, provider string, settings map[string]any, enabled bool) (entity.NotificationEntry, error)
 	UpdateNotificationEntry(ctx context.Context, id int64, provider *string, settings map[string]any, enabled *bool) (entity.NotificationEntry, error)

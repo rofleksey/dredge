@@ -225,6 +225,13 @@ type NotificationEntry struct {
 	CreatedAt time.Time
 }
 
+// NotificationListFilter controls notifications list pagination (newest first).
+type NotificationListFilter struct {
+	Limit           int
+	CursorCreatedAt *time.Time
+	CursorID        *int64
+}
+
 // Stream is one recorded broadcast session for a monitored channel (Helix stream id).
 type Stream struct {
 	ID                  int64

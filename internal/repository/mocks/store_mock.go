@@ -834,18 +834,18 @@ func (mr *MockStoreMockRecorder) ListMonitoredTwitchUsers(ctx any) *gomock.Call 
 }
 
 // ListNotificationEntries mocks base method.
-func (m *MockStore) ListNotificationEntries(ctx context.Context) ([]entity.NotificationEntry, error) {
+func (m *MockStore) ListNotificationEntries(ctx context.Context, f entity.NotificationListFilter) ([]entity.NotificationEntry, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListNotificationEntries", ctx)
+	ret := m.ctrl.Call(m, "ListNotificationEntries", ctx, f)
 	ret0, _ := ret[0].([]entity.NotificationEntry)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListNotificationEntries indicates an expected call of ListNotificationEntries.
-func (mr *MockStoreMockRecorder) ListNotificationEntries(ctx any) *gomock.Call {
+func (mr *MockStoreMockRecorder) ListNotificationEntries(ctx, f any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNotificationEntries", reflect.TypeOf((*MockStore)(nil).ListNotificationEntries), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNotificationEntries", reflect.TypeOf((*MockStore)(nil).ListNotificationEntries), ctx, f)
 }
 
 // ListRules mocks base method.

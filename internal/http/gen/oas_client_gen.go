@@ -152,8 +152,10 @@ type Invoker interface {
 	ListChatHistory(ctx context.Context, params ListChatHistoryParams) (ListChatHistoryRes, error)
 	// ListNotifications invokes listNotifications operation.
 	//
+	// List notification entries (newest first) with cursor-based incremental loading.
+	//
 	// GET /settings/notifications
-	ListNotifications(ctx context.Context) ([]NotificationEntry, error)
+	ListNotifications(ctx context.Context, params ListNotificationsParams) ([]NotificationEntry, error)
 	// ListRecordedStreamActivity invokes listRecordedStreamActivity operation.
 	//
 	// Non-message activity in the stream time window (newest first).
@@ -3832,13 +3834,15 @@ func (c *Client) sendListChatHistory(ctx context.Context, params ListChatHistory
 
 // ListNotifications invokes listNotifications operation.
 //
+// List notification entries (newest first) with cursor-based incremental loading.
+//
 // GET /settings/notifications
-func (c *Client) ListNotifications(ctx context.Context) ([]NotificationEntry, error) {
-	res, err := c.sendListNotifications(ctx)
+func (c *Client) ListNotifications(ctx context.Context, params ListNotificationsParams) ([]NotificationEntry, error) {
+	res, err := c.sendListNotifications(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendListNotifications(ctx context.Context) (res []NotificationEntry, err error) {
+func (c *Client) sendListNotifications(ctx context.Context, params ListNotificationsParams) (res []NotificationEntry, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listNotifications"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -3878,6 +3882,61 @@ func (c *Client) sendListNotifications(ctx context.Context) (res []NotificationE
 	var pathParts [1]string
 	pathParts[0] = "/settings/notifications"
 	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "cursor_created_at" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor_created_at",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CursorCreatedAt.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "cursor_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CursorID.Get(); ok {
+				return e.EncodeValue(conv.Int64ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)

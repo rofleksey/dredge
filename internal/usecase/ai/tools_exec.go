@@ -370,7 +370,7 @@ func (u *Usecase) toolListTwitchUsers(ctx context.Context, args string) (string,
 }
 
 func (u *Usecase) toolListNotifications(ctx context.Context) (string, error) {
-	list, err := u.sett.ListNotifications(ctx)
+	list, err := u.sett.ListNotifications(ctx, entity.NotificationListFilter{Limit: 200})
 	if err != nil {
 		return mustJSON(map[string]string{"error": err.Error()}), err
 	}

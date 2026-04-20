@@ -10,14 +10,25 @@ import (
 	"go.uber.org/zap"
 )
 
-func (r *Repository) ListNotificationEntries(ctx context.Context) ([]entity.NotificationEntry, error) {
+func (r *Repository) ListNotificationEntries(ctx context.Context, f entity.NotificationListFilter) ([]entity.NotificationEntry, error) {
 	ctx, span := r.obs.StartSpan(ctx, "repo.list_notification_entries")
 	defer span.End()
 
+	limit := f.Limit
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > 200 {
+		limit = 200
+	}
+
 	rows, err := r.pool.Query(ctx, `
 		SELECT id, provider, settings, enabled, created_at
-		FROM notification_entries ORDER BY id
-	`)
+		FROM notification_entries
+		WHERE ($1::timestamptz IS NULL OR $2::bigint IS NULL OR (created_at, id) < ($1, $2))
+		ORDER BY created_at DESC, id DESC
+		LIMIT $3
+	`, f.CursorCreatedAt, f.CursorID, limit)
 	if err != nil {
 		r.obs.LogError(ctx, span, "list notification entries failed", err)
 		return nil, err

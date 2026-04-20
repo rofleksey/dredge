@@ -331,6 +331,26 @@ paths:
       operationId: listNotifications
       security:
         - bearerAuth: []
+      description: List notification entries (newest first) with cursor-based incremental loading.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor_created_at
+          in: query
+          description: Keyset cursor; use with cursor_id from the last entry of the previous batch.
+          schema:
+            type: string
+            format: date-time
+        - name: cursor_id
+          in: query
+          schema:
+            type: integer
+            format: int64
       responses:
         "200":
           description: Notification entries

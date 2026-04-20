@@ -132,8 +132,10 @@ type Handler interface {
 	ListChatHistory(ctx context.Context, params ListChatHistoryParams) (ListChatHistoryRes, error)
 	// ListNotifications implements listNotifications operation.
 	//
+	// List notification entries (newest first) with cursor-based incremental loading.
+	//
 	// GET /settings/notifications
-	ListNotifications(ctx context.Context) ([]NotificationEntry, error)
+	ListNotifications(ctx context.Context, params ListNotificationsParams) ([]NotificationEntry, error)
 	// ListRecordedStreamActivity implements listRecordedStreamActivity operation.
 	//
 	// Non-message activity in the stream time window (newest first).

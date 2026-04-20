@@ -5518,6 +5518,8 @@ func (s *Server) handleListChatHistoryRequest(args [0]string, argsEscaped bool, 
 
 // handleListNotificationsRequest handles listNotifications operation.
 //
+// List notification entries (newest first) with cursor-based incremental loading.
+//
 // GET /settings/notifications
 func (s *Server) handleListNotificationsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
@@ -5634,6 +5636,16 @@ func (s *Server) handleListNotificationsRequest(args [0]string, argsEscaped bool
 			return
 		}
 	}
+	params, err := decodeListNotificationsParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
 
 	var rawBody []byte
 
@@ -5646,13 +5658,26 @@ func (s *Server) handleListNotificationsRequest(args [0]string, argsEscaped bool
 			OperationID:      "listNotifications",
 			Body:             nil,
 			RawBody:          rawBody,
-			Params:           middleware.Parameters{},
-			Raw:              r,
+			Params: middleware.Parameters{
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "cursor_created_at",
+					In:   "query",
+				}: params.CursorCreatedAt,
+				{
+					Name: "cursor_id",
+					In:   "query",
+				}: params.CursorID,
+			},
+			Raw: r,
 		}
 
 		type (
 			Request  = struct{}
-			Params   = struct{}
+			Params   = ListNotificationsParams
 			Response = []NotificationEntry
 		)
 		response, err = middleware.HookMiddleware[
@@ -5662,14 +5687,14 @@ func (s *Server) handleListNotificationsRequest(args [0]string, argsEscaped bool
 		](
 			m,
 			mreq,
-			nil,
+			unpackListNotificationsParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.ListNotifications(ctx)
+				response, err = s.h.ListNotifications(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.ListNotifications(ctx)
+		response, err = s.h.ListNotifications(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)

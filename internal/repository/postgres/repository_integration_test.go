@@ -143,10 +143,29 @@ func TestRepository_integration(t *testing.T) {
 
 	notif, err := repo.CreateNotificationEntry(ctx, "telegram", map[string]any{"k": "v"}, true)
 	require.NoError(t, err)
-
-	entries, err := repo.ListNotificationEntries(ctx)
+	time.Sleep(5 * time.Millisecond)
+	notif2, err := repo.CreateNotificationEntry(ctx, "webhook", map[string]any{"url": "https://example.org/a"}, true)
 	require.NoError(t, err)
-	assert.NotEmpty(t, entries)
+	time.Sleep(5 * time.Millisecond)
+	notif3, err := repo.CreateNotificationEntry(ctx, "telegram", map[string]any{"chat_id": "1"}, false)
+	require.NoError(t, err)
+
+	entries, err := repo.ListNotificationEntries(ctx, entity.NotificationListFilter{Limit: 2})
+	require.NoError(t, err)
+	require.Len(t, entries, 2)
+	assert.Equal(t, notif3.ID, entries[0].ID)
+	assert.Equal(t, notif2.ID, entries[1].ID)
+
+	curAt := entries[len(entries)-1].CreatedAt
+	curID := entries[len(entries)-1].ID
+	more, err := repo.ListNotificationEntries(ctx, entity.NotificationListFilter{
+		Limit:           2,
+		CursorCreatedAt: &curAt,
+		CursorID:        &curID,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, more)
+	assert.Equal(t, notif.ID, more[0].ID)
 
 	enabled, err := repo.ListEnabledNotificationEntries(ctx)
 	require.NoError(t, err)

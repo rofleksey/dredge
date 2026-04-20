@@ -61,6 +61,12 @@ const router = createRouter({
           meta: { fillMainOutlet: true },
         },
         {
+          path: 'notifications',
+          name: 'notifications',
+          component: () => import('../views/NotificationsView.vue'),
+          meta: { fillMainOutlet: true },
+        },
+        {
           path: 'users/:id',
           name: 'user',
           component: () => import('../views/UserView.vue'),

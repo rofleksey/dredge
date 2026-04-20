@@ -332,13 +332,30 @@ export class DefaultService {
         });
     }
     /**
+     * List notification entries (newest first) with cursor-based incremental loading.
      * @returns NotificationEntry Notification entries
      * @throws ApiError
      */
-    public static listNotifications(): CancelablePromise<Array<NotificationEntry>> {
+    public static listNotifications({
+        limit = 50,
+        cursorCreatedAt,
+        cursorId,
+    }: {
+        limit?: number,
+        /**
+         * Keyset cursor; use with cursor_id from the last entry of the previous batch.
+         */
+        cursorCreatedAt?: string,
+        cursorId?: number,
+    }): CancelablePromise<Array<NotificationEntry>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/settings/notifications',
+            query: {
+                'limit': limit,
+                'cursor_created_at': cursorCreatedAt,
+                'cursor_id': cursorId,
+            },
         });
     }
     /**
