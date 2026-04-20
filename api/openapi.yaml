@@ -865,6 +865,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IrcMonitorStatus"
+  /twitch/irc-monitor/joined-history:
+    get:
+      operationId: listIrcMonitorJoinedHistory
+      summary: Historical IRC joined channel counts (periodic samples)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: days
+          in: query
+          description: Number of calendar days of history ending at request time (UTC window)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 90
+            default: 7
+      responses:
+        "200":
+          description: Samples oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IrcJoinedSample"
   /twitch/streams:
     get:
       operationId: listRecordedStreams
@@ -1919,6 +1943,17 @@ components:
               irc_ok:
                 type: boolean
                 description: True when the IRC client's NAMES-backed userlist for this channel is non-empty (session state)
+    IrcJoinedSample:
+      type: object
+      required: [captured_at, joined_count]
+      properties:
+        captured_at:
+          type: string
+          format: date-time
+        joined_count:
+          type: integer
+          minimum: 0
+          description: Number of monitored channels joined on IRC at sample time
     ChannelLive:
       type: object
       required: [broadcaster_id, broadcaster_login, display_name, profile_image_url, is_live]

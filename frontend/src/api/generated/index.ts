@@ -33,6 +33,7 @@ export type { FollowedMonitoredChannel } from './models/FollowedMonitoredChannel
 export type { GetChannelLiveRequest } from './models/GetChannelLiveRequest';
 export type { GetTwitchUserActivityTimelineRequest } from './models/GetTwitchUserActivityTimelineRequest';
 export type { GetTwitchUserProfileRequest } from './models/GetTwitchUserProfileRequest';
+export type { IrcJoinedSample } from './models/IrcJoinedSample';
 export type { IrcMonitorSettings } from './models/IrcMonitorSettings';
 export type { IrcMonitorStatus } from './models/IrcMonitorStatus';
 export type { ListChannelChattersRequest } from './models/ListChannelChattersRequest';

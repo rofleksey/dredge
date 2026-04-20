@@ -24,6 +24,7 @@ import type { DeleteByIDRequest } from '../models/DeleteByIDRequest';
 import type { GetChannelLiveRequest } from '../models/GetChannelLiveRequest';
 import type { GetTwitchUserActivityTimelineRequest } from '../models/GetTwitchUserActivityTimelineRequest';
 import type { GetTwitchUserProfileRequest } from '../models/GetTwitchUserProfileRequest';
+import type { IrcJoinedSample } from '../models/IrcJoinedSample';
 import type { IrcMonitorSettings } from '../models/IrcMonitorSettings';
 import type { IrcMonitorStatus } from '../models/IrcMonitorStatus';
 import type { ListChannelChattersRequest } from '../models/ListChannelChattersRequest';
@@ -772,6 +773,27 @@ export class DefaultService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/twitch/irc-monitor/status',
+        });
+    }
+    /**
+     * Historical IRC joined channel counts (periodic samples)
+     * @returns IrcJoinedSample Samples oldest first
+     * @throws ApiError
+     */
+    public static listIrcMonitorJoinedHistory({
+        days = 7,
+    }: {
+        /**
+         * Number of calendar days of history ending at request time (UTC window)
+         */
+        days?: number,
+    }): CancelablePromise<Array<IrcJoinedSample>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/twitch/irc-monitor/joined-history',
+            query: {
+                'days': days,
+            },
         });
     }
     /**

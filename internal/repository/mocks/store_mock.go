@@ -549,6 +549,20 @@ func (mr *MockStoreMockRecorder) InsertChatMessageForChannelLogin(ctx, channelLo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertChatMessageForChannelLogin", reflect.TypeOf((*MockStore)(nil).InsertChatMessageForChannelLogin), ctx, channelLogin, chatterTwitchUserID, chatterUsername, body, keywordMatch, msgType, badgeTags, firstMessage)
 }
 
+// InsertIrcJoinedSample mocks base method.
+func (m *MockStore) InsertIrcJoinedSample(ctx context.Context, joinedCount int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertIrcJoinedSample", ctx, joinedCount)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertIrcJoinedSample indicates an expected call of InsertIrcJoinedSample.
+func (mr *MockStoreMockRecorder) InsertIrcJoinedSample(ctx, joinedCount any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertIrcJoinedSample", reflect.TypeOf((*MockStore)(nil).InsertIrcJoinedSample), ctx, joinedCount)
+}
+
 // InsertUserActivityEvent mocks base method.
 func (m *MockStore) InsertUserActivityEvent(ctx context.Context, chatterID int64, eventType string, channelTwitchUserID *int64, details map[string]any) error {
 	m.ctrl.T.Helper()
@@ -771,6 +785,21 @@ func (m *MockStore) ListFollowedMonitoredChannels(ctx context.Context, chatterID
 func (mr *MockStoreMockRecorder) ListFollowedMonitoredChannels(ctx, chatterID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFollowedMonitoredChannels", reflect.TypeOf((*MockStore)(nil).ListFollowedMonitoredChannels), ctx, chatterID)
+}
+
+// ListIrcJoinedSamples mocks base method.
+func (m *MockStore) ListIrcJoinedSamples(ctx context.Context, from, to time.Time) ([]entity.IrcJoinedSample, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListIrcJoinedSamples", ctx, from, to)
+	ret0, _ := ret[0].([]entity.IrcJoinedSample)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListIrcJoinedSamples indicates an expected call of ListIrcJoinedSamples.
+func (mr *MockStoreMockRecorder) ListIrcJoinedSamples(ctx, from, to any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListIrcJoinedSamples", reflect.TypeOf((*MockStore)(nil).ListIrcJoinedSamples), ctx, from, to)
 }
 
 // ListLinkedTwitchAccountUserIDs mocks base method.

@@ -1102,6 +1102,101 @@ func decodeListChatHistoryParams(args [0]string, argsEscaped bool, r *http.Reque
 	return params, nil
 }
 
+// ListIrcMonitorJoinedHistoryParams is parameters of listIrcMonitorJoinedHistory operation.
+type ListIrcMonitorJoinedHistoryParams struct {
+	// Number of calendar days of history ending at request time (UTC window).
+	Days OptInt `json:",omitempty,omitzero"`
+}
+
+func unpackListIrcMonitorJoinedHistoryParams(packed middleware.Parameters) (params ListIrcMonitorJoinedHistoryParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "days",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Days = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeListIrcMonitorJoinedHistoryParams(args [0]string, argsEscaped bool, r *http.Request) (params ListIrcMonitorJoinedHistoryParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: days.
+	{
+		val := int(7)
+		params.Days.SetTo(val)
+	}
+	// Decode query: days.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "days",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotDaysVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDaysVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Days.SetTo(paramsDotDaysVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Days.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           90,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "days",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ListNotificationsParams is parameters of listNotifications operation.
 type ListNotificationsParams struct {
 	Limit OptInt `json:",omitempty,omitzero"`

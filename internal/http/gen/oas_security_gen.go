@@ -64,6 +64,7 @@ var operationRolesBearerAuth = map[string][]string{
 	ListChannelBlacklistOperation:          []string{},
 	ListChannelChattersOperation:           []string{},
 	ListChatHistoryOperation:               []string{},
+	ListIrcMonitorJoinedHistoryOperation:   []string{},
 	ListNotificationsOperation:             []string{},
 	ListRecordedStreamActivityOperation:    []string{},
 	ListRecordedStreamMessagesOperation:    []string{},

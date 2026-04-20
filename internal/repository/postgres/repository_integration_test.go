@@ -438,5 +438,22 @@ func TestRepository_integration(t *testing.T) {
 	require.Len(t, gqlFollows, 1)
 	assert.Equal(t, "foo", gqlFollows[0].FollowedChannelLogin)
 
+	require.NoError(t, repo.InsertIrcJoinedSample(ctx, 5))
+	require.NoError(t, repo.InsertIrcJoinedSample(ctx, 105))
+
+	joinedWindowEnd := time.Now().UTC()
+	joinedSamples, err := repo.ListIrcJoinedSamples(ctx, joinedWindowEnd.Add(-time.Hour), joinedWindowEnd.Add(time.Hour))
+	require.NoError(t, err)
+	require.GreaterOrEqual(t, len(joinedSamples), 2)
+
+	joinedCounts := map[int]int{}
+
+	for _, s := range joinedSamples {
+		joinedCounts[s.JoinedCount]++
+	}
+
+	assert.GreaterOrEqual(t, joinedCounts[5], 1)
+	assert.GreaterOrEqual(t, joinedCounts[105], 1)
+
 	_ = msgID
 }

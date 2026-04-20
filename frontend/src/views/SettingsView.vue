@@ -665,7 +665,10 @@ const filteredChannelBlacklist = computed(() => {
       <section v-show="tab === 'channels'" class="panel">
         <h2>{{ channelsHeading }}</h2>
         <p class="hint">
-          Monitored: {{ monitoredCount }} · IRC joined: {{ ircJoinedCount }} / {{ maxIrcJoinedChannels }}
+          Monitored: {{ monitoredCount }} ·
+          <RouterLink class="irc-joined-link" :to="{ name: 'irc-joined-graph' }">
+            IRC joined: {{ ircJoinedCount }} / {{ maxIrcJoinedChannels }}
+          </RouterLink>
           <span v-if="!ircStatus?.connected" class="muted"> (IRC not connected)</span>
         </p>
         <p v-if="ircJoinedCount > maxIrcJoinedChannels" class="hint hint-warn">
@@ -1031,6 +1034,16 @@ h2 {
 
   a {
     color: var(--accent-bright);
+  }
+}
+
+.irc-joined-link {
+  color: var(--accent-bright);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 

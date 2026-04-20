@@ -67,6 +67,12 @@ const router = createRouter({
           meta: { fillMainOutlet: true },
         },
         {
+          path: 'irc-joined',
+          name: 'irc-joined-graph',
+          component: () => import('../views/IrcJoinedGraphView.vue'),
+          meta: { fillMainOutlet: true },
+        },
+        {
           path: 'users/:id',
           name: 'user',
           component: () => import('../views/UserView.vue'),

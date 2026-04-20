@@ -36,6 +36,7 @@ const (
 	ListChannelBlacklistOperation          OperationName = "ListChannelBlacklist"
 	ListChannelChattersOperation           OperationName = "ListChannelChatters"
 	ListChatHistoryOperation               OperationName = "ListChatHistory"
+	ListIrcMonitorJoinedHistoryOperation   OperationName = "ListIrcMonitorJoinedHistory"
 	ListNotificationsOperation             OperationName = "ListNotifications"
 	ListRecordedStreamActivityOperation    OperationName = "ListRecordedStreamActivity"
 	ListRecordedStreamMessagesOperation    OperationName = "ListRecordedStreamMessages"

@@ -90,6 +90,8 @@ type Store interface {
 	UpdateSuspicionSettings(ctx context.Context, s entity.SuspicionSettings) error
 	GetIrcMonitorSettings(ctx context.Context) (entity.IrcMonitorSettings, error)
 	UpdateIrcMonitorSettings(ctx context.Context, s entity.IrcMonitorSettings) error
+	InsertIrcJoinedSample(ctx context.Context, joinedCount int) error
+	ListIrcJoinedSamples(ctx context.Context, from, to time.Time) ([]entity.IrcJoinedSample, error)
 	ListLinkedTwitchAccountUserIDs(ctx context.Context) ([]int64, error)
 
 	GetAISettings(ctx context.Context) (entity.AISettings, error)

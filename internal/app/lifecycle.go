@@ -24,6 +24,8 @@ type twitchRuntime struct {
 	stopPresence       context.CancelFunc
 	streamRecorderCtx  context.Context
 	stopStreamRecorder context.CancelFunc
+	ircJoinedSnapCtx   context.Context
+	stopIrcJoinedSnap  context.CancelFunc
 	enrichWorkerCtx    context.Context
 	stopEnrichWorker   context.CancelFunc
 	persistCtx         context.Context
@@ -75,6 +77,7 @@ func onAppStart(
 
 	rt.presenceCtx, rt.stopPresence = context.WithCancel(context.Background())
 	rt.streamRecorderCtx, rt.stopStreamRecorder = context.WithCancel(context.Background())
+	rt.ircJoinedSnapCtx, rt.stopIrcJoinedSnap = context.WithCancel(context.Background())
 	rt.enrichWorkerCtx, rt.stopEnrichWorker = context.WithCancel(context.Background())
 	rt.persistCtx, rt.stopPersist = context.WithCancel(context.Background())
 
@@ -91,6 +94,7 @@ func onAppStart(
 
 	go twitchSvc.StartPresenceTicker(rt.presenceCtx)
 	go twitchSvc.StartStreamSessionRecorder(rt.streamRecorderCtx)
+	go twitchSvc.StartIrcJoinedSnapshotLoop(rt.ircJoinedSnapCtx)
 
 	if addr := cfg.Server.MetricsAddress; addr != "" {
 		metricsMux := http.NewServeMux()
@@ -145,6 +149,7 @@ func onAppStop(
 
 	rt.stopPresence()
 	rt.stopStreamRecorder()
+	rt.stopIrcJoinedSnap()
 	rt.stopEnrichWorker()
 
 	twitchSvc.StopMonitor()

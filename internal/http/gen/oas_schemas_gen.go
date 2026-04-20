@@ -1544,6 +1544,33 @@ func (s *GetTwitchUserProfileRequest) SetID(val int64) {
 	s.ID = val
 }
 
+// Ref: #/components/schemas/IrcJoinedSample
+type IrcJoinedSample struct {
+	CapturedAt time.Time `json:"captured_at"`
+	// Number of monitored channels joined on IRC at sample time.
+	JoinedCount int `json:"joined_count"`
+}
+
+// GetCapturedAt returns the value of CapturedAt.
+func (s *IrcJoinedSample) GetCapturedAt() time.Time {
+	return s.CapturedAt
+}
+
+// GetJoinedCount returns the value of JoinedCount.
+func (s *IrcJoinedSample) GetJoinedCount() int {
+	return s.JoinedCount
+}
+
+// SetCapturedAt sets the value of CapturedAt.
+func (s *IrcJoinedSample) SetCapturedAt(val time.Time) {
+	s.CapturedAt = val
+}
+
+// SetJoinedCount sets the value of JoinedCount.
+func (s *IrcJoinedSample) SetJoinedCount(val int) {
+	s.JoinedCount = val
+}
+
 // Ref: #/components/schemas/IrcMonitorSettings
 type IrcMonitorSettings struct {
 	// Linked Twitch account id (Helix user id) for authenticated IRC; null uses anonymous read-only IRC

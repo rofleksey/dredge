@@ -225,6 +225,15 @@ func (UnimplementedHandler) ListChatHistory(ctx context.Context, params ListChat
 	return r, ht.ErrNotImplemented
 }
 
+// ListIrcMonitorJoinedHistory implements listIrcMonitorJoinedHistory operation.
+//
+// Historical IRC joined channel counts (periodic samples).
+//
+// GET /twitch/irc-monitor/joined-history
+func (UnimplementedHandler) ListIrcMonitorJoinedHistory(ctx context.Context, params ListIrcMonitorJoinedHistoryParams) (r []IrcJoinedSample, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListNotifications implements listNotifications operation.
 //
 // List notification entries (newest first) with cursor-based incremental loading.

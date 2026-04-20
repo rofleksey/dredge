@@ -152,6 +152,13 @@ type IrcMonitorSettings struct {
 	EnrichmentCooldown   time.Duration
 }
 
+// IrcJoinedSample is one periodic snapshot of how many monitored channels are joined on IRC.
+type IrcJoinedSample struct {
+	ID          int64
+	JoinedCount int
+	CapturedAt  time.Time
+}
+
 // ChatHistoryMessage is a persisted Twitch chat line (IRC or sent via dredge).
 type ChatHistoryMessage struct {
 	ID                  int64
