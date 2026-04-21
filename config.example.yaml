@@ -34,6 +34,7 @@ twitch:
   user_oauth_token_cache_ttl: 30m
 observability:
   service_name: "dredge-backend"
+  # Use info or warn in production; debug is for local development.
   log_level: "debug"
   sentry_dsn: ""
   # none: human-readable console only. otlp: also send logs via OTLP/HTTP (see OTEL_EXPORTER_OTLP_*).

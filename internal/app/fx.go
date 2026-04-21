@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/fx"
@@ -112,7 +113,9 @@ func fxOptions() fx.Option {
 				mux.Handle(handler.TwitchOAuthCallbackPath, handler.NewTwitchOAuthCallback(oauth, sett, obs))
 				mux.Handle("/", webui.NewMux(srv))
 
-				return &http.Server{Addr: cfg.Server.Address, Handler: obs.InstrumentHTTP(httpmw.WrapCORS(string(origin), mux))}, nil
+				chain := httpmw.WrapSecurityHeaders(httpmw.WrapCORS(string(origin), mux))
+
+				return &http.Server{Addr: cfg.Server.Address, Handler: obs.InstrumentHTTP(chain)}, nil
 			},
 		),
 		// registerLifecycle must run first: RunMigrations runs in its OnStart before any
@@ -123,5 +126,8 @@ func fxOptions() fx.Option {
 }
 
 func New() *fx.App {
-	return fx.New(fxOptions())
+	return fx.New(
+		fxOptions(),
+		fx.StopTimeout(45*time.Second),
+	)
 }

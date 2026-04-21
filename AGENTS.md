@@ -16,4 +16,6 @@ OpenAPI → Go without `make`: `go run github.com/ogen-go/ogen/cmd/ogen@latest -
 
 **Config:** `cp config.example.yaml config.yaml` — `config.yaml` is gitignored.
 
+**Deployment:** In production, terminate **HTTPS** at a **reverse proxy** (nginx, Caddy, Traefik, etc.) in front of Dredge; the Go process serves **plain HTTP** only and does **not** embed TLS. PostgreSQL is accessed with a normal DSN; **TLS from the application to Postgres is not in scope**. Configure the proxy for **WebSocket** upgrades to `/ws`. Prometheus (if enabled) listens on `server.metrics_address` separately from `server.address` (`GET /health` is on the main listener). Prefer `observability.log_level` **`info`** or **`warn`** outside local dev.
+
 **Lint:** `.golangci.yml` enables `wsl_v5` (blank lines between statement groups). Non-trivial edits: run `make lint`.

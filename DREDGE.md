@@ -210,6 +210,8 @@ Requirements are grouped by capability. **FR IDs** are stable labels for traceab
 - **External services:** Twitch developer application (client id/secret, registered redirect URL), optional Telegram/webhook endpoints, optional Sentry and OTLP collectors.
 - **Frontend:** Built with project Makefile (`make frontend-build`), output embedded or copied under `internal/webui/static/`.
 - **Migrations:** SQL under `internal/repository/postgres/migrations/`, executed during application lifecycle startup.
+- **HTTPS and TLS:** The application listens for **HTTP** only. Production assumes a **reverse proxy** terminates **HTTPS** for clients; **TLS is not implemented inside the Go server**. **TLS from the application to PostgreSQL is not required** for the documented deployment model.
+- **WebSockets:** The operator’s reverse proxy must support upgrading and proxying **`/ws`** to the backend.
 
 ---
 
