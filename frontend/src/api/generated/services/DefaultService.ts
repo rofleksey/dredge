@@ -10,6 +10,7 @@ import type { AiRunAccepted } from '../models/AiRunAccepted';
 import type { AiSettings } from '../models/AiSettings';
 import type { ChannelBlacklistChange } from '../models/ChannelBlacklistChange';
 import type { ChannelChatterEntry } from '../models/ChannelChatterEntry';
+import type { ChannelDiscoverySettings } from '../models/ChannelDiscoverySettings';
 import type { ChannelLive } from '../models/ChannelLive';
 import type { ChatHistoryEntry } from '../models/ChatHistoryEntry';
 import type { ConfirmAiToolRequest } from '../models/ConfirmAiToolRequest';
@@ -21,6 +22,7 @@ import type { CreateRuleRequest } from '../models/CreateRuleRequest';
 import type { CreateTwitchAccountRequest } from '../models/CreateTwitchAccountRequest';
 import type { CreateTwitchUserRequest } from '../models/CreateTwitchUserRequest';
 import type { DeleteByIDRequest } from '../models/DeleteByIDRequest';
+import type { DiscoveryCandidate } from '../models/DiscoveryCandidate';
 import type { GetChannelLiveRequest } from '../models/GetChannelLiveRequest';
 import type { GetTwitchUserActivityTimelineRequest } from '../models/GetTwitchUserActivityTimelineRequest';
 import type { GetTwitchUserProfileRequest } from '../models/GetTwitchUserProfileRequest';
@@ -228,6 +230,86 @@ export class DefaultService {
             url: '/settings/irc-monitor-settings',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns ChannelDiscoverySettings Twitch live channel discovery settings
+     * @throws ApiError
+     */
+    public static getChannelDiscoverySettings(): CancelablePromise<ChannelDiscoverySettings> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/settings/channel-discovery',
+        });
+    }
+    /**
+     * @returns ChannelDiscoverySettings Updated settings
+     * @throws ApiError
+     */
+    public static updateChannelDiscoverySettings({
+        requestBody,
+    }: {
+        requestBody: ChannelDiscoverySettings,
+    }): CancelablePromise<ChannelDiscoverySettings> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/settings/channel-discovery',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Invalid settings (e.g. enabled with empty game_id)`,
+            },
+        });
+    }
+    /**
+     * @returns DiscoveryCandidate Pending discovery channels (not monitored)
+     * @throws ApiError
+     */
+    public static listChannelDiscoveryCandidates(): CancelablePromise<Array<DiscoveryCandidate>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/settings/channel-discovery/candidates',
+        });
+    }
+    /**
+     * @returns TwitchUser Channel is now monitored
+     * @throws ApiError
+     */
+    public static approveChannelDiscoveryCandidate({
+        twitchUserId,
+    }: {
+        twitchUserId: number,
+    }): CancelablePromise<TwitchUser> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/settings/channel-discovery/candidates/{twitch_user_id}/approve',
+            path: {
+                'twitch_user_id': twitchUserId,
+            },
+            errors: {
+                400: `Invalid monitor settings for this user`,
+                404: `Candidate not found or twitch user missing`,
+            },
+        });
+    }
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static denyChannelDiscoveryCandidate({
+        twitchUserId,
+    }: {
+        twitchUserId: number,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/settings/channel-discovery/candidates/{twitch_user_id}/deny',
+            path: {
+                'twitch_user_id': twitchUserId,
+            },
+            errors: {
+                404: `Candidate not found`,
+            },
         });
     }
     /**

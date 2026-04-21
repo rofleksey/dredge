@@ -152,6 +152,27 @@ type IrcMonitorSettings struct {
 	EnrichmentCooldown   time.Duration
 }
 
+// ChannelDiscoverySettings is the singleton row (id=1) for Twitch live channel discovery (Helix /streams by game).
+type ChannelDiscoverySettings struct {
+	Enabled                bool
+	PollIntervalSeconds    int
+	GameID                 string
+	MinLiveViewers         int
+	RequiredStreamTags     []string
+	MaxStreamPagesPerRun   int
+}
+
+// TwitchDiscoveryCandidate is a pending channel suggested by discovery (not monitored until approved).
+type TwitchDiscoveryCandidate struct {
+	User         TwitchUser
+	DiscoveredAt time.Time
+	LastSeenAt   time.Time
+	ViewerCount  *int64
+	Title        *string
+	GameName     *string
+	StreamTags   []string
+}
+
 // IrcJoinedSample is one periodic snapshot of how many monitored channels are joined on IRC.
 type IrcJoinedSample struct {
 	ID          int64

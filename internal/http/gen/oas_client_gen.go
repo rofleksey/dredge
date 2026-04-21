@@ -28,6 +28,10 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	// ApproveChannelDiscoveryCandidate invokes approveChannelDiscoveryCandidate operation.
+	//
+	// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+	ApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (ApproveChannelDiscoveryCandidateRes, error)
 	// ConfirmAiTool invokes confirmAiTool operation.
 	//
 	// POST /ai/conversations/{conversationId}/confirm
@@ -90,10 +94,18 @@ type Invoker interface {
 	//
 	// POST /settings/twitch-accounts/delete
 	DeleteTwitchAccount(ctx context.Context, request *DeleteByIDRequest) (DeleteTwitchAccountRes, error)
+	// DenyChannelDiscoveryCandidate invokes denyChannelDiscoveryCandidate operation.
+	//
+	// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+	DenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (DenyChannelDiscoveryCandidateRes, error)
 	// GetAiSettings invokes getAiSettings operation.
 	//
 	// GET /ai/settings
 	GetAiSettings(ctx context.Context) (*AiSettings, error)
+	// GetChannelDiscoverySettings invokes getChannelDiscoverySettings operation.
+	//
+	// GET /settings/channel-discovery
+	GetChannelDiscoverySettings(ctx context.Context) (*ChannelDiscoverySettings, error)
 	// GetChannelLive invokes getChannelLive operation.
 	//
 	// POST /twitch/channels/live
@@ -146,6 +158,10 @@ type Invoker interface {
 	//
 	// POST /twitch/channels/chatters
 	ListChannelChatters(ctx context.Context, request *ListChannelChattersRequest) (ListChannelChattersRes, error)
+	// ListChannelDiscoveryCandidates invokes listChannelDiscoveryCandidates operation.
+	//
+	// GET /settings/channel-discovery/candidates
+	ListChannelDiscoveryCandidates(ctx context.Context) ([]DiscoveryCandidate, error)
 	// ListChatHistory invokes listChatHistory operation.
 	//
 	// GET /twitch/chat/history
@@ -254,6 +270,10 @@ type Invoker interface {
 	//
 	// POST /settings/rules/test-regex
 	TestRuleRegex(ctx context.Context, request *TestRuleRegexRequest) (*TestRuleRegexResponse, error)
+	// UpdateChannelDiscoverySettings invokes updateChannelDiscoverySettings operation.
+	//
+	// PATCH /settings/channel-discovery
+	UpdateChannelDiscoverySettings(ctx context.Context, request *ChannelDiscoverySettings) (UpdateChannelDiscoverySettingsRes, error)
 	// UpdateIrcMonitorSettings invokes updateIrcMonitorSettings operation.
 	//
 	// PATCH /settings/irc-monitor-settings
@@ -319,6 +339,130 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 		return c.serverURL
 	}
 	return u
+}
+
+// ApproveChannelDiscoveryCandidate invokes approveChannelDiscoveryCandidate operation.
+//
+// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+func (c *Client) ApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (ApproveChannelDiscoveryCandidateRes, error) {
+	res, err := c.sendApproveChannelDiscoveryCandidate(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (res ApproveChannelDiscoveryCandidateRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("approveChannelDiscoveryCandidate"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/settings/channel-discovery/candidates/{twitch_user_id}/approve"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ApproveChannelDiscoveryCandidateOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/settings/channel-discovery/candidates/"
+	{
+		// Encode "twitch_user_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "twitch_user_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.Int64ToString(params.TwitchUserID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/approve"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ApproveChannelDiscoveryCandidateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeApproveChannelDiscoveryCandidateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
 }
 
 // ConfirmAiTool invokes confirmAiTool operation.
@@ -2128,6 +2272,130 @@ func (c *Client) sendDeleteTwitchAccount(ctx context.Context, request *DeleteByI
 	return result, nil
 }
 
+// DenyChannelDiscoveryCandidate invokes denyChannelDiscoveryCandidate operation.
+//
+// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+func (c *Client) DenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (DenyChannelDiscoveryCandidateRes, error) {
+	res, err := c.sendDenyChannelDiscoveryCandidate(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (res DenyChannelDiscoveryCandidateRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("denyChannelDiscoveryCandidate"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/settings/channel-discovery/candidates/{twitch_user_id}/deny"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DenyChannelDiscoveryCandidateOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/settings/channel-discovery/candidates/"
+	{
+		// Encode "twitch_user_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "twitch_user_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.Int64ToString(params.TwitchUserID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/deny"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DenyChannelDiscoveryCandidateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDenyChannelDiscoveryCandidateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetAiSettings invokes getAiSettings operation.
 //
 // GET /ai/settings
@@ -2226,6 +2494,111 @@ func (c *Client) sendGetAiSettings(ctx context.Context) (res *AiSettings, err er
 
 	stage = "DecodeResponse"
 	result, err := decodeGetAiSettingsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetChannelDiscoverySettings invokes getChannelDiscoverySettings operation.
+//
+// GET /settings/channel-discovery
+func (c *Client) GetChannelDiscoverySettings(ctx context.Context) (*ChannelDiscoverySettings, error) {
+	res, err := c.sendGetChannelDiscoverySettings(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetChannelDiscoverySettings(ctx context.Context) (res *ChannelDiscoverySettings, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getChannelDiscoverySettings"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/settings/channel-discovery"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetChannelDiscoverySettingsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/settings/channel-discovery"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetChannelDiscoverySettingsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetChannelDiscoverySettingsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3697,6 +4070,111 @@ func (c *Client) sendListChannelChatters(ctx context.Context, request *ListChann
 
 	stage = "DecodeResponse"
 	result, err := decodeListChannelChattersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListChannelDiscoveryCandidates invokes listChannelDiscoveryCandidates operation.
+//
+// GET /settings/channel-discovery/candidates
+func (c *Client) ListChannelDiscoveryCandidates(ctx context.Context) ([]DiscoveryCandidate, error) {
+	res, err := c.sendListChannelDiscoveryCandidates(ctx)
+	return res, err
+}
+
+func (c *Client) sendListChannelDiscoveryCandidates(ctx context.Context) (res []DiscoveryCandidate, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listChannelDiscoveryCandidates"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/settings/channel-discovery/candidates"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListChannelDiscoveryCandidatesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/settings/channel-discovery/candidates"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListChannelDiscoveryCandidatesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListChannelDiscoveryCandidatesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6721,6 +7199,114 @@ func (c *Client) sendTestRuleRegex(ctx context.Context, request *TestRuleRegexRe
 
 	stage = "DecodeResponse"
 	result, err := decodeTestRuleRegexResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateChannelDiscoverySettings invokes updateChannelDiscoverySettings operation.
+//
+// PATCH /settings/channel-discovery
+func (c *Client) UpdateChannelDiscoverySettings(ctx context.Context, request *ChannelDiscoverySettings) (UpdateChannelDiscoverySettingsRes, error) {
+	res, err := c.sendUpdateChannelDiscoverySettings(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendUpdateChannelDiscoverySettings(ctx context.Context, request *ChannelDiscoverySettings) (res UpdateChannelDiscoverySettingsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateChannelDiscoverySettings"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/settings/channel-discovery"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateChannelDiscoverySettingsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/settings/channel-discovery"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateChannelDiscoverySettingsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateChannelDiscoverySettingsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateChannelDiscoverySettingsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

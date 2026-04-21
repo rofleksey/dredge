@@ -206,6 +206,107 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IrcMonitorSettings"
+  /settings/channel-discovery:
+    get:
+      operationId: getChannelDiscoverySettings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Twitch live channel discovery settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChannelDiscoverySettings"
+    patch:
+      operationId: updateChannelDiscoverySettings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelDiscoverySettings"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChannelDiscoverySettings"
+        "400":
+          description: Invalid settings (e.g. enabled with empty game_id)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/channel-discovery/candidates:
+    get:
+      operationId: listChannelDiscoveryCandidates
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Pending discovery channels (not monitored)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DiscoveryCandidate"
+  /settings/channel-discovery/candidates/{twitch_user_id}/approve:
+    post:
+      operationId: approveChannelDiscoveryCandidate
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: twitch_user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Channel is now monitored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TwitchUser"
+        "400":
+          description: Invalid monitor settings for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "404":
+          description: Candidate not found or twitch user missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /settings/channel-discovery/candidates/{twitch_user_id}/deny:
+    post:
+      operationId: denyChannelDiscoveryCandidate
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: twitch_user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Channel denied; will not appear in discovery again
+        "404":
+          description: Candidate not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
   /settings/rules:
     get:
       operationId: listRules
@@ -1832,6 +1933,72 @@ components:
           type: integer
           minimum: 1
           description: Per-user enrichment cooldown used by worker queue checks; default 24h
+    ChannelDiscoverySettings:
+      type: object
+      required:
+        - enabled
+        - poll_interval_seconds
+        - game_id
+        - min_live_viewers
+        - required_stream_tags
+        - max_stream_pages_per_run
+      properties:
+        enabled:
+          type: boolean
+          description: When true, the backend periodically scans Helix live streams for the configured game
+        poll_interval_seconds:
+          type: integer
+          minimum: 60
+          description: Minimum seconds between discovery runs (default 3600)
+        game_id:
+          type: string
+          description: Twitch Helix category id (game_id) passed to GET /helix/streams; required when enabled is true
+        min_live_viewers:
+          type: integer
+          minimum: 0
+          description: Minimum concurrent viewers (Helix stream viewer_count) for a channel to be suggested
+        required_stream_tags:
+          type: array
+          items:
+            type: string
+          description: |
+            When non-empty, a live stream must include every listed tag on its Helix `tags` array (case-insensitive match).
+            Empty means no tag filter.
+        max_stream_pages_per_run:
+          type: integer
+          minimum: 1
+          description: Max Helix /streams pages (100 streams each) per discovery run
+    DiscoveryCandidate:
+      type: object
+      required:
+        - user
+        - discovered_at
+        - last_seen_at
+        - stream_tags
+      properties:
+        user:
+          $ref: "#/components/schemas/TwitchUser"
+        discovered_at:
+          type: string
+          format: date-time
+        last_seen_at:
+          type: string
+          format: date-time
+        viewer_count:
+          type: integer
+          format: int64
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        game_name:
+          type: string
+          nullable: true
+        stream_tags:
+          type: array
+          items:
+            type: string
+          description: Stream tag snapshot from the last matching Helix /streams row
     ChannelBlacklistChange:
       type: object
       required: [login, add]

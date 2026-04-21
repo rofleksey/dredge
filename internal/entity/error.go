@@ -18,4 +18,6 @@ var (
 	ErrNoLinkedTwitchAccount = errors.New("no linked twitch account")
 	// ErrInvalidTwitchUserMonitorSettings is returned when notify_off_stream_messages is enabled while irc_only_when_live is true.
 	ErrInvalidTwitchUserMonitorSettings = errors.New("notify_off_stream_messages is only allowed when irc_only_when_live is false")
+	ErrDiscoveryCandidateNotFound      = errors.New("discovery candidate not found")
+	ErrInvalidChannelDiscoverySettings = errors.New("invalid channel discovery settings")
 )

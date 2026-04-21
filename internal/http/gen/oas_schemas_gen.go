@@ -353,6 +353,14 @@ func (s *AiSettings) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
 }
 
+type ApproveChannelDiscoveryCandidateBadRequest ErrorMessage
+
+func (*ApproveChannelDiscoveryCandidateBadRequest) approveChannelDiscoveryCandidateRes() {}
+
+type ApproveChannelDiscoveryCandidateNotFound ErrorMessage
+
+func (*ApproveChannelDiscoveryCandidateNotFound) approveChannelDiscoveryCandidateRes() {}
+
 type BearerAuth struct {
 	Token string
 	Roles []string
@@ -467,6 +475,86 @@ func (s *ChannelChatterEntry) SetAccountCreatedAt(val OptNilDateTime) {
 func (s *ChannelChatterEntry) SetMessageCount(val OptNilInt64) {
 	s.MessageCount = val
 }
+
+// Ref: #/components/schemas/ChannelDiscoverySettings
+type ChannelDiscoverySettings struct {
+	// When true, the backend periodically scans Helix live streams for the configured game.
+	Enabled bool `json:"enabled"`
+	// Minimum seconds between discovery runs (default 3600).
+	PollIntervalSeconds int `json:"poll_interval_seconds"`
+	// Twitch Helix category id (game_id) passed to GET /helix/streams; required when enabled is true.
+	GameID string `json:"game_id"`
+	// Minimum concurrent viewers (Helix stream viewer_count) for a channel to be suggested.
+	MinLiveViewers int `json:"min_live_viewers"`
+	// When non-empty, a live stream must include every listed tag on its Helix `tags` array
+	// (case-insensitive match).
+	// Empty means no tag filter.
+	RequiredStreamTags []string `json:"required_stream_tags"`
+	// Max Helix /streams pages (100 streams each) per discovery run.
+	MaxStreamPagesPerRun int `json:"max_stream_pages_per_run"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *ChannelDiscoverySettings) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetPollIntervalSeconds returns the value of PollIntervalSeconds.
+func (s *ChannelDiscoverySettings) GetPollIntervalSeconds() int {
+	return s.PollIntervalSeconds
+}
+
+// GetGameID returns the value of GameID.
+func (s *ChannelDiscoverySettings) GetGameID() string {
+	return s.GameID
+}
+
+// GetMinLiveViewers returns the value of MinLiveViewers.
+func (s *ChannelDiscoverySettings) GetMinLiveViewers() int {
+	return s.MinLiveViewers
+}
+
+// GetRequiredStreamTags returns the value of RequiredStreamTags.
+func (s *ChannelDiscoverySettings) GetRequiredStreamTags() []string {
+	return s.RequiredStreamTags
+}
+
+// GetMaxStreamPagesPerRun returns the value of MaxStreamPagesPerRun.
+func (s *ChannelDiscoverySettings) GetMaxStreamPagesPerRun() int {
+	return s.MaxStreamPagesPerRun
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *ChannelDiscoverySettings) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetPollIntervalSeconds sets the value of PollIntervalSeconds.
+func (s *ChannelDiscoverySettings) SetPollIntervalSeconds(val int) {
+	s.PollIntervalSeconds = val
+}
+
+// SetGameID sets the value of GameID.
+func (s *ChannelDiscoverySettings) SetGameID(val string) {
+	s.GameID = val
+}
+
+// SetMinLiveViewers sets the value of MinLiveViewers.
+func (s *ChannelDiscoverySettings) SetMinLiveViewers(val int) {
+	s.MinLiveViewers = val
+}
+
+// SetRequiredStreamTags sets the value of RequiredStreamTags.
+func (s *ChannelDiscoverySettings) SetRequiredStreamTags(val []string) {
+	s.RequiredStreamTags = val
+}
+
+// SetMaxStreamPagesPerRun sets the value of MaxStreamPagesPerRun.
+func (s *ChannelDiscoverySettings) SetMaxStreamPagesPerRun(val int) {
+	s.MaxStreamPagesPerRun = val
+}
+
+func (*ChannelDiscoverySettings) updateChannelDiscoverySettingsRes() {}
 
 // Ref: #/components/schemas/ChannelLive
 type ChannelLive struct {
@@ -1342,6 +1430,93 @@ type DeleteTwitchAccountNoContent struct{}
 
 func (*DeleteTwitchAccountNoContent) deleteTwitchAccountRes() {}
 
+// DenyChannelDiscoveryCandidateNoContent is response for DenyChannelDiscoveryCandidate operation.
+type DenyChannelDiscoveryCandidateNoContent struct{}
+
+func (*DenyChannelDiscoveryCandidateNoContent) denyChannelDiscoveryCandidateRes() {}
+
+// Ref: #/components/schemas/DiscoveryCandidate
+type DiscoveryCandidate struct {
+	User         TwitchUser   `json:"user"`
+	DiscoveredAt time.Time    `json:"discovered_at"`
+	LastSeenAt   time.Time    `json:"last_seen_at"`
+	ViewerCount  OptNilInt64  `json:"viewer_count"`
+	Title        OptNilString `json:"title"`
+	GameName     OptNilString `json:"game_name"`
+	// Stream tag snapshot from the last matching Helix /streams row.
+	StreamTags []string `json:"stream_tags"`
+}
+
+// GetUser returns the value of User.
+func (s *DiscoveryCandidate) GetUser() TwitchUser {
+	return s.User
+}
+
+// GetDiscoveredAt returns the value of DiscoveredAt.
+func (s *DiscoveryCandidate) GetDiscoveredAt() time.Time {
+	return s.DiscoveredAt
+}
+
+// GetLastSeenAt returns the value of LastSeenAt.
+func (s *DiscoveryCandidate) GetLastSeenAt() time.Time {
+	return s.LastSeenAt
+}
+
+// GetViewerCount returns the value of ViewerCount.
+func (s *DiscoveryCandidate) GetViewerCount() OptNilInt64 {
+	return s.ViewerCount
+}
+
+// GetTitle returns the value of Title.
+func (s *DiscoveryCandidate) GetTitle() OptNilString {
+	return s.Title
+}
+
+// GetGameName returns the value of GameName.
+func (s *DiscoveryCandidate) GetGameName() OptNilString {
+	return s.GameName
+}
+
+// GetStreamTags returns the value of StreamTags.
+func (s *DiscoveryCandidate) GetStreamTags() []string {
+	return s.StreamTags
+}
+
+// SetUser sets the value of User.
+func (s *DiscoveryCandidate) SetUser(val TwitchUser) {
+	s.User = val
+}
+
+// SetDiscoveredAt sets the value of DiscoveredAt.
+func (s *DiscoveryCandidate) SetDiscoveredAt(val time.Time) {
+	s.DiscoveredAt = val
+}
+
+// SetLastSeenAt sets the value of LastSeenAt.
+func (s *DiscoveryCandidate) SetLastSeenAt(val time.Time) {
+	s.LastSeenAt = val
+}
+
+// SetViewerCount sets the value of ViewerCount.
+func (s *DiscoveryCandidate) SetViewerCount(val OptNilInt64) {
+	s.ViewerCount = val
+}
+
+// SetTitle sets the value of Title.
+func (s *DiscoveryCandidate) SetTitle(val OptNilString) {
+	s.Title = val
+}
+
+// SetGameName sets the value of GameName.
+func (s *DiscoveryCandidate) SetGameName(val OptNilString) {
+	s.GameName = val
+}
+
+// SetStreamTags sets the value of StreamTags.
+func (s *DiscoveryCandidate) SetStreamTags(val []string) {
+	s.StreamTags = val
+}
+
 // Ref: #/components/schemas/ErrorMessage
 type ErrorMessage struct {
 	Message string `json:"message"`
@@ -1357,29 +1532,31 @@ func (s *ErrorMessage) SetMessage(val string) {
 	s.Message = val
 }
 
-func (*ErrorMessage) confirmAiToolRes()                 {}
-func (*ErrorMessage) createAiMessageRes()               {}
-func (*ErrorMessage) createTwitchUserRes()              {}
-func (*ErrorMessage) deleteAiConversationRes()          {}
-func (*ErrorMessage) deleteNotificationRes()            {}
-func (*ErrorMessage) deleteRuleRes()                    {}
-func (*ErrorMessage) deleteTwitchAccountRes()           {}
-func (*ErrorMessage) getChannelLiveRes()                {}
-func (*ErrorMessage) getRecordedStreamLeaderboardRes()  {}
-func (*ErrorMessage) getRecordedStreamRes()             {}
-func (*ErrorMessage) getTwitchUserActivityTimelineRes() {}
-func (*ErrorMessage) getTwitchUserProfileRes()          {}
-func (*ErrorMessage) listAiMessagesRes()                {}
-func (*ErrorMessage) listChannelChattersRes()           {}
-func (*ErrorMessage) listChatHistoryRes()               {}
-func (*ErrorMessage) listRecordedStreamActivityRes()    {}
-func (*ErrorMessage) listRecordedStreamMessagesRes()    {}
-func (*ErrorMessage) listTwitchUserActivityRes()        {}
-func (*ErrorMessage) setChannelBlacklistRes()           {}
-func (*ErrorMessage) stopAiAgentRes()                   {}
-func (*ErrorMessage) updateNotificationRes()            {}
-func (*ErrorMessage) updateRuleRes()                    {}
-func (*ErrorMessage) updateTwitchAccountRes()           {}
+func (*ErrorMessage) confirmAiToolRes()                  {}
+func (*ErrorMessage) createAiMessageRes()                {}
+func (*ErrorMessage) createTwitchUserRes()               {}
+func (*ErrorMessage) deleteAiConversationRes()           {}
+func (*ErrorMessage) deleteNotificationRes()             {}
+func (*ErrorMessage) deleteRuleRes()                     {}
+func (*ErrorMessage) deleteTwitchAccountRes()            {}
+func (*ErrorMessage) denyChannelDiscoveryCandidateRes()  {}
+func (*ErrorMessage) getChannelLiveRes()                 {}
+func (*ErrorMessage) getRecordedStreamLeaderboardRes()   {}
+func (*ErrorMessage) getRecordedStreamRes()              {}
+func (*ErrorMessage) getTwitchUserActivityTimelineRes()  {}
+func (*ErrorMessage) getTwitchUserProfileRes()           {}
+func (*ErrorMessage) listAiMessagesRes()                 {}
+func (*ErrorMessage) listChannelChattersRes()            {}
+func (*ErrorMessage) listChatHistoryRes()                {}
+func (*ErrorMessage) listRecordedStreamActivityRes()     {}
+func (*ErrorMessage) listRecordedStreamMessagesRes()     {}
+func (*ErrorMessage) listTwitchUserActivityRes()         {}
+func (*ErrorMessage) setChannelBlacklistRes()            {}
+func (*ErrorMessage) stopAiAgentRes()                    {}
+func (*ErrorMessage) updateChannelDiscoverySettingsRes() {}
+func (*ErrorMessage) updateNotificationRes()             {}
+func (*ErrorMessage) updateRuleRes()                     {}
+func (*ErrorMessage) updateTwitchAccountRes()            {}
 
 // Ref: #/components/schemas/FollowedChannelEntry
 type FollowedChannelEntry struct {
@@ -4036,8 +4213,9 @@ func (s *TwitchUser) SetNotifyStreamStart(val bool) {
 	s.NotifyStreamStart = val
 }
 
-func (*TwitchUser) createTwitchUserRes() {}
-func (*TwitchUser) updateTwitchUserRes() {}
+func (*TwitchUser) approveChannelDiscoveryCandidateRes() {}
+func (*TwitchUser) createTwitchUserRes()                 {}
+func (*TwitchUser) updateTwitchUserRes()                 {}
 
 // Ref: #/components/schemas/TwitchUserProfile
 type TwitchUserProfile struct {

@@ -12,7 +12,12 @@ import {
   UpdateTwitchAccountPostRequest,
 } from '../api/generated';
 import type { PatchAiSettingsRequest } from '../api/generated';
-import type { IrcMonitorSettings, IrcMonitorStatus } from '../api/generated';
+import type {
+  ChannelDiscoverySettings,
+  DiscoveryCandidate,
+  IrcMonitorSettings,
+  IrcMonitorStatus,
+} from '../api/generated';
 import type { SuspicionSettings } from '../api/generated';
 import type { Rule } from '../api/generated';
 import AppModal from '../components/AppModal.vue';
@@ -23,7 +28,15 @@ import { useChannelsStore } from '../stores/channels';
 import { useTwitchAccountsStore } from '../stores/twitchAccounts';
 import { useWatchPreferencesStore } from '../stores/watchPreferences';
 
-type SettingsTab = 'channels' | 'rules' | 'notifications' | 'twitch' | 'suspicion' | 'display' | 'ai';
+type SettingsTab =
+  | 'channels'
+  | 'rules'
+  | 'notifications'
+  | 'twitch'
+  | 'channelDiscovery'
+  | 'suspicion'
+  | 'display'
+  | 'ai';
 
 const route = useRoute();
 const router = useRouter();
@@ -82,9 +95,22 @@ const savingNotif = ref(false);
 const savingBlacklist = ref(false);
 const savingSuspicion = ref(false);
 const savingIrcMonitor = ref(false);
+const savingDiscovery = ref(false);
 /** '' = anonymous IRC; otherwise linked account Twitch user id as string */
 const ircOAuthAccountId = ref('');
 const enrichmentCooldownHours = ref(24);
+
+const discoveryDraft = reactive<ChannelDiscoverySettings>({
+  enabled: false,
+  poll_interval_seconds: 3600,
+  game_id: '',
+  min_live_viewers: 0,
+  required_stream_tags: [],
+  max_stream_pages_per_run: 20,
+});
+const discoveryTagsText = ref('');
+const discoveryCandidates = ref<DiscoveryCandidate[]>([]);
+let discoveryPollId: number | null = null;
 
 const ircStatus = ref<IrcMonitorStatus | null>(null);
 let ircPollId: number | null = null;
@@ -115,6 +141,28 @@ function startIrcPoll(): void {
   }, 4000);
 }
 
+async function loadDiscoveryCandidates(): Promise<void> {
+  try {
+    discoveryCandidates.value = await DefaultService.listChannelDiscoveryCandidates();
+  } catch {
+    discoveryCandidates.value = [];
+  }
+}
+
+function stopDiscoveryPoll(): void {
+  if (discoveryPollId !== null) {
+    window.clearInterval(discoveryPollId);
+    discoveryPollId = null;
+  }
+}
+
+function startDiscoveryPoll(): void {
+  stopDiscoveryPoll();
+  discoveryPollId = window.setInterval(() => {
+    void loadDiscoveryCandidates();
+  }, 30_000);
+}
+
 watch(
   () => tab.value,
   (t) => {
@@ -123,16 +171,24 @@ watch(
     } else {
       stopIrcPoll();
     }
+
+    if (t === 'channelDiscovery') {
+      void loadDiscoveryCandidates();
+      startDiscoveryPoll();
+    } else {
+      stopDiscoveryPoll();
+    }
   },
   { immediate: true },
 );
 
 onBeforeUnmount(() => {
   stopIrcPoll();
+  stopDiscoveryPoll();
 });
 
 async function refresh(): Promise<void> {
-  const [rulesList, rCount, taCount, notifList, bl, sus, ircMon, aiSt] = await Promise.all([
+  const [rulesList, rCount, taCount, notifList, bl, sus, ircMon, disc, cand, aiSt] = await Promise.all([
     DefaultService.listRules(),
     DefaultService.countRules(),
     DefaultService.countTwitchAccounts(),
@@ -140,6 +196,8 @@ async function refresh(): Promise<void> {
     DefaultService.listChannelBlacklist(),
     DefaultService.getSuspicionSettings(),
     DefaultService.getIrcMonitorSettings(),
+    DefaultService.getChannelDiscoverySettings(),
+    DefaultService.listChannelDiscoveryCandidates(),
     DefaultService.getAiSettings(),
   ]);
   await Promise.all([channelsStore.fetch(), twitchStore.fetch()]);
@@ -150,11 +208,32 @@ async function refresh(): Promise<void> {
   channelBlacklist.value = bl;
   Object.assign(suspicionDraft, sus);
   applyIrcMonitorDraft(ircMon);
+  applyDiscoveryDraft(disc);
+  discoveryCandidates.value = cand;
   aiBaseUrl.value = aiSt.base_url ?? '';
   aiModel.value = aiSt.model ?? '';
   aiHasToken.value = Boolean(aiSt.has_token);
   aiTokenLast4.value = aiSt.token_last4 ?? '';
   aiTokenDraft.value = '';
+}
+
+function applyDiscoveryDraft(s: ChannelDiscoverySettings): void {
+  discoveryDraft.enabled = s.enabled;
+  discoveryDraft.poll_interval_seconds =
+    typeof s.poll_interval_seconds === 'number' && s.poll_interval_seconds >= 60
+      ? s.poll_interval_seconds
+      : 3600;
+  discoveryDraft.game_id = s.game_id ?? '';
+  discoveryDraft.min_live_viewers =
+    typeof s.min_live_viewers === 'number' && s.min_live_viewers >= 0 ? s.min_live_viewers : 0;
+  discoveryDraft.required_stream_tags = Array.isArray(s.required_stream_tags)
+    ? [...s.required_stream_tags]
+    : [];
+  discoveryDraft.max_stream_pages_per_run =
+    typeof s.max_stream_pages_per_run === 'number' && s.max_stream_pages_per_run >= 1
+      ? s.max_stream_pages_per_run
+      : 20;
+  discoveryTagsText.value = (discoveryDraft.required_stream_tags || []).join('\n');
 }
 
 function applyIrcMonitorDraft(s: IrcMonitorSettings): void {
@@ -215,6 +294,7 @@ function syncTabFromRoute(): void {
     t === 'rules' ||
     t === 'notifications' ||
     t === 'twitch' ||
+    t === 'channelDiscovery' ||
     t === 'suspicion' ||
     t === 'display' ||
     t === 'ai'
@@ -539,6 +619,84 @@ async function saveIrcMonitorSettings(): Promise<void> {
   }
 }
 
+async function saveChannelDiscoverySettings(): Promise<void> {
+  if (savingDiscovery.value) {
+    return;
+  }
+  savingDiscovery.value = true;
+  try {
+    const tags = discoveryTagsText.value
+      .split('\n')
+      .map((x) => x.trim())
+      .filter((x) => x.length > 0);
+    const body: ChannelDiscoverySettings = {
+      enabled: discoveryDraft.enabled,
+      poll_interval_seconds: Math.max(60, Math.floor(discoveryDraft.poll_interval_seconds) || 3600),
+      game_id: discoveryDraft.game_id.trim(),
+      min_live_viewers: Math.max(0, Math.floor(discoveryDraft.min_live_viewers) || 0),
+      required_stream_tags: tags,
+      max_stream_pages_per_run: Math.max(1, Math.floor(discoveryDraft.max_stream_pages_per_run) || 20),
+    };
+    const s = await DefaultService.updateChannelDiscoverySettings({ requestBody: body });
+    applyDiscoveryDraft(s);
+    notify({
+      id: 'channel-discovery-settings',
+      type: 'success',
+      title: 'Channel discovery',
+      description: 'Settings saved.',
+    });
+  } catch (e: unknown) {
+    const msg =
+      e instanceof ApiError && e.body && typeof e.body === 'object' && 'message' in e.body
+        ? String((e.body as { message: string }).message)
+        : 'Could not save channel discovery settings.';
+    notify({ id: 'channel-discovery-settings', type: 'error', title: 'Channel discovery', description: msg });
+  } finally {
+    savingDiscovery.value = false;
+  }
+}
+
+async function approveDiscoveryUser(userId: number): Promise<void> {
+  try {
+    await DefaultService.approveChannelDiscoveryCandidate({ twitchUserId: userId });
+    await channelsStore.fetch();
+    await loadDiscoveryCandidates();
+    notify({
+      id: 'discovery-approve',
+      type: 'success',
+      title: 'Channel discovery',
+      description: 'Channel is now monitored.',
+    });
+  } catch {
+    notify({
+      id: 'discovery-approve',
+      type: 'error',
+      title: 'Channel discovery',
+      description: 'Could not approve.',
+    });
+  }
+}
+
+async function denyDiscoveryUser(userId: number): Promise<void> {
+  try {
+    await DefaultService.denyChannelDiscoveryCandidate({ twitchUserId: userId });
+    await loadDiscoveryCandidates();
+    notify({
+      id: 'discovery-deny',
+      type: 'success',
+      title: 'Channel discovery',
+      description: 'Channel denied for future discovery.',
+    });
+  } catch {
+    notify({
+      id: 'discovery-deny',
+      type: 'error',
+      title: 'Channel discovery',
+      description: 'Could not deny.',
+    });
+  }
+}
+
 async function saveAiSettings(): Promise<void> {
   if (savingAi.value) {
     return;
@@ -657,6 +815,9 @@ const filteredChannelBlacklist = computed(() => {
           Notifications
         </button>
         <button type="button" :class="{ active: tab === 'twitch' }" @click="setTab('twitch')">{{ twitchHeading }}</button>
+        <button type="button" :class="{ active: tab === 'channelDiscovery' }" @click="setTab('channelDiscovery')">
+          Channel discovery
+        </button>
         <button type="button" :class="{ active: tab === 'suspicion' }" @click="setTab('suspicion')">Suspicion</button>
         <button type="button" :class="{ active: tab === 'ai' }" @click="setTab('ai')">AI</button>
         <button type="button" :class="{ active: tab === 'display' }" @click="setTab('display')">Display</button>
@@ -795,6 +956,74 @@ const filteredChannelBlacklist = computed(() => {
             </div>
           </li>
         </ul>
+      </section>
+
+      <section v-show="tab === 'channelDiscovery'" class="panel">
+        <h2>Channel discovery</h2>
+        <p class="hint">
+          Periodically scans Twitch live streams (Helix) for a game. Matching channels appear below until you approve
+          (monitor) or deny (never suggest again). Required tags use AND semantics (every listed tag must appear on the
+          stream). Minimum viewers uses Helix concurrent viewer count.
+        </p>
+        <form class="stack gap-setting" @submit.prevent="saveChannelDiscoverySettings">
+          <label class="row-inline">
+            <input v-model="discoveryDraft.enabled" type="checkbox" />
+            <span>Enable discovery</span>
+          </label>
+          <label class="stack gap-setting">
+            <span>Poll interval (seconds)</span>
+            <input v-model.number="discoveryDraft.poll_interval_seconds" type="number" min="60" max="86400" required />
+          </label>
+          <label class="stack gap-setting">
+            <span>Twitch game id (Helix category id)</span>
+            <input v-model="discoveryDraft.game_id" type="text" placeholder="e.g. 33214" autocomplete="off" />
+          </label>
+          <label class="stack gap-setting">
+            <span>Minimum live viewers</span>
+            <input v-model.number="discoveryDraft.min_live_viewers" type="number" min="0" max="2000000" required />
+          </label>
+          <label class="stack gap-setting">
+            <span>Max stream pages per run (100 streams each)</span>
+            <input v-model.number="discoveryDraft.max_stream_pages_per_run" type="number" min="1" max="500" required />
+          </label>
+          <label class="stack gap-setting">
+            <span>Required stream tags (one per line; leave empty for no tag filter)</span>
+            <textarea v-model="discoveryTagsText" rows="5" placeholder="One Twitch stream tag per line" />
+          </label>
+          <p class="row-actions">
+            <SubmitButton :loading="savingDiscovery">Save discovery settings</SubmitButton>
+          </p>
+        </form>
+
+        <h3 class="subh">Pending channels</h3>
+        <p v-if="!discoveryCandidates.length" class="muted small">No pending suggestions.</p>
+        <table v-else class="discovery-table">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Viewers</th>
+              <th>Tags</th>
+              <th>Title</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="c in discoveryCandidates" :key="c.user.id">
+              <td>
+                <RouterLink class="chan-link" :to="{ name: 'user', params: { id: String(c.user.id) } }">
+                  {{ c.user.username }}
+                </RouterLink>
+              </td>
+              <td>{{ c.viewer_count ?? '—' }}</td>
+              <td class="discovery-tags">{{ (c.stream_tags || []).join(', ') }}</td>
+              <td class="discovery-title">{{ c.title || '—' }}</td>
+              <td class="row-actions wrap">
+                <button type="button" class="btn-secondary" @click="approveDiscoveryUser(c.user.id)">Approve</button>
+                <button type="button" class="btn-danger" @click="denyDiscoveryUser(c.user.id)">Deny</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
       <section v-show="tab === 'suspicion'" class="panel">
@@ -1406,5 +1635,35 @@ code {
   align-items: center;
   gap: 0.35rem;
   flex-direction: row;
+}
+
+.discovery-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+
+  th,
+  td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.35rem 0.4rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+}
+
+.discovery-tags {
+  max-width: 12rem;
+  word-break: break-word;
+}
+
+.discovery-title {
+  max-width: 14rem;
+  word-break: break-word;
 }
 </style>

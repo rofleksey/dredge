@@ -71,6 +71,35 @@ func (mr *MockStoreMockRecorder) AddChannelBlacklist(ctx, login any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddChannelBlacklist", reflect.TypeOf((*MockStore)(nil).AddChannelBlacklist), ctx, login)
 }
 
+// AddTwitchDiscoveryDenied mocks base method.
+func (m *MockStore) AddTwitchDiscoveryDenied(ctx context.Context, twitchUserID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddTwitchDiscoveryDenied", ctx, twitchUserID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddTwitchDiscoveryDenied indicates an expected call of AddTwitchDiscoveryDenied.
+func (mr *MockStoreMockRecorder) AddTwitchDiscoveryDenied(ctx, twitchUserID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTwitchDiscoveryDenied", reflect.TypeOf((*MockStore)(nil).AddTwitchDiscoveryDenied), ctx, twitchUserID)
+}
+
+// ApproveDiscoveryCandidate mocks base method.
+func (m *MockStore) ApproveDiscoveryCandidate(ctx context.Context, twitchUserID int64) (entity.TwitchUser, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ApproveDiscoveryCandidate", ctx, twitchUserID)
+	ret0, _ := ret[0].(entity.TwitchUser)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ApproveDiscoveryCandidate indicates an expected call of ApproveDiscoveryCandidate.
+func (mr *MockStoreMockRecorder) ApproveDiscoveryCandidate(ctx, twitchUserID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApproveDiscoveryCandidate", reflect.TypeOf((*MockStore)(nil).ApproveDiscoveryCandidate), ctx, twitchUserID)
+}
+
 // CloseOpenStreamsForChannel mocks base method.
 func (m *MockStore) CloseOpenStreamsForChannel(ctx context.Context, channelTwitchUserID int64) error {
 	m.ctrl.T.Helper()
@@ -352,6 +381,34 @@ func (mr *MockStoreMockRecorder) DeleteTwitchAccount(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTwitchAccount", reflect.TypeOf((*MockStore)(nil).DeleteTwitchAccount), ctx, id)
 }
 
+// DeleteTwitchDiscoveryCandidate mocks base method.
+func (m *MockStore) DeleteTwitchDiscoveryCandidate(ctx context.Context, twitchUserID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteTwitchDiscoveryCandidate", ctx, twitchUserID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteTwitchDiscoveryCandidate indicates an expected call of DeleteTwitchDiscoveryCandidate.
+func (mr *MockStoreMockRecorder) DeleteTwitchDiscoveryCandidate(ctx, twitchUserID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTwitchDiscoveryCandidate", reflect.TypeOf((*MockStore)(nil).DeleteTwitchDiscoveryCandidate), ctx, twitchUserID)
+}
+
+// DenyDiscoveryCandidate mocks base method.
+func (m *MockStore) DenyDiscoveryCandidate(ctx context.Context, twitchUserID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DenyDiscoveryCandidate", ctx, twitchUserID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DenyDiscoveryCandidate indicates an expected call of DenyDiscoveryCandidate.
+func (mr *MockStoreMockRecorder) DenyDiscoveryCandidate(ctx, twitchUserID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DenyDiscoveryCandidate", reflect.TypeOf((*MockStore)(nil).DenyDiscoveryCandidate), ctx, twitchUserID)
+}
+
 // GetAIConversation mocks base method.
 func (m *MockStore) GetAIConversation(ctx context.Context, id int64) (entity.AIConversation, error) {
 	m.ctrl.T.Helper()
@@ -380,6 +437,21 @@ func (m *MockStore) GetAISettings(ctx context.Context) (entity.AISettings, error
 func (mr *MockStoreMockRecorder) GetAISettings(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAISettings", reflect.TypeOf((*MockStore)(nil).GetAISettings), ctx)
+}
+
+// GetChannelDiscoverySettings mocks base method.
+func (m *MockStore) GetChannelDiscoverySettings(ctx context.Context) (entity.ChannelDiscoverySettings, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChannelDiscoverySettings", ctx)
+	ret0, _ := ret[0].(entity.ChannelDiscoverySettings)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetChannelDiscoverySettings indicates an expected call of GetChannelDiscoverySettings.
+func (mr *MockStoreMockRecorder) GetChannelDiscoverySettings(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChannelDiscoverySettings", reflect.TypeOf((*MockStore)(nil).GetChannelDiscoverySettings), ctx)
 }
 
 // GetHelixMeta mocks base method.
@@ -936,6 +1008,36 @@ func (mr *MockStoreMockRecorder) ListTwitchAccounts(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTwitchAccounts", reflect.TypeOf((*MockStore)(nil).ListTwitchAccounts), ctx)
 }
 
+// ListTwitchDiscoveryCandidates mocks base method.
+func (m *MockStore) ListTwitchDiscoveryCandidates(ctx context.Context) ([]entity.TwitchDiscoveryCandidate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListTwitchDiscoveryCandidates", ctx)
+	ret0, _ := ret[0].([]entity.TwitchDiscoveryCandidate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListTwitchDiscoveryCandidates indicates an expected call of ListTwitchDiscoveryCandidates.
+func (mr *MockStoreMockRecorder) ListTwitchDiscoveryCandidates(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTwitchDiscoveryCandidates", reflect.TypeOf((*MockStore)(nil).ListTwitchDiscoveryCandidates), ctx)
+}
+
+// ListTwitchDiscoveryDeniedUserIDs mocks base method.
+func (m *MockStore) ListTwitchDiscoveryDeniedUserIDs(ctx context.Context) ([]int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListTwitchDiscoveryDeniedUserIDs", ctx)
+	ret0, _ := ret[0].([]int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListTwitchDiscoveryDeniedUserIDs indicates an expected call of ListTwitchDiscoveryDeniedUserIDs.
+func (mr *MockStoreMockRecorder) ListTwitchDiscoveryDeniedUserIDs(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTwitchDiscoveryDeniedUserIDs", reflect.TypeOf((*MockStore)(nil).ListTwitchDiscoveryDeniedUserIDs), ctx)
+}
+
 // ListTwitchUsers mocks base method.
 func (m *MockStore) ListTwitchUsers(ctx context.Context) ([]entity.TwitchUser, error) {
 	m.ctrl.T.Helper()
@@ -1186,6 +1288,20 @@ func (mr *MockStoreMockRecorder) TwitchUserIDByUsername(ctx, username any) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TwitchUserIDByUsername", reflect.TypeOf((*MockStore)(nil).TwitchUserIDByUsername), ctx, username)
 }
 
+// UpdateChannelDiscoverySettings mocks base method.
+func (m *MockStore) UpdateChannelDiscoverySettings(ctx context.Context, s entity.ChannelDiscoverySettings) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateChannelDiscoverySettings", ctx, s)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateChannelDiscoverySettings indicates an expected call of UpdateChannelDiscoverySettings.
+func (mr *MockStoreMockRecorder) UpdateChannelDiscoverySettings(ctx, s any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateChannelDiscoverySettings", reflect.TypeOf((*MockStore)(nil).UpdateChannelDiscoverySettings), ctx, s)
+}
+
 // UpdateIrcMonitorSettings mocks base method.
 func (m *MockStore) UpdateIrcMonitorSettings(ctx context.Context, s entity.IrcMonitorSettings) error {
 	m.ctrl.T.Helper()
@@ -1328,6 +1444,20 @@ func (m *MockStore) UpsertStreamFromHelix(ctx context.Context, channelTwitchUser
 func (mr *MockStoreMockRecorder) UpsertStreamFromHelix(ctx, channelTwitchUserID, helixStreamID, startedAt, title, gameName, viewerCount any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertStreamFromHelix", reflect.TypeOf((*MockStore)(nil).UpsertStreamFromHelix), ctx, channelTwitchUserID, helixStreamID, startedAt, title, gameName, viewerCount)
+}
+
+// UpsertTwitchDiscoveryCandidate mocks base method.
+func (m *MockStore) UpsertTwitchDiscoveryCandidate(ctx context.Context, twitchUserID int64, viewerCount *int64, title, gameName *string, streamTags []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertTwitchDiscoveryCandidate", ctx, twitchUserID, viewerCount, title, gameName, streamTags)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertTwitchDiscoveryCandidate indicates an expected call of UpsertTwitchDiscoveryCandidate.
+func (mr *MockStoreMockRecorder) UpsertTwitchDiscoveryCandidate(ctx, twitchUserID, viewerCount, title, gameName, streamTags any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertTwitchDiscoveryCandidate", reflect.TypeOf((*MockStore)(nil).UpsertTwitchDiscoveryCandidate), ctx, twitchUserID, viewerCount, title, gameName, streamTags)
 }
 
 // UpsertTwitchUserFromChat mocks base method.

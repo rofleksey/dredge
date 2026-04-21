@@ -1,27 +1,4 @@
-﻿# --- Build & install artifacts ---
-bin/
-dist/
-frontend/dist/
-*.exe
-
-# --- Dependencies ---
-frontend/node_modules/
-vendor/
-
-# --- Generated Go (never hand-edit; make gen, make mocks; OpenAPI in api/) ---
-internal/http/gen/
-internal/repository/mocks/
-internal/gen/
-internal/transport/http/gen/
-
-# --- Generated frontend (npm run generate:openapi in frontend/) ---
-frontend/src/api/generated/
-
-# --- Embedded SPA output (make frontend-build) ---
-internal/webui/static/*
-!internal/webui/static/.gitkeep
-
-# --- Local / sensitive ---
+﻿# --- Local / sensitive ---
 config.yaml
 .env
 .env.*

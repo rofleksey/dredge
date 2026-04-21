@@ -316,6 +316,20 @@ func encodeTestRuleRegexRequest(
 	return nil
 }
 
+func encodeUpdateChannelDiscoverySettingsRequest(
+	req *ChannelDiscoverySettings,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeUpdateIrcMonitorSettingsRequest(
 	req *IrcMonitorSettings,
 	r *http.Request,

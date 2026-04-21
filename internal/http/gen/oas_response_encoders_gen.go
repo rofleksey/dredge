@@ -11,6 +11,52 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+func encodeApproveChannelDiscoveryCandidateResponse(response ApproveChannelDiscoveryCandidateRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *TwitchUser:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ApproveChannelDiscoveryCandidateBadRequest:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ApproveChannelDiscoveryCandidateNotFound:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeConfirmAiToolResponse(response ConfirmAiToolRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *AiRunAccepted:
@@ -326,7 +372,47 @@ func encodeDeleteTwitchAccountResponse(response DeleteTwitchAccountRes, w http.R
 	}
 }
 
+func encodeDenyChannelDiscoveryCandidateResponse(response DenyChannelDiscoveryCandidateRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *DenyChannelDiscoveryCandidateNoContent:
+		w.WriteHeader(204)
+		span.SetStatus(codes.Ok, http.StatusText(204))
+
+		return nil
+
+	case *ErrorMessage:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeGetAiSettingsResponse(response *AiSettings, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetChannelDiscoverySettingsResponse(response *ChannelDiscoverySettings, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -661,6 +747,24 @@ func encodeListChannelChattersResponse(response ListChannelChattersRes, w http.R
 	default:
 		return errors.Errorf("unexpected response type: %T", response)
 	}
+}
+
+func encodeListChannelDiscoveryCandidatesResponse(response []DiscoveryCandidate, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	e.ArrStart()
+	for _, elem := range response {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
 }
 
 func encodeListChatHistoryResponse(response ListChatHistoryRes, w http.ResponseWriter, span trace.Span) error {
@@ -1180,6 +1284,39 @@ func encodeTestRuleRegexResponse(response *TestRuleRegexResponse, w http.Respons
 	}
 
 	return nil
+}
+
+func encodeUpdateChannelDiscoverySettingsResponse(response UpdateChannelDiscoverySettingsRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *ChannelDiscoverySettings:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ErrorMessage:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
 }
 
 func encodeUpdateIrcMonitorSettingsResponse(response *IrcMonitorSettings, w http.ResponseWriter, span trace.Span) error {

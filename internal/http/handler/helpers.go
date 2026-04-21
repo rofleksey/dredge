@@ -480,3 +480,80 @@ func suspicionGenToEntity(s *gen.SuspicionSettings) entity.SuspicionSettings {
 		MaxGQLFollowPages:   s.MaxGqlFollowPages,
 	}
 }
+
+func channelDiscoveryEntityToGen(s entity.ChannelDiscoverySettings) *gen.ChannelDiscoverySettings {
+	tags := s.RequiredStreamTags
+	if tags == nil {
+		tags = []string{}
+	}
+
+	return &gen.ChannelDiscoverySettings{
+		Enabled:              s.Enabled,
+		PollIntervalSeconds:  s.PollIntervalSeconds,
+		GameID:               s.GameID,
+		MinLiveViewers:       s.MinLiveViewers,
+		RequiredStreamTags:   tags,
+		MaxStreamPagesPerRun: s.MaxStreamPagesPerRun,
+	}
+}
+
+func channelDiscoveryGenToEntity(g *gen.ChannelDiscoverySettings) entity.ChannelDiscoverySettings {
+	if g == nil {
+		return entity.ChannelDiscoverySettings{}
+	}
+
+	tags := g.RequiredStreamTags
+	if tags == nil {
+		tags = []string{}
+	}
+
+	return entity.ChannelDiscoverySettings{
+		Enabled:              g.Enabled,
+		PollIntervalSeconds:  g.PollIntervalSeconds,
+		GameID:               g.GameID,
+		MinLiveViewers:       g.MinLiveViewers,
+		RequiredStreamTags:   tags,
+		MaxStreamPagesPerRun: g.MaxStreamPagesPerRun,
+	}
+}
+
+func discoveryCandidateEntityToGen(c entity.TwitchDiscoveryCandidate) gen.DiscoveryCandidate {
+	out := gen.DiscoveryCandidate{}
+
+	out.SetUser(entityTwitchUserToGen(c.User))
+	out.SetDiscoveredAt(c.DiscoveredAt)
+	out.SetLastSeenAt(c.LastSeenAt)
+
+	tags := c.StreamTags
+	if tags == nil {
+		tags = []string{}
+	}
+
+	out.SetStreamTags(tags)
+
+	if c.ViewerCount != nil {
+		out.SetViewerCount(gen.NewOptNilInt64(*c.ViewerCount))
+	} else {
+		var v gen.OptNilInt64
+		v.SetToNull()
+		out.SetViewerCount(v)
+	}
+
+	if c.Title != nil && *c.Title != "" {
+		out.SetTitle(gen.NewOptNilString(*c.Title))
+	} else {
+		var t gen.OptNilString
+		t.SetToNull()
+		out.SetTitle(t)
+	}
+
+	if c.GameName != nil && *c.GameName != "" {
+		out.SetGameName(gen.NewOptNilString(*c.GameName))
+	} else {
+		var g gen.OptNilString
+		g.SetToNull()
+		out.SetGameName(g)
+	}
+
+	return out
+}

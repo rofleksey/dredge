@@ -6,7 +6,7 @@
 | Module | `github.com/rofleksey/dredge` |
 | API surface | OpenAPI 3.0 (`api/openapi.yaml`), version **0.1.0** |
 | Document purpose | Capture **what** the system must do for operators and integrators; implementation detail lives in `AGENTS.md` and the codebase. |
-| Last reviewed | 2026-04-21 |
+| Last reviewed | 2026-04-22 |
 
 ---
 
@@ -54,7 +54,7 @@ There is **no multi-tenant public SaaS** requirement implied by the codebase: de
 ### 4.1 In scope
 
 - **Authentication and authorization:** Password-based admin login, JWT session, admin gate on API and `/ws` except documented exceptions.
-- **Settings:** Twitch users (channels), per-channel IRC/notification flags, channel blacklist, suspicion thresholds, IRC monitor settings (anonymous vs linked OAuth).
+- **Settings:** Twitch users (channels), per-channel IRC/notification flags, channel blacklist, suspicion thresholds, IRC monitor settings (anonymous vs linked OAuth), **Twitch live channel discovery** (Helix game scan, pending candidates, approve/deny).
 - **Rules engine:** Rules CRUD, triggers, template variables, regex test endpoint, execution integrated with Twitch live pipeline and notifications.
 - **Twitch integration:** Helix-backed browse and stream APIs, chat send where OAuth allows, chat history and message search APIs, chatter lists and watch hints, IRC monitor status and join history samples, stream-scoped messages/activity/leaderboard APIs, user activity and timelines.
 - **Notifications:** Notification provider entries (e.g. Telegram, webhook), lifecycle management.
@@ -104,6 +104,15 @@ Requirements are grouped by capability. **FR IDs** are stable labels for traceab
 | **FR-TWCH-02** | Must | Create Twitch users by channel identity, rejecting unknown Twitch channels with a clear client error. |
 | **FR-TWCH-03** | Must | Update per-channel settings including **IRC only when live**, **off-stream message notifications**, and **stream start notifications**, with validation when combinations are invalid (e.g. off-stream notifications vs live-only IRC). |
 | **FR-TWCH-04** | Should | Reflect **live/offline** and enrichment fields where Helix and workers populate them (exact fields per API schema). |
+
+#### Twitch live channel discovery (Helix)
+
+| ID | Priority | Requirement |
+| --- | --- | --- |
+| **FR-TWDISC-01** | Should | Operators can configure **enabled**, **poll interval** (seconds, minimum 60, default 3600), **Twitch Helix game id**, **minimum live viewers** (Helix stream `viewer_count`), **required stream tags** (empty = no filter; when non-empty, a stream must include **every** configured tag on its Helix `tags` list, **case-insensitive** trimmed match), and **max Helix stream pages per run** (100 streams per page). |
+| **FR-TWDISC-02** | Should | A background job runs discovery when enabled, upserts matching non-monitored channels as **candidates** (with tag/title/viewer snapshot), and skips channels on the **discovery deny list**. |
+| **FR-TWDISC-03** | Should | Operators can **approve** a candidate (sets `monitored=true`, removes candidate) or **deny** (records denial, removes candidate); denied channels are never suggested again by discovery. Discovery denial is **separate** from the global channel blacklist used for suspicion. |
+| **FR-TWDISC-04** | Should | Expose **GET/PATCH `/settings/channel-discovery`**, **GET `/settings/channel-discovery/candidates`**, **POST** approve/deny under `/settings/channel-discovery/candidates/{twitch_user_id}/…` (admin-gated, per OpenAPI). |
 
 ### 5.4 IRC monitoring and presence
 
@@ -237,7 +246,7 @@ All paths below are **admin-gated** unless noted. Full request/response schemas 
 | Area | Paths (summary) |
 | --- | --- |
 | Auth | `POST /auth/login` (public), `GET /me` (auth only) |
-| Settings | `/settings/twitch-users`, `…/update`, `…/channel-blacklist`, `…/suspicion-settings`, `…/irc-monitor-settings`, `…/rules*`, `…/rule-triggers`, `…/notifications*`, `…/twitch-accounts*` |
+| Settings | `/settings/twitch-users`, `…/update`, `…/channel-blacklist`, `…/suspicion-settings`, `…/irc-monitor-settings`, `…/channel-discovery`, `…/channel-discovery/candidates`, `…/rules*`, `…/rule-triggers`, `…/notifications*`, `…/twitch-accounts*` |
 | Twitch data | `/twitch/send`, `…/chat/history`, `…/messages`, `…/users`, `…/channels/live`, `…/channels/chatters`, `…/watch/hints`, `…/irc-monitor/status`, `…/irc-monitor/joined-history`, `…/streams`, `…/streams/{streamId}`, `…/streams/{streamId}/messages|activity|leaderboard`, `…/users/activity`, `…/users/activity/timeline` |
 | AI (optional) | `/ai/settings`, `/ai/conversations`, `/ai/conversations/{id}`, `…/messages`, `…/confirm`, `…/stop` |
 | Non-OpenAPI | `GET /health` (public), `GET /ws` (admin), `GET/POST` Twitch OAuth callback route (see handler constants) |

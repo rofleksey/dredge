@@ -91,6 +91,15 @@ type Store interface {
 	UpdateSuspicionSettings(ctx context.Context, s entity.SuspicionSettings) error
 	GetIrcMonitorSettings(ctx context.Context) (entity.IrcMonitorSettings, error)
 	UpdateIrcMonitorSettings(ctx context.Context, s entity.IrcMonitorSettings) error
+	GetChannelDiscoverySettings(ctx context.Context) (entity.ChannelDiscoverySettings, error)
+	UpdateChannelDiscoverySettings(ctx context.Context, s entity.ChannelDiscoverySettings) error
+	ListTwitchDiscoveryDeniedUserIDs(ctx context.Context) ([]int64, error)
+	AddTwitchDiscoveryDenied(ctx context.Context, twitchUserID int64) error
+	ListTwitchDiscoveryCandidates(ctx context.Context) ([]entity.TwitchDiscoveryCandidate, error)
+	UpsertTwitchDiscoveryCandidate(ctx context.Context, twitchUserID int64, viewerCount *int64, title, gameName *string, streamTags []string) error
+	DeleteTwitchDiscoveryCandidate(ctx context.Context, twitchUserID int64) error
+	ApproveDiscoveryCandidate(ctx context.Context, twitchUserID int64) (entity.TwitchUser, error)
+	DenyDiscoveryCandidate(ctx context.Context, twitchUserID int64) error
 	InsertIrcJoinedSample(ctx context.Context, joinedCount int) error
 	InsertRuleTriggerEvent(ctx context.Context, ruleID int64, ruleName, triggerEvent, actionType, displayText string) error
 	ListIrcJoinedSamples(ctx context.Context, from, to time.Time) ([]entity.IrcJoinedSample, error)

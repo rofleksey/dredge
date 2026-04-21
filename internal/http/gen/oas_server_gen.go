@@ -8,6 +8,10 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// ApproveChannelDiscoveryCandidate implements approveChannelDiscoveryCandidate operation.
+	//
+	// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+	ApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (ApproveChannelDiscoveryCandidateRes, error)
 	// ConfirmAiTool implements confirmAiTool operation.
 	//
 	// POST /ai/conversations/{conversationId}/confirm
@@ -70,10 +74,18 @@ type Handler interface {
 	//
 	// POST /settings/twitch-accounts/delete
 	DeleteTwitchAccount(ctx context.Context, req *DeleteByIDRequest) (DeleteTwitchAccountRes, error)
+	// DenyChannelDiscoveryCandidate implements denyChannelDiscoveryCandidate operation.
+	//
+	// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+	DenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (DenyChannelDiscoveryCandidateRes, error)
 	// GetAiSettings implements getAiSettings operation.
 	//
 	// GET /ai/settings
 	GetAiSettings(ctx context.Context) (*AiSettings, error)
+	// GetChannelDiscoverySettings implements getChannelDiscoverySettings operation.
+	//
+	// GET /settings/channel-discovery
+	GetChannelDiscoverySettings(ctx context.Context) (*ChannelDiscoverySettings, error)
 	// GetChannelLive implements getChannelLive operation.
 	//
 	// POST /twitch/channels/live
@@ -126,6 +138,10 @@ type Handler interface {
 	//
 	// POST /twitch/channels/chatters
 	ListChannelChatters(ctx context.Context, req *ListChannelChattersRequest) (ListChannelChattersRes, error)
+	// ListChannelDiscoveryCandidates implements listChannelDiscoveryCandidates operation.
+	//
+	// GET /settings/channel-discovery/candidates
+	ListChannelDiscoveryCandidates(ctx context.Context) ([]DiscoveryCandidate, error)
 	// ListChatHistory implements listChatHistory operation.
 	//
 	// GET /twitch/chat/history
@@ -234,6 +250,10 @@ type Handler interface {
 	//
 	// POST /settings/rules/test-regex
 	TestRuleRegex(ctx context.Context, req *TestRuleRegexRequest) (*TestRuleRegexResponse, error)
+	// UpdateChannelDiscoverySettings implements updateChannelDiscoverySettings operation.
+	//
+	// PATCH /settings/channel-discovery
+	UpdateChannelDiscoverySettings(ctx context.Context, req *ChannelDiscoverySettings) (UpdateChannelDiscoverySettingsRes, error)
 	// UpdateIrcMonitorSettings implements updateIrcMonitorSettings operation.
 	//
 	// PATCH /settings/irc-monitor-settings

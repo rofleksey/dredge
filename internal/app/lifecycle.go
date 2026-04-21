@@ -26,6 +26,8 @@ type twitchRuntime struct {
 	stopStreamRecorder context.CancelFunc
 	ircJoinedSnapCtx   context.Context
 	stopIrcJoinedSnap  context.CancelFunc
+	discoveryCtx       context.Context
+	stopDiscovery      context.CancelFunc
 	enrichWorkerCtx    context.Context
 	stopEnrichWorker   context.CancelFunc
 	persistCtx         context.Context
@@ -78,6 +80,7 @@ func onAppStart(
 	rt.presenceCtx, rt.stopPresence = context.WithCancel(context.Background())
 	rt.streamRecorderCtx, rt.stopStreamRecorder = context.WithCancel(context.Background())
 	rt.ircJoinedSnapCtx, rt.stopIrcJoinedSnap = context.WithCancel(context.Background())
+	rt.discoveryCtx, rt.stopDiscovery = context.WithCancel(context.Background())
 	rt.enrichWorkerCtx, rt.stopEnrichWorker = context.WithCancel(context.Background())
 	rt.persistCtx, rt.stopPersist = context.WithCancel(context.Background())
 
@@ -95,6 +98,7 @@ func onAppStart(
 	go twitchSvc.StartPresenceTicker(rt.presenceCtx)
 	go twitchSvc.StartStreamSessionRecorder(rt.streamRecorderCtx)
 	go twitchSvc.StartIrcJoinedSnapshotLoop(rt.ircJoinedSnapCtx)
+	go twitchSvc.StartChannelDiscoveryLoop(rt.discoveryCtx)
 
 	if addr := cfg.Server.MetricsAddress; addr != "" {
 		metricsMux := http.NewServeMux()
@@ -150,6 +154,7 @@ func onAppStop(
 	rt.stopPresence()
 	rt.stopStreamRecorder()
 	rt.stopIrcJoinedSnap()
+	rt.stopDiscovery()
 	rt.stopEnrichWorker()
 
 	twitchSvc.StopMonitor()

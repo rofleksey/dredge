@@ -464,5 +464,61 @@ func TestRepository_integration(t *testing.T) {
 	assert.GreaterOrEqual(t, joinedCounts[5], 1)
 	assert.GreaterOrEqual(t, joinedCounts[105], 1)
 
+	disc, err := repo.GetChannelDiscoverySettings(ctx)
+	require.NoError(t, err)
+	assert.False(t, disc.Enabled)
+
+	require.NoError(t, repo.UpdateChannelDiscoverySettings(ctx, entity.ChannelDiscoverySettings{
+		Enabled:              true,
+		PollIntervalSeconds:  120,
+		GameID:               "33214",
+		MinLiveViewers:       5,
+		RequiredStreamTags:   []string{"English"},
+		MaxStreamPagesPerRun: 3,
+	}))
+
+	disc2, err := repo.GetChannelDiscoverySettings(ctx)
+	require.NoError(t, err)
+	assert.True(t, disc2.Enabled)
+	assert.Equal(t, "33214", disc2.GameID)
+	assert.Equal(t, []string{"English"}, disc2.RequiredStreamTags)
+
+	_, err = repo.UpsertTwitchUserFromChat(ctx, 777_001, "discotest")
+	require.NoError(t, err)
+
+	vc := int64(42)
+	tTitle := "t"
+	tGame := "g"
+
+	require.NoError(t, repo.UpsertTwitchDiscoveryCandidate(ctx, 777_001, &vc, &tTitle, &tGame, []string{"English"}))
+
+	cands, err := repo.ListTwitchDiscoveryCandidates(ctx)
+	require.NoError(t, err)
+
+	var foundCand bool
+
+	for _, c := range cands {
+		if c.User.ID == 777_001 {
+			foundCand = true
+
+			assert.Equal(t, []string{"English"}, c.StreamTags)
+		}
+	}
+
+	require.True(t, foundCand)
+
+	uAp, err := repo.ApproveDiscoveryCandidate(ctx, 777_001)
+	require.NoError(t, err)
+	assert.True(t, uAp.Monitored)
+
+	_, err = repo.UpsertTwitchUserFromChat(ctx, 777_002, "denytest")
+	require.NoError(t, err)
+	require.NoError(t, repo.UpsertTwitchDiscoveryCandidate(ctx, 777_002, nil, nil, nil, nil))
+	require.NoError(t, repo.DenyDiscoveryCandidate(ctx, 777_002))
+
+	deniedIDs, err := repo.ListTwitchDiscoveryDeniedUserIDs(ctx)
+	require.NoError(t, err)
+	assert.Contains(t, deniedIDs, int64(777_002))
+
 	_ = msgID
 }

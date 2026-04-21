@@ -13,6 +13,13 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// ApproveChannelDiscoveryCandidate implements approveChannelDiscoveryCandidate operation.
+//
+// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+func (UnimplementedHandler) ApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (r ApproveChannelDiscoveryCandidateRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ConfirmAiTool implements confirmAiTool operation.
 //
 // POST /ai/conversations/{conversationId}/confirm
@@ -120,10 +127,24 @@ func (UnimplementedHandler) DeleteTwitchAccount(ctx context.Context, req *Delete
 	return r, ht.ErrNotImplemented
 }
 
+// DenyChannelDiscoveryCandidate implements denyChannelDiscoveryCandidate operation.
+//
+// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+func (UnimplementedHandler) DenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (r DenyChannelDiscoveryCandidateRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAiSettings implements getAiSettings operation.
 //
 // GET /ai/settings
 func (UnimplementedHandler) GetAiSettings(ctx context.Context) (r *AiSettings, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetChannelDiscoverySettings implements getChannelDiscoverySettings operation.
+//
+// GET /settings/channel-discovery
+func (UnimplementedHandler) GetChannelDiscoverySettings(ctx context.Context) (r *ChannelDiscoverySettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -215,6 +236,13 @@ func (UnimplementedHandler) ListChannelBlacklist(ctx context.Context) (r []strin
 //
 // POST /twitch/channels/chatters
 func (UnimplementedHandler) ListChannelChatters(ctx context.Context, req *ListChannelChattersRequest) (r ListChannelChattersRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListChannelDiscoveryCandidates implements listChannelDiscoveryCandidates operation.
+//
+// GET /settings/channel-discovery/candidates
+func (UnimplementedHandler) ListChannelDiscoveryCandidates(ctx context.Context) (r []DiscoveryCandidate, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -389,6 +417,13 @@ func (UnimplementedHandler) StopAiAgent(ctx context.Context, params StopAiAgentP
 //
 // POST /settings/rules/test-regex
 func (UnimplementedHandler) TestRuleRegex(ctx context.Context, req *TestRuleRegexRequest) (r *TestRuleRegexResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateChannelDiscoverySettings implements updateChannelDiscoverySettings operation.
+//
+// PATCH /settings/channel-discovery
+func (UnimplementedHandler) UpdateChannelDiscoverySettings(ctx context.Context, req *ChannelDiscoverySettings) (r UpdateChannelDiscoverySettingsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

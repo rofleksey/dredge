@@ -15,6 +15,71 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+// ApproveChannelDiscoveryCandidateParams is parameters of approveChannelDiscoveryCandidate operation.
+type ApproveChannelDiscoveryCandidateParams struct {
+	TwitchUserID int64
+}
+
+func unpackApproveChannelDiscoveryCandidateParams(packed middleware.Parameters) (params ApproveChannelDiscoveryCandidateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "twitch_user_id",
+			In:   "path",
+		}
+		params.TwitchUserID = packed[key].(int64)
+	}
+	return params
+}
+
+func decodeApproveChannelDiscoveryCandidateParams(args [1]string, argsEscaped bool, r *http.Request) (params ApproveChannelDiscoveryCandidateParams, _ error) {
+	// Decode path: twitch_user_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "twitch_user_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.TwitchUserID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "twitch_user_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ConfirmAiToolParams is parameters of confirmAiTool operation.
 type ConfirmAiToolParams struct {
 	ConversationId int64
@@ -643,6 +708,71 @@ func decodeDeleteAiConversationParams(args [1]string, argsEscaped bool, r *http.
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "conversationId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DenyChannelDiscoveryCandidateParams is parameters of denyChannelDiscoveryCandidate operation.
+type DenyChannelDiscoveryCandidateParams struct {
+	TwitchUserID int64
+}
+
+func unpackDenyChannelDiscoveryCandidateParams(packed middleware.Parameters) (params DenyChannelDiscoveryCandidateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "twitch_user_id",
+			In:   "path",
+		}
+		params.TwitchUserID = packed[key].(int64)
+	}
+	return params
+}
+
+func decodeDenyChannelDiscoveryCandidateParams(args [1]string, argsEscaped bool, r *http.Request) (params DenyChannelDiscoveryCandidateParams, _ error) {
+	// Decode path: twitch_user_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "twitch_user_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt64(val)
+				if err != nil {
+					return err
+				}
+
+				params.TwitchUserID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "twitch_user_id",
 			In:   "path",
 			Err:  err,
 		}
