@@ -253,15 +253,73 @@ All paths below are **admin-gated** unless noted. Full request/response schemas 
 
 ---
 
-## 10. Related documents
+## 10. Frontend project requirements
+
+The frontend is a Vue single-page application for admin operators. This section documents
+the UI architecture and conventions that must remain consistent as the frontend evolves.
+
+### 10.1 Scope and operator workflows
+
+- Authenticated shell with primary navigation and live status.
+- Watch surface for live channel monitoring.
+- Settings flows for Twitch users/accounts, IRC monitor, rules, notifications, and AI options.
+- Analyst views for messages, users, streams, and rule trigger inspection.
+
+### 10.2 Frontend stack and API contract
+
+- Stack: **Vue 3** (Composition API with `<script setup>`), **Vue Router**, **Pinia**, **Vite**.
+- API client is generated from **`api/openapi.yaml`** into **`frontend/src/api/generated`**.
+- Hash-history routes are defined in **`frontend/src/router/index.ts`**.
+
+### 10.3 Design system and theme tokens
+
+Global theme tokens are declared in **`frontend/src/styles/global.scss`** and are the source
+of truth for UI colors and base typography.
+
+- Core colors: `--bg-base`, `--bg-elevated`, `--bg-hover`, `--border`, `--text`, `--text-muted`, `--accent`, `--accent-bright`.
+- Scrollbar tokens: `--scrollbar-thumb`, `--scrollbar-thumb-hover`, `--scrollbar-track`.
+- Shared text utilities: **`.muted`**, **`.muted--body`**, **`.muted--compact`** (secondary copy; prefer these over redefining muted styles in scoped view CSS).
+- Semantic component colors currently used in views include success/live and danger tones; when extracted, values must remain visually identical.
+
+### 10.4 Component architecture
+
+- Reusable core UI primitives live under **`frontend/src/components/core`**.
+- Primitive set: **Button**, **TextInput**, **PageHeader** (page title, optional total pill, subtitle, slots for toolbars or custom header bodies), **LoadMoreRow** (paginated “load more” with **solid** and **ghost** variants). **Card** and further form wrappers may be added when duplication warrants it.
+- API error toasts: use **`frontend/src/lib/notifyApiError.ts`** (`notifyApiError`, `apiErrorMessage`) instead of repeating `ApiError` body parsing in views.
+- **AppModal** remains the canonical modal shell and should be reused rather than replaced.
+- Legacy **SubmitButton** usage should migrate to the shared **Button** primitive.
+
+### 10.5 Page and route structure
+
+Current frontend routes include:
+
+- Public: `/login`.
+- Authenticated: `/`, `/settings`, `/settings/rules/new`, `/settings/rules/:id/edit`, `/ai`,
+  `/messages`, `/rule-triggers`, `/irc-joined`, `/users`, `/users/:id`, `/streams`, `/streams/:id`.
+
+### 10.6 Frontend coding standards
+
+- Keep core primitives as flat files in `frontend/src/components/core` (for example `Button.vue`, `TextInput.vue`) with scoped `lang="scss"` styles in each SFC.
+- Public primitives are re-exported through `frontend/src/components/core/index.ts`.
+- Preserve accessibility behavior (`aria-*`, focus management) when refactoring.
+- Allow class/style overrides on primitives without breaking default visuals.
+- Frontend-facing behavior changes should update this section and the revision history.
+
+---
+
+## 11. Related documents
 
 - **`AGENTS.md`** — Contributor and coding-agent guide: layout, codegen commands, auth exception list (must stay in sync with code), layering conventions, and style gates.
 - **`api/openapi.yaml`** — Normative HTTP contract for version 0.1.0.
 
 ---
 
-## 11. Revision history
+## 12. Revision history
 
 | Version | Date | Notes |
 | --- | --- | --- |
 | 0.1 | 2026-04-21 | Initial PRD from repository survey (OpenAPI 0.1.0, `fx` wiring, migrations, use case modules). |
+| 0.2 | 2026-04-23 | Added §10 Frontend project requirements and renumbered related documents/revision history sections. |
+| 0.3 | 2026-04-23 | Frontend §10: core primitives path `frontend/src/components/core`; scoped SCSS in SFCs (no CSS modules for core). |
+| 0.4 | 2026-04-23 | Frontend §10: flattened core primitives directly under `components/core` (no per-component subfolders). |
+| 0.5 | 2026-04-23 | Frontend §10: global muted utilities; core **PageHeader**, **LoadMoreRow**; `notifyApiError` helper; **TextInput** optional `name` prop. |

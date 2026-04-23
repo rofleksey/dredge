@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
-import { ApiError, DefaultService } from '../api/generated';
+import { DefaultService } from '../api/generated';
 import type { TwitchUser } from '../api/generated';
-import { notify } from '../lib/notify';
+import { LoadMoreRow, PageHeader, TextInput } from '../components/core';
+import { notifyApiError } from '../lib/notifyApiError';
 
 defineOptions({ name: 'UsersView' });
 
@@ -49,15 +50,10 @@ async function load(append = false): Promise<void> {
       users.value = [];
     }
     totalCount.value = null;
-    const msg =
-      e instanceof ApiError && e.body && typeof e.body.message === 'string'
-        ? e.body.message
-        : 'Could not load users.';
-    notify({
+    notifyApiError(e, {
       id: 'users-load',
-      type: 'error',
       title: 'Users',
-      description: msg,
+      fallbackMessage: 'Could not load users.',
     });
   } finally {
     loading.value = false;
@@ -89,19 +85,21 @@ watch(q, () => {
 
 <template>
   <div class="page users-page">
-    <header class="page-head">
-      <h1 class="page-title">
-        Users
-        <span v-if="totalCount != null" class="count-pill">{{ totalCount.toLocaleString() }} total</span>
-      </h1>
-    </header>
+    <PageHeader title="Users" :total-count="totalCount" layout="inline" />
 
-    <label class="search">
-      <span class="label">Search by username</span>
-      <input v-model="q" type="search" autocomplete="off" placeholder="Substring match…" />
-    </label>
+    <div class="users-search">
+      <TextInput
+        v-model="q"
+        label="Search by username"
+        type="search"
+        autocomplete="off"
+        placeholder="Substring match…"
+        density="compact"
+        surface="base"
+      />
+    </div>
 
-    <p v-if="loading" class="muted">Loading…</p>
+    <p v-if="loading" class="muted muted--body">Loading…</p>
     <ul v-else class="user-list">
       <li v-for="u in users" :key="u.id" :class="{ suspicious: u.is_sus }">
         <RouterLink
@@ -116,12 +114,8 @@ watch(q, () => {
         <span v-if="u.monitored" class="tag">monitored</span>
       </li>
     </ul>
-    <div v-if="!loading && users.length" class="more-row">
-      <button type="button" class="btn-more" :disabled="loadingMore" @click="loadMore">
-        {{ loadingMore ? 'Loading…' : 'Load more' }}
-      </button>
-    </div>
-    <p v-if="!loading && !users.length" class="muted">No users match.</p>
+    <LoadMoreRow v-if="!loading && users.length" :loading="loadingMore" @click="loadMore" />
+    <p v-if="!loading && !users.length" class="muted muted--body">No users match.</p>
   </div>
 </template>
 
@@ -134,51 +128,9 @@ watch(q, () => {
   flex-direction: column;
 }
 
-.page-head {
-  margin-bottom: 0.75rem;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.count-pill {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.search {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.users-search {
   margin-bottom: 0.75rem;
   max-width: 24rem;
-
-  .label {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-  }
-
-  input {
-    padding: 0.45rem 0.5rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--border);
-    background: var(--bg-base);
-    color: var(--text);
-    font-size: 0.9rem;
-  }
-}
-
-.muted {
-  color: var(--text-muted);
-  font-size: 0.88rem;
 }
 
 .user-list {
@@ -232,22 +184,4 @@ watch(q, () => {
   color: #ff6b7a;
 }
 
-.more-row {
-  margin-top: 0.5rem;
-}
-
-.btn-more {
-  padding: 0.4rem 0.85rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--border);
-  background: var(--bg-base);
-  color: var(--text);
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
 </style>

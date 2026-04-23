@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import * as Plot from '@observablehq/plot';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { ApiError, DefaultService } from '../api/generated';
+import { DefaultService } from '../api/generated';
 import type { IrcJoinedSample } from '../api/generated';
-import { notify } from '../lib/notify';
+import { notifyApiError } from '../lib/notifyApiError';
 
 defineOptions({ name: 'IrcJoinedGraphView' });
 
@@ -133,15 +133,10 @@ async function load(): Promise<void> {
     samples.value = await DefaultService.listIrcMonitorJoinedHistory({ days: historyDays });
   } catch (e: unknown) {
     samples.value = [];
-    const msg =
-      e instanceof ApiError && e.body && typeof e.body === 'object' && 'message' in e.body
-        ? String((e.body as { message: string }).message)
-        : 'Could not load IRC joined history.';
-    notify({
+    notifyApiError(e, {
       id: 'irc-joined-history',
-      type: 'error',
       title: 'IRC joined',
-      description: msg,
+      fallbackMessage: 'Could not load IRC joined history.',
     });
   } finally {
     loading.value = false;
@@ -206,10 +201,6 @@ h1 {
   margin: 0 0 0.35rem;
   font-size: 1.15rem;
   color: var(--accent-bright);
-}
-
-.muted {
-  color: var(--text-muted);
 }
 
 .small {

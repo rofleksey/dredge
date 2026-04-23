@@ -3,15 +3,16 @@ import { useDebounceFn } from '@vueuse/core';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ChatMessageLine from '../components/ChatMessageLine.vue';
+import { LoadMoreRow } from '../components/core';
 import TwitchUserLink from '../components/TwitchUserLink.vue';
-import { ApiError, ChatHistoryEntry, DefaultService } from '../api/generated';
+import { ChatHistoryEntry, DefaultService } from '../api/generated';
 import type { RecordedStream } from '../api/generated';
 import type { StreamLeaderboardEntry } from '../api/generated';
 import { StreamLeaderboardSort } from '../api/generated/models/StreamLeaderboardSort';
 import type { UserActivityEvent } from '../api/generated/models/UserActivityEvent';
 import { formatDateTime } from '../lib/dateTime';
 import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
-import { notify } from '../lib/notify';
+import { notifyApiError } from '../lib/notifyApiError';
 import { useLiveSocketStore } from '../stores/liveSocket';
 
 defineOptions({ name: 'StreamDetailView' });
@@ -47,14 +48,6 @@ const actCursorAt = ref<string | undefined>();
 const actCursorId = ref<number | undefined>();
 const actHasMore = ref(true);
 
-function notifyErr(e: unknown, id: string, title: string): void {
-  const msg =
-    e instanceof ApiError && e.body && typeof e.body.message === 'string'
-      ? e.body.message
-      : 'Request failed.';
-  notify({ id, type: 'error', title, description: msg });
-}
-
 async function loadMeta(): Promise<void> {
   if (!Number.isFinite(streamId.value)) {
     meta.value = null;
@@ -65,7 +58,7 @@ async function loadMeta(): Promise<void> {
     meta.value = await DefaultService.getRecordedStream({ streamId: streamId.value });
   } catch (e) {
     meta.value = null;
-    notifyErr(e, 'stream-meta', 'Stream');
+    notifyApiError(e, { id: 'stream-meta', title: 'Stream', fallbackMessage: 'Request failed.' });
   } finally {
     loadingMeta.value = false;
   }
@@ -84,7 +77,7 @@ async function loadLeaderboard(): Promise<void> {
     });
   } catch (e) {
     leaderboard.value = [];
-    notifyErr(e, 'stream-lb', 'Leaderboard');
+    notifyApiError(e, { id: 'stream-lb', title: 'Leaderboard', fallbackMessage: 'Request failed.' });
   } finally {
     loadingLb.value = false;
   }
@@ -124,7 +117,7 @@ async function loadMessages(first: boolean): Promise<void> {
     if (first) {
       messages.value = [];
     }
-    notifyErr(e, 'stream-msg', 'Messages');
+    notifyApiError(e, { id: 'stream-msg', title: 'Messages', fallbackMessage: 'Request failed.' });
   } finally {
     loadingMsg.value = false;
     loadingMsgMore.value = false;
@@ -165,7 +158,7 @@ async function loadActivity(first: boolean): Promise<void> {
     if (first) {
       activity.value = [];
     }
-    notifyErr(e, 'stream-act', 'Activity');
+    notifyApiError(e, { id: 'stream-act', title: 'Activity', fallbackMessage: 'Request failed.' });
   } finally {
     loadingAct.value = false;
     loadingActMore.value = false;
@@ -369,11 +362,13 @@ function loadMoreActivity(): void {
           </li>
         </ul>
         <p v-else class="muted">No messages recorded for this stream.</p>
-        <div v-if="messages.length && msgHasMore" class="more-row">
-          <button type="button" class="btn-more" :disabled="loadingMsgMore" @click="loadMoreMessages">
-            {{ loadingMsgMore ? 'Loading…' : 'Load more' }}
-          </button>
-        </div>
+        <LoadMoreRow
+          v-if="messages.length && msgHasMore"
+          variant="ghost"
+          row-spacing="tight"
+          :loading="loadingMsgMore"
+          @click="loadMoreMessages"
+        />
       </section>
 
       <section v-show="tab === 'activity'" class="panel">
@@ -386,11 +381,13 @@ function loadMoreActivity(): void {
           </li>
         </ul>
         <p v-else class="muted">No activity in this window.</p>
-        <div v-if="activity.length && actHasMore" class="more-row">
-          <button type="button" class="btn-more" :disabled="loadingActMore" @click="loadMoreActivity">
-            {{ loadingActMore ? 'Loading…' : 'Load more' }}
-          </button>
-        </div>
+        <LoadMoreRow
+          v-if="activity.length && actHasMore"
+          variant="ghost"
+          row-spacing="tight"
+          :loading="loadingActMore"
+          @click="loadMoreActivity"
+        />
       </section>
     </template>
     <p v-else class="muted">Stream not found.</p>
@@ -542,16 +539,4 @@ function loadMoreActivity(): void {
   font-weight: 600;
 }
 
-.more-row {
-  margin-top: 0.35rem;
-}
-
-.btn-more {
-  padding: 0.35rem 0.75rem;
-  border-radius: 0.25rem;
-  border: 1px dashed var(--border);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-}
 </style>

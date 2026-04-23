@@ -2,10 +2,11 @@
 import { watchDebounced } from '@vueuse/core';
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { ApiError, DefaultService } from '../api/generated';
+import { DefaultService } from '../api/generated';
 import type { RecordedStream } from '../api/generated';
 import { formatDateTime } from '../lib/dateTime';
-import { notify } from '../lib/notify';
+import { LoadMoreRow, PageHeader, TextInput } from '../components/core';
+import { notifyApiError } from '../lib/notifyApiError';
 
 defineOptions({ name: 'StreamsView' });
 
@@ -63,18 +64,10 @@ async function loadMore(): Promise<void> {
   try {
     await loadPage(true);
   } catch (e) {
-    notifyFromErr(e, 'streams-more');
+    notifyApiError(e, { id: 'streams-more', title: 'Streams', fallbackMessage: 'Request failed.' });
   } finally {
     loadingMore.value = false;
   }
-}
-
-function notifyFromErr(e: unknown, id: string): void {
-  const msg =
-    e instanceof ApiError && e.body && typeof e.body.message === 'string'
-      ? e.body.message
-      : 'Request failed.';
-  notify({ id, type: 'error', title: 'Streams', description: msg });
 }
 
 async function applyFilterDebounced(): Promise<void> {
@@ -82,7 +75,7 @@ async function applyFilterDebounced(): Promise<void> {
     await loadFirst();
   } catch (e) {
     streams.value = [];
-    notifyFromErr(e, 'streams-load');
+    notifyApiError(e, { id: 'streams-load', title: 'Streams', fallbackMessage: 'Request failed.' });
   }
 }
 
@@ -97,7 +90,7 @@ watchDebounced(
 onMounted(() => {
   void loadFirst().catch((e) => {
     streams.value = [];
-    notifyFromErr(e, 'streams-load');
+    notifyApiError(e, { id: 'streams-load', title: 'Streams', fallbackMessage: 'Request failed.' });
   });
 });
 
@@ -112,22 +105,24 @@ function statusLabel(s: RecordedStream): string {
 
 <template>
   <div class="streams-page">
-    <header class="streams-head">
-      <h1>Streams</h1>
-      <p class="muted">Recorded broadcasts for monitored channels</p>
-    </header>
+    <PageHeader
+      title="Streams"
+      subtitle="Recorded broadcasts for monitored channels"
+      layout="stacked"
+      size="large"
+    />
 
     <div class="streams-filter">
-      <label class="field">
-        <span class="label">Channel</span>
-        <input
-          v-model="channelFilter"
-          type="search"
-          name="channel"
-          placeholder="Filter by login…"
-          autocomplete="off"
-        />
-      </label>
+      <TextInput
+        v-model="channelFilter"
+        label="Channel"
+        name="channel"
+        type="search"
+        autocomplete="off"
+        placeholder="Filter by login…"
+        density="compact"
+        surface="base"
+      />
     </div>
 
     <p v-if="loading" class="muted">Loading…</p>
@@ -163,11 +158,12 @@ function statusLabel(s: RecordedStream): string {
     </table>
     <p v-else class="muted">No streams recorded yet.</p>
 
-    <div v-if="streams.length && hasMore" class="more-row">
-      <button type="button" class="btn-more" :disabled="loadingMore" @click="loadMore">
-        {{ loadingMore ? 'Loading…' : 'Load more' }}
-      </button>
-    </div>
+    <LoadMoreRow
+      v-if="streams.length && hasMore"
+      variant="ghost"
+      :loading="loadingMore"
+      @click="loadMore"
+    />
   </div>
 </template>
 
@@ -184,11 +180,6 @@ function statusLabel(s: RecordedStream): string {
   gap: 0.75rem;
 }
 
-.streams-head h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.35rem;
-}
-
 .streams-filter {
   display: flex;
   flex-wrap: wrap;
@@ -196,24 +187,8 @@ function statusLabel(s: RecordedStream): string {
   align-items: flex-end;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+.streams-filter :deep(.text-input-root) {
   min-width: 12rem;
-
-  .label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
-
-  input {
-    padding: 0.35rem 0.5rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--border);
-    background: var(--bg-base);
-    color: var(--text);
-  }
 }
 
 .streams-table {
@@ -260,21 +235,4 @@ function statusLabel(s: RecordedStream): string {
   }
 }
 
-.more-row {
-  margin-top: 0.5rem;
-}
-
-.btn-more {
-  padding: 0.35rem 0.75rem;
-  border-radius: 0.25rem;
-  border: 1px dashed var(--border);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-}
 </style>

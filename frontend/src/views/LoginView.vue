@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import SubmitButton from '../components/SubmitButton.vue';
+import { Button, TextInput } from '../components/core';
 import { notify } from '../lib/notify';
 import { useAuthStore } from '../stores/auth';
 
@@ -38,17 +38,27 @@ async function submit(): Promise<void> {
       <h1>Sign in</h1>
       <p class="hint">Use your Dredge account (admin for full access).</p>
       <form @submit.prevent="submit">
-        <label>
-          <span>Email</span>
-          <input v-model="email" type="email" required autocomplete="username" />
-        </label>
-        <label>
-          <span>Password</span>
-          <input v-model="password" type="password" required autocomplete="current-password" />
-        </label>
-        <SubmitButton class="btn-primary" :loading="loading">
+        <TextInput
+          v-model="email"
+          label="Email"
+          type="email"
+          required
+          autocomplete="username"
+          surface="base"
+          density="comfortable"
+        />
+        <TextInput
+          v-model="password"
+          label="Password"
+          type="password"
+          required
+          autocomplete="current-password"
+          surface="base"
+          density="comfortable"
+        />
+        <Button class="signin-btn" native-type="submit" :loading="loading" full-width>
           {{ loading ? 'Signing in…' : 'Sign in' }}
-        </SubmitButton>
+        </Button>
       </form>
     </div>
   </div>
@@ -91,37 +101,8 @@ form {
   gap: 0.85rem;
 }
 
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-
-  input {
-    padding: 0.55rem 0.65rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--border);
-    background: var(--bg-base);
-    color: var(--text);
-    font-size: 1rem;
-  }
-}
-
-.btn-primary {
+.signin-btn {
   margin-top: 0.25rem;
   padding: 0.6rem;
-  border: none;
-  border-radius: 0.25rem;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:disabled,
-  &[aria-busy='true'] {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
 }
 </style>

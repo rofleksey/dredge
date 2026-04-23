@@ -80,7 +80,7 @@ const emit = defineEmits<{
           </select>
         </label>
       </div>
-      <p v-if="loadingViewerChatters" class="muted tiny">Loading…</p>
+      <p v-if="loadingViewerChatters" class="muted muted--compact tiny">Loading…</p>
       <ul v-else-if="displayedViewerChatters.length" class="viewer-chatter-list">
         <li v-for="c in displayedViewerChatters" :key="c.user_twitch_id" class="viewer-chatter-row">
           <TwitchUserLink
@@ -98,20 +98,15 @@ const emit = defineEmits<{
           >
         </li>
       </ul>
-      <p v-else-if="viewerChatters.length && !displayedViewerChatters.length" class="muted tiny">
+      <p v-else-if="viewerChatters.length && !displayedViewerChatters.length" class="muted muted--compact tiny">
         No names match the filter.
       </p>
-      <p v-else class="muted tiny">No names loaded.</p>
+      <p v-else class="muted muted--compact tiny">No names loaded.</p>
     </div>
   </AppModal>
 </template>
 
 <style scoped lang="scss">
-.muted {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
-
 .tiny {
   font-size: 0.72rem;
 }

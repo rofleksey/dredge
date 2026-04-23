@@ -3,6 +3,7 @@ import * as Plot from '@observablehq/plot';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ChatMessageLine from '../components/ChatMessageLine.vue';
+import { LoadMoreRow, PageHeader } from '../components/core';
 import { ApiError, ChatHistoryEntry, DefaultService } from '../api/generated';
 import type {
   ActivityTimelineSegment,
@@ -654,43 +655,45 @@ function formatPresenceWeek(sec: number): string {
 <template>
   <div class="page user-page">
     <template v-if="loadingProfile">
-      <p class="muted">Loading…</p>
+      <p class="muted muted--body">Loading…</p>
     </template>
     <template v-else-if="notFound">
-      <p class="muted">User not found.</p>
+      <p class="muted muted--body">User not found.</p>
     </template>
     <template v-else-if="profile">
-      <header class="page-head">
-        <div class="user-head-row">
-          <img
-            v-if="profileAvatarUrl"
-            class="profile-avatar"
-            :src="profileAvatarUrl"
-            alt=""
-            width="48"
-            height="48"
-            loading="lazy"
-          />
-          <h1 class="page-title">{{ profile.username }}</h1>
-        </div>
-        <nav class="user-tabs" aria-label="User sections">
-          <button type="button" :class="{ active: userTab === 'overview' }" @click="userTab = 'overview'">Overview</button>
-          <button type="button" :class="{ active: userTab === 'following' }" @click="userTab = 'following'">Following</button>
-          <button type="button" :class="{ active: userTab === 'messages' }" @click="userTab = 'messages'">Messages</button>
-          <button type="button" :class="{ active: userTab === 'activity' }" @click="userTab = 'activity'">Activity</button>
-          <button type="button" :class="{ active: userTab === 'graphs' }" @click="userTab = 'graphs'">Graphs</button>
-          <button type="button" :class="{ active: userTab === 'settings' }" @click="userTab = 'settings'">Settings</button>
-        </nav>
-      </header>
+      <PageHeader layout="stacked">
+        <template #body>
+          <div class="user-head-row">
+            <img
+              v-if="profileAvatarUrl"
+              class="profile-avatar"
+              :src="profileAvatarUrl"
+              alt=""
+              width="48"
+              height="48"
+              loading="lazy"
+            />
+            <h1 class="page-title">{{ profile.username }}</h1>
+          </div>
+          <nav class="user-tabs" aria-label="User sections">
+            <button type="button" :class="{ active: userTab === 'overview' }" @click="userTab = 'overview'">Overview</button>
+            <button type="button" :class="{ active: userTab === 'following' }" @click="userTab = 'following'">Following</button>
+            <button type="button" :class="{ active: userTab === 'messages' }" @click="userTab = 'messages'">Messages</button>
+            <button type="button" :class="{ active: userTab === 'activity' }" @click="userTab = 'activity'">Activity</button>
+            <button type="button" :class="{ active: userTab === 'graphs' }" @click="userTab = 'graphs'">Graphs</button>
+            <button type="button" :class="{ active: userTab === 'settings' }" @click="userTab = 'settings'">Settings</button>
+          </nav>
+        </template>
+      </PageHeader>
 
       <section v-show="userTab === 'overview'" class="panel">
         <div v-if="profile.is_sus || profile.sus_description" class="sus-banner">
           <div class="sus-banner-head">
             <span v-if="profile.is_sus" class="sus-badge">Suspicious</span>
-            <span v-if="profile.sus_type" class="muted sus-type">{{ profile.sus_type }}</span>
+            <span v-if="profile.sus_type" class="muted muted--body sus-type">{{ profile.sus_type }}</span>
           </div>
           <p v-if="profile.sus_description" class="sus-desc">{{ profile.sus_description }}</p>
-          <p v-if="profile.sus_auto_suppressed" class="muted sus-hint">
+          <p v-if="profile.sus_auto_suppressed" class="muted muted--body sus-hint">
             Automatic suspicion is off until you use “Allow automatic suspicion again”.
           </p>
         </div>
@@ -759,8 +762,8 @@ function formatPresenceWeek(sec: number): string {
           <ul class="follow-list">
             <li v-for="f in profile.followed_monitored_channels" :key="f.channel_id">
               <span class="ch">#{{ f.channel_login }}</span>
-              <span class="muted" v-if="f.followed_at">{{ formatWhen(f.followed_at) }}</span>
-              <span class="muted" v-else>—</span>
+              <span class="muted muted--body" v-if="f.followed_at">{{ formatWhen(f.followed_at) }}</span>
+              <span class="muted muted--body" v-else>—</span>
             </li>
           </ul>
         </div>
@@ -790,7 +793,7 @@ function formatPresenceWeek(sec: number): string {
                   <span class="ch">#{{ row.channel_login }}</span>
                   <span v-if="row.on_blacklist" class="tag-bl">blacklist</span>
                 </td>
-                <td class="muted">{{ row.followed_at ? formatWhen(row.followed_at) : '—' }}</td>
+                <td class="muted muted--body">{{ row.followed_at ? formatWhen(row.followed_at) : '—' }}</td>
                 <td class="follow-action">
                   <button
                     v-if="canAddFollowedChannel(row)"
@@ -807,12 +810,12 @@ function formatPresenceWeek(sec: number): string {
             </tbody>
           </table>
         </div>
-        <p v-if="!sortedFollowedChannels.length" class="muted">No follows loaded yet (run enrichment) or nothing matches the filter.</p>
+        <p v-if="!sortedFollowedChannels.length" class="muted muted--body">No follows loaded yet (run enrichment) or nothing matches the filter.</p>
       </section>
 
       <section v-show="userTab === 'messages'" class="panel">
         <h2 class="section-title">Messages</h2>
-        <p v-if="loadingMessages" class="muted">Loading messages…</p>
+        <p v-if="loadingMessages" class="muted muted--body">Loading messages…</p>
         <ul v-else class="lines">
           <ChatMessageLine
             v-for="m in messages"
@@ -833,34 +836,34 @@ function formatPresenceWeek(sec: number): string {
             :channel-login="m.channel"
           />
         </ul>
-        <div v-if="!loadingMessages && messages.length" class="more-row">
-          <button type="button" class="btn-more" :disabled="loadingMore" @click="loadMore">
-            {{ loadingMore ? 'Loading…' : 'Load more' }}
-          </button>
-        </div>
-        <p v-if="!loadingMessages && !messages.length" class="muted">No messages for this user.</p>
+        <LoadMoreRow
+          v-if="!loadingMessages && messages.length"
+          :loading="loadingMore"
+          @click="loadMore"
+        />
+        <p v-if="!loadingMessages && !messages.length" class="muted muted--body">No messages for this user.</p>
       </section>
 
       <section v-show="userTab === 'activity'" class="panel">
         <h2 class="section-title">Activity</h2>
-        <p v-if="loadingActivity" class="muted">Loading activity…</p>
+        <p v-if="loadingActivity" class="muted muted--body">Loading activity…</p>
         <ul v-else class="activity-list">
           <li v-for="e in activity" :key="e.id">
             <span class="act-ts">{{ formatWhen(e.created_at) }}</span>
             <span class="act-body">{{ activityLabel(e) }}</span>
           </li>
         </ul>
-        <div v-if="!loadingActivity && activity.length" class="more-row">
-          <button type="button" class="btn-more" :disabled="loadingActivityMore" @click="loadActivityMore">
-            {{ loadingActivityMore ? 'Loading…' : 'Load more' }}
-          </button>
-        </div>
-        <p v-if="!loadingActivity && !activity.length" class="muted">No activity recorded yet.</p>
+        <LoadMoreRow
+          v-if="!loadingActivity && activity.length"
+          :loading="loadingActivityMore"
+          @click="loadActivityMore"
+        />
+        <p v-if="!loadingActivity && !activity.length" class="muted muted--body">No activity recorded yet.</p>
       </section>
 
       <section v-show="userTab === 'settings'" class="panel">
         <h2 class="section-title">Monitoring</h2>
-        <p class="muted hint">IRC and notification behavior for this channel (requires admin).</p>
+        <p class="muted muted--body hint">IRC and notification behavior for this channel (requires admin).</p>
         <ul class="settings-options">
           <li>
             <label class="check-row">
@@ -900,7 +903,7 @@ function formatPresenceWeek(sec: number): string {
               />
               <span>Notify about off-stream messages (join IRC while offline)</span>
             </label>
-            <p v-if="profile.irc_only_when_live" class="muted small indent">
+            <p v-if="profile.irc_only_when_live" class="muted muted--body small indent">
               Turn off “only when online” to enable off-stream message notifications.
             </p>
           </li>
@@ -920,12 +923,12 @@ function formatPresenceWeek(sec: number): string {
 
       <section v-show="userTab === 'graphs'" class="panel graphs-panel">
         <h2 class="section-title">Activity timeline</h2>
-        <p class="muted hint">
+        <p class="muted muted--body hint">
           In-chat presence from IRC join/leave events over the last 7 days, by channel.
         </p>
-        <p v-if="loadingTimeline" class="muted">Loading chart…</p>
+        <p v-if="loadingTimeline" class="muted muted--body">Loading chart…</p>
         <div v-show="!loadingTimeline" ref="chartEl" class="chart-host" />
-        <p v-if="!loadingTimeline && !timelineSegments.length" class="muted">No timeline data in this range.</p>
+        <p v-if="!loadingTimeline && !timelineSegments.length" class="muted muted--body">No timeline data in this range.</p>
       </section>
     </template>
   </div>
@@ -938,10 +941,6 @@ function formatPresenceWeek(sec: number): string {
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-
-.page-head {
-  margin-bottom: 0.75rem;
 }
 
 .user-head-row {
@@ -1102,11 +1101,6 @@ function formatPresenceWeek(sec: number): string {
   font-weight: 600;
 }
 
-.muted {
-  color: var(--text-muted);
-  font-size: 0.88rem;
-}
-
 .hint {
   margin: 0 0 0.5rem;
   font-size: 0.8rem;
@@ -1170,25 +1164,6 @@ function formatPresenceWeek(sec: number): string {
   border: 1px solid var(--border);
   border-radius: 0.35rem;
   background: var(--bg-elevated);
-}
-
-.more-row {
-  margin-top: 0.5rem;
-}
-
-.btn-more {
-  padding: 0.4rem 0.85rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--border);
-  background: var(--bg-base);
-  color: var(--text);
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 }
 
 .sus-banner {

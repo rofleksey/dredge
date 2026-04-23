@@ -19,3 +19,20 @@ OpenAPI → Go without `make`: `go run github.com/ogen-go/ogen/cmd/ogen@latest -
 **Deployment:** In production, terminate **HTTPS** at a **reverse proxy** (nginx, Caddy, Traefik, etc.) in front of Dredge; the Go process serves **plain HTTP** only and does **not** embed TLS. PostgreSQL is accessed with a normal DSN; **TLS from the application to Postgres is not in scope**. Configure the proxy for **WebSocket** upgrades to `/ws`. Prometheus (if enabled) listens on `server.metrics_address` separately from `server.address` (`GET /health` is on the main listener). Prefer `observability.log_level` **`info`** or **`warn`** outside local dev.
 
 **Lint:** `.golangci.yml` enables `wsl_v5` (blank lines between statement groups). Non-trivial edits: run `make lint`.
+
+## Frontend development
+
+### Documentation requirements
+
+- Always read the **Frontend project requirements** chapter in `DREDGE.md` before frontend changes.
+- After frontend changes that affect UI architecture, design tokens, routes, or coding standards:
+  - Update the **Frontend project requirements** chapter in `DREDGE.md`.
+  - Add a row to the `DREDGE.md` revision history table (`Version | Date | Notes`).
+  - Keep details consistent with other functional and API requirements in `DREDGE.md`.
+
+### Frontend change workflow
+
+1. Review `DREDGE.md` frontend requirements and current route/component conventions.
+2. Implement the frontend change.
+3. Update `DREDGE.md` frontend requirements and revision history in the same change when applicable.
+4. Verify references and conventions remain accurate after refactor/migration.

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { ApiError, DefaultService } from '../api/generated';
+import { DefaultService } from '../api/generated';
 import type { RuleTrigger } from '../api/generated';
-import { notify } from '../lib/notify';
+import { LoadMoreRow } from '../components/core';
+import { notifyApiError } from '../lib/notifyApiError';
 
 defineOptions({ name: 'RuleTriggersView' });
 
@@ -38,15 +39,10 @@ async function fetchFirst(): Promise<void> {
   } catch (e) {
     entries.value = [];
     hasMore.value = false;
-    const msg =
-      e instanceof ApiError && e.body && typeof e.body.message === 'string'
-        ? e.body.message
-        : 'Could not load rule triggers.';
-    notify({
+    notifyApiError(e, {
       id: 'rule-triggers-load',
-      type: 'error',
       title: 'Rule triggers',
-      description: msg,
+      fallbackMessage: 'Could not load rule triggers.',
     });
   } finally {
     loading.value = false;
@@ -73,12 +69,11 @@ async function fetchMore(): Promise<void> {
       }
     }
     hasMore.value = next.length === pageSize;
-  } catch {
-    notify({
+  } catch (e) {
+    notifyApiError(e, {
       id: 'rule-triggers-more',
-      type: 'error',
       title: 'Rule triggers',
-      description: 'Could not load more.',
+      fallbackMessage: 'Could not load more.',
     });
   } finally {
     loadingMore.value = false;
@@ -114,11 +109,16 @@ onMounted(() => {
       </li>
     </ul>
 
-    <div v-if="!loading && entries.length > 0" class="more-row">
-      <button type="button" class="btn-more" :disabled="loadingMore || !hasMore" @click="fetchMore">
-        {{ loadingMore ? 'Loading...' : hasMore ? 'Show more' : 'No more' }}
-      </button>
-    </div>
+    <LoadMoreRow
+      v-if="!loading && entries.length > 0"
+      row-spacing="relaxed"
+      :loading="loadingMore"
+      :has-more="hasMore"
+      idle-text="Show more"
+      loading-text="Loading..."
+      exhausted-text="No more"
+      @click="fetchMore"
+    />
   </div>
 </template>
 
@@ -192,28 +192,6 @@ h1 {
   color: var(--text);
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-.more-row {
-  margin-top: 0.65rem;
-}
-
-.btn-more {
-  padding: 0.42rem 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 0.25rem;
-  background: var(--bg-base);
-  color: var(--text);
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-}
-
-.muted {
-  color: var(--text-muted);
 }
 
 .small {

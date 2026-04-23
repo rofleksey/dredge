@@ -28,7 +28,7 @@ const emit = defineEmits<{
       +
     </button>
     <template v-if="loading">
-      <span class="muted tiny follows-hint">…</span>
+      <span class="muted muted--compact tiny follows-hint">…</span>
     </template>
     <template v-else>
       <button
@@ -71,7 +71,7 @@ const emit = defineEmits<{
         />
         <span v-else class="follow-initial" aria-hidden="true">{{ f.broadcaster_login.charAt(0).toUpperCase() }}</span>
       </button>
-      <p v-if="!monitoredSidebar.length" class="muted tiny follows-hint">No monitored channels</p>
+      <p v-if="!monitoredSidebar.length" class="muted muted--compact tiny follows-hint">No monitored channels</p>
     </template>
   </aside>
 </template>
@@ -166,11 +166,6 @@ const emit = defineEmits<{
 
 .tiny {
   font-size: 0.72rem;
-}
-
-.muted {
-  color: var(--text-muted);
-  font-size: 0.85rem;
 }
 
 @media (max-width: 639px) {

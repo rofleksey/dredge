@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useScroll } from '@vueuse/core';
 import { nextTick, ref, watch } from 'vue';
-import SubmitButton from '../../components/SubmitButton.vue';
 import ChatMessageLine from '../../components/ChatMessageLine.vue';
 import ChatSystemLine from '../../components/ChatSystemLine.vue';
 import type { TwitchAccount } from '../../api/generated';
+import { Button } from '../../components/core';
 import type { ChatRow } from './types';
 
 const props = defineProps<{
@@ -106,15 +106,16 @@ watch(
           @keydown="composerKeydown"
         />
       </label>
-      <SubmitButton
+      <Button
         native-type="button"
         class="btn-send"
         :loading="sendingChat"
         :disabled="!accounts.length"
+        full-width
         @click="sendChat"
       >
         {{ sendingChat ? 'Sending…' : 'Chat' }}
-      </SubmitButton>
+      </Button>
     </div>
   </section>
 </template>
@@ -205,10 +206,6 @@ watch(
 
 .chat-channel-empty {
   font-size: 0.85rem;
-}
-
-.muted {
-  color: var(--text-muted);
 }
 
 .lines {

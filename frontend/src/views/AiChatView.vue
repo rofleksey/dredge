@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { AiMessage, ApiError, DefaultService } from '../api/generated';
+import { AiMessage, DefaultService } from '../api/generated';
 import type { AiConversation } from '../api/generated';
 import ChatMessageLine from '../components/ChatMessageLine.vue';
-import SubmitButton from '../components/SubmitButton.vue';
+import { Button } from '../components/core';
 import { notify } from '../lib/notify';
+import { notifyApiError } from '../lib/notifyApiError';
 import { useLiveSocketStore } from '../stores/liveSocket';
 
 type ActivityEntry = { ts: number; text: string; kind?: string };
@@ -198,11 +199,11 @@ async function onSend(): Promise<void> {
     await loadMessages();
     await scrollChatToBottom();
   } catch (e: unknown) {
-    const msg =
-      e instanceof ApiError && e.body && typeof e.body === 'object' && 'message' in e.body
-        ? String((e.body as { message: string }).message)
-        : 'Could not send message.';
-    notify({ id: 'ai-send', type: 'error', title: 'AI', description: msg });
+    notifyApiError(e, {
+      id: 'ai-send',
+      title: 'AI',
+      fallbackMessage: 'Could not send message.',
+    });
   } finally {
     sending.value = false;
   }
@@ -237,11 +238,11 @@ async function onConfirm(approve: boolean): Promise<void> {
     }
     await loadMessages();
   } catch (e: unknown) {
-    const msg =
-      e instanceof ApiError && e.body && typeof e.body === 'object' && 'message' in e.body
-        ? String((e.body as { message: string }).message)
-        : 'Could not confirm tool.';
-    notify({ id: 'ai-confirm', type: 'error', title: 'AI', description: msg });
+    notifyApiError(e, {
+      id: 'ai-confirm',
+      title: 'AI',
+      fallbackMessage: 'Could not confirm tool.',
+    });
   }
 }
 
@@ -457,8 +458,8 @@ function formatShortTime(ts: number): string {
           </p>
           <pre v-if="pending.arguments.trim()" class="ai-args">{{ pending.arguments }}</pre>
           <div class="row">
-            <button type="button" class="btn-primary" @click="onConfirm(true)">Approve</button>
-            <button type="button" class="btn-ghost" @click="onConfirm(false)">Reject</button>
+            <Button native-type="button" class="btn-primary" @click="onConfirm(true)">Approve</Button>
+            <Button native-type="button" variant="ghost" class="btn-ghost" @click="onConfirm(false)">Reject</Button>
           </div>
         </div>
 
@@ -478,14 +479,15 @@ function formatShortTime(ts: number): string {
               @keydown="onComposerKeydown"
             />
           </label>
-          <SubmitButton
+          <Button
             class="btn-send"
             native-type="submit"
             :loading="sending"
             :disabled="!draft.trim() || sending"
+            full-width
           >
             {{ sending ? 'Sending…' : 'Send' }}
-          </SubmitButton>
+          </Button>
         </form>
       </section>
     </div>
@@ -873,10 +875,6 @@ function formatShortTime(ts: number): string {
       cursor: not-allowed;
     }
   }
-}
-
-.muted {
-  color: var(--text-muted);
 }
 
 .row {

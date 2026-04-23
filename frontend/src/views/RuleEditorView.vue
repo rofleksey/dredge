@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import { ApiError, DefaultService } from '../api/generated';
+import { DefaultService } from '../api/generated';
 import { RuleActionType } from '../api/generated/models/RuleActionType';
 import { RuleEventType } from '../api/generated/models/RuleEventType';
 import type { RuleTemplateVariable } from '../api/generated/models/RuleTemplateVariable';
+import { Button } from '../components/core';
 import RuleMiddlewareRow from '../components/RuleMiddlewareRow.vue';
 import RuleTemplateVariablesHint from '../components/RuleTemplateVariablesHint.vue';
-import SubmitButton from '../components/SubmitButton.vue';
 import {
   defaultMiddlewareRow,
   defaultRuleForm,
@@ -18,6 +18,7 @@ import {
   validateRuleForm,
 } from '../lib/ruleForm';
 import { notify } from '../lib/notify';
+import { notifyApiError } from '../lib/notifyApiError';
 import { useTwitchAccountsStore } from '../stores/twitchAccounts';
 
 defineOptions({ name: 'RuleEditorView' });
@@ -48,13 +49,6 @@ async function fetchTemplateVariables(): Promise<void> {
   }
 }
 
-function notifyErr(e: unknown, id: string, title: string): void {
-  const msg =
-    e instanceof ApiError && e.body && typeof (e.body as { message?: string }).message === 'string'
-      ? (e.body as { message: string }).message
-      : 'Request failed.';
-  notify({ id, type: 'error', title, description: msg });
-}
 
 async function load(): Promise<void> {
   loading.value = true;
@@ -79,7 +73,7 @@ async function load(): Promise<void> {
     form.value = ruleToFormState(found);
     loadedRuleId.value = found.id;
   } catch (e) {
-    notifyErr(e, 'rule-load', 'Rules');
+    notifyApiError(e, { id: 'rule-load', title: 'Rules', fallbackMessage: 'Request failed.' });
     await router.replace({ name: 'settings', query: { tab: 'rules' } });
   } finally {
     loading.value = false;
@@ -132,7 +126,7 @@ async function save(): Promise<void> {
     }
     await router.push({ name: 'settings', query: { tab: 'rules' } });
   } catch (e) {
-    notifyErr(e, 'rule-save', 'Rules');
+    notifyApiError(e, { id: 'rule-save', title: 'Rules', fallbackMessage: 'Request failed.' });
   } finally {
     saving.value = false;
   }
@@ -159,7 +153,7 @@ async function removeRule(): Promise<void> {
     notify({ id: 'rule-del', type: 'success', title: 'Rules', description: 'Rule deleted.' });
     await router.push({ name: 'settings', query: { tab: 'rules' } });
   } catch (e) {
-    notifyErr(e, 'rule-del', 'Rules');
+    notifyApiError(e, { id: 'rule-del', title: 'Rules', fallbackMessage: 'Request failed.' });
   } finally {
     deleting.value = false;
   }
@@ -246,7 +240,7 @@ const pageTitle = computed(() => {
           </button>
         </div>
         <p class="row-actions">
-          <button type="button" class="btn-secondary" @click="addMiddleware">Add middleware</button>
+          <Button native-type="button" variant="secondary" @click="addMiddleware">Add middleware</Button>
         </p>
       </section>
 
@@ -295,18 +289,18 @@ const pageTitle = computed(() => {
       </section>
 
       <footer class="rule-editor-footer">
-        <button
+        <Button
           v-if="!isNew"
-          type="button"
-          class="btn-danger"
+          native-type="button"
+          variant="danger"
           :disabled="deleting"
           @click="removeRule"
         >
           Delete
-        </button>
+        </Button>
         <div class="rule-editor-footer-actions">
-          <button type="button" class="btn-secondary" @click="cancel">Cancel</button>
-          <SubmitButton class="btn-primary" :loading="saving">Save</SubmitButton>
+          <Button native-type="button" variant="secondary" @click="cancel">Cancel</Button>
+          <Button native-type="submit" :loading="saving">Save</Button>
         </div>
       </footer>
     </form>
@@ -417,69 +411,12 @@ h2 {
   margin-bottom: 0.45rem;
 }
 
-.muted {
-  color: var(--text-muted);
-}
-
 .small {
   font-size: 0.78rem;
 }
 
 .row-actions {
   margin: 0.35rem 0 0;
-}
-
-.btn-secondary {
-  padding: 0.45rem 0.75rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  color: var(--text);
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:hover {
-    background: var(--bg-hover);
-    border-color: var(--accent);
-  }
-}
-
-.btn-primary {
-  padding: 0.45rem 0.85rem;
-  border-radius: 0.25rem;
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:disabled,
-  &[aria-busy='true'] {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
-}
-
-.btn-danger {
-  padding: 0.45rem 0.75rem;
-  border-radius: 0.25rem;
-  border: 1px solid #c0392b;
-  background: rgba(192, 57, 43, 0.2);
-  color: #ffb4a8;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: rgba(192, 57, 43, 0.35);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 }
 
 .rule-editor-footer {

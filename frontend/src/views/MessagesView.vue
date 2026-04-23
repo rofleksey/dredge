@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import AppModal from '../components/AppModal.vue';
-import SubmitButton from '../components/SubmitButton.vue';
 import ChatMessageLine from '../components/ChatMessageLine.vue';
-import { ApiError, ChatHistoryEntry, DefaultService } from '../api/generated';
+import { ChatHistoryEntry, DefaultService } from '../api/generated';
 import type { ChatBadgeTag } from '../lib/chatBadges';
 import { effectiveChatterIsSus, effectiveSuspicionTitle } from '../lib/suspicionOverlay';
-import { notify } from '../lib/notify';
+import { notifyApiError } from '../lib/notifyApiError';
 import { useLiveSocketStore } from '../stores/liveSocket';
+import { Button, LoadMoreRow, PageHeader, TextInput } from '../components/core';
 
 defineOptions({ name: 'MessagesView' });
 
@@ -102,15 +102,10 @@ async function fetchFirst(): Promise<void> {
   } catch (e) {
     messages.value = [];
     totalCount.value = null;
-    const msg =
-      e instanceof ApiError && e.body && typeof e.body.message === 'string'
-        ? e.body.message
-        : 'Could not load messages.';
-    notify({
+    notifyApiError(e, {
       id: 'messages-load',
-      type: 'error',
       title: 'Messages',
-      description: msg,
+      fallbackMessage: 'Could not load messages.',
     });
   } finally {
     loading.value = false;
@@ -141,12 +136,11 @@ async function fetchMore(): Promise<void> {
       }
     }
     void refreshCount();
-  } catch {
-    notify({
+  } catch (e) {
+    notifyApiError(e, {
       id: 'messages-more',
-      type: 'error',
       title: 'Messages',
-      description: 'Could not load more.',
+      fallbackMessage: 'Could not load more.',
     });
   } finally {
     loadingMore.value = false;
@@ -200,18 +194,16 @@ function rowChatterSusTitle(m: ChatHistoryEntry): string {
 
 <template>
   <div class="page messages-page">
-    <header class="page-head">
-      <h1 class="page-title">
-        Messages
-        <span v-if="totalCount != null" class="count-pill">{{ totalCount.toLocaleString() }} total</span>
-      </h1>
-      <div class="toolbar">
-        <button type="button" class="btn-filter" @click="openFilters">Filters</button>
-        <span class="filter-hint" :title="filterSummary">Filters: {{ filterSummary }}</span>
-      </div>
-    </header>
+    <PageHeader title="Messages" :total-count="totalCount" layout="inline">
+      <template #trailing>
+        <div class="toolbar">
+          <button type="button" class="btn-filter" @click="openFilters">Filters</button>
+          <span class="filter-hint" :title="filterSummary">Filters: {{ filterSummary }}</span>
+        </div>
+      </template>
+    </PageHeader>
 
-    <p v-if="loading" class="muted">Loading…</p>
+    <p v-if="loading" class="muted muted--body">Loading…</p>
     <ul v-else class="lines">
       <ChatMessageLine
         v-for="m in messages"
@@ -233,47 +225,29 @@ function rowChatterSusTitle(m: ChatHistoryEntry): string {
       />
     </ul>
 
-    <div v-if="!loading && messages.length" class="more-row">
-      <button type="button" class="btn-more" :disabled="loadingMore" @click="fetchMore">
-        {{ loadingMore ? 'Loading…' : 'Load more' }}
-      </button>
-    </div>
+    <LoadMoreRow v-if="!loading && messages.length" :loading="loadingMore" @click="fetchMore" />
 
     <AppModal :open="filtersOpen" title="Message filters" @close="filtersOpen = false">
       <template #default>
         <div class="fields">
-          <label>
-            Username
-            <input v-model="draft.username" type="text" autocomplete="off" />
-          </label>
-          <label>
-            Text contains
-            <input v-model="draft.text" type="text" autocomplete="off" />
-          </label>
-          <label>
-            Channel
-            <input v-model="draft.channel" type="text" placeholder="channel login" autocomplete="off" />
-          </label>
-          <label>
-            From
-            <input v-model="draft.createdFrom" type="datetime-local" />
-          </label>
-          <label>
-            To
-            <input v-model="draft.createdTo" type="datetime-local" />
-          </label>
+          <TextInput v-model="draft.username" label="Username" autocomplete="off" density="compact" />
+          <TextInput v-model="draft.text" label="Text contains" autocomplete="off" density="compact" />
+          <TextInput
+            v-model="draft.channel"
+            label="Channel"
+            placeholder="channel login"
+            autocomplete="off"
+            density="compact"
+          />
+          <TextInput v-model="draft.createdFrom" label="From" type="datetime-local" density="compact" />
+          <TextInput v-model="draft.createdTo" label="To" type="datetime-local" density="compact" />
         </div>
       </template>
       <template #footer>
-        <button type="button" class="btn-ghost" @click="clearFilters">Clear</button>
-        <SubmitButton
-          native-type="button"
-          class="btn-primary"
-          :loading="filtersApplying"
-          @click="applyFilters"
-        >
+        <Button native-type="button" variant="ghost" size="small" @click="clearFilters">Clear</Button>
+        <Button native-type="button" size="small" :loading="filtersApplying" @click="applyFilters">
           {{ filtersApplying ? 'Applying…' : 'Apply' }}
-        </SubmitButton>
+        </Button>
       </template>
     </AppModal>
   </div>
@@ -286,30 +260,6 @@ function rowChatterSusTitle(m: ChatHistoryEntry): string {
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-
-.page-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.count-pill {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--text-muted);
 }
 
 .toolbar {
@@ -342,11 +292,6 @@ function rowChatterSusTitle(m: ChatHistoryEntry): string {
   white-space: nowrap;
 }
 
-.muted {
-  color: var(--text-muted);
-  font-size: 0.88rem;
-}
-
 .lines {
   list-style: none;
   margin: 0;
@@ -361,75 +306,9 @@ function rowChatterSusTitle(m: ChatHistoryEntry): string {
   background: var(--bg-elevated);
 }
 
-.more-row {
-  margin-top: 0.5rem;
-}
-
-.btn-more {
-  padding: 0.4rem 0.85rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--border);
-  background: var(--bg-base);
-  color: var(--text);
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
 .fields {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    color: var(--text-muted);
-    font-size: 0.78rem;
-  }
-
-  input {
-    padding: 0.4rem 0.45rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--border);
-    background: var(--bg-base);
-    color: var(--text);
-    font-size: 0.85rem;
-  }
-}
-
-.btn-ghost {
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:hover {
-    background: var(--bg-hover);
-  }
-}
-
-.btn-primary {
-  padding: 0.4rem 0.85rem;
-  border-radius: 0.25rem;
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
 }
 </style>

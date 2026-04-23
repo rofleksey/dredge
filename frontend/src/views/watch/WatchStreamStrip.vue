@@ -57,7 +57,7 @@ const emit = defineEmits<{
     </div>
   </header>
   <header v-else-if="selectedChannel && loadingChannelMeta" class="stream-strip compact placeholder">
-    <span class="muted">Loading channel…</span>
+    <span class="muted muted--compact">Loading channel…</span>
   </header>
 </template>
 
@@ -186,8 +186,4 @@ const emit = defineEmits<{
   }
 }
 
-.muted {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
 </style>

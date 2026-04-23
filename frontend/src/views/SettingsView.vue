@@ -4,7 +4,6 @@ import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import {
-  ApiError,
   CreateNotificationRequest,
   DefaultService,
   NotificationEntry,
@@ -21,9 +20,10 @@ import type {
 import type { SuspicionSettings } from '../api/generated';
 import type { Rule } from '../api/generated';
 import AppModal from '../components/AppModal.vue';
-import SubmitButton from '../components/SubmitButton.vue';
+import { Button } from '../components/core';
 import { isChannelJoinedOnIrc } from '../lib/ircMonitorJoined';
 import { notify } from '../lib/notify';
+import { notifyApiError } from '../lib/notifyApiError';
 import { useChannelsStore } from '../stores/channels';
 import { useTwitchAccountsStore } from '../stores/twitchAccounts';
 import { useWatchPreferencesStore } from '../stores/watchPreferences';
@@ -337,21 +337,11 @@ async function addChannel(): Promise<void> {
     await channelsStore.fetch();
     await router.push({ name: 'user', params: { id: String(created.id) } });
   } catch (e: unknown) {
-    if (e instanceof ApiError && e.status === 400 && e.body && typeof e.body === 'object' && 'message' in e.body) {
-      notify({
-        id: 'settings-add-channel',
-        type: 'error',
-        title: 'Channels',
-        description: String((e.body as { message: string }).message),
-      });
-    } else {
-      notify({
-        id: 'settings-add-channel',
-        type: 'error',
-        title: 'Channels',
-        description: 'Could not add channel.',
-      });
-    }
+    notifyApiError(e, {
+      id: 'settings-add-channel',
+      title: 'Channels',
+      fallbackMessage: 'Could not add channel.',
+    });
   } finally {
     addingChannel.value = false;
   }
@@ -559,11 +549,11 @@ async function addBlacklistEntry(): Promise<void> {
     channelBlacklist.value = await DefaultService.listChannelBlacklist();
     notify({ id: 'bl-add', type: 'success', title: 'Blacklist', description: 'Channel added.' });
   } catch (e: unknown) {
-    const msg =
-      e instanceof ApiError && e.body && typeof e.body === 'object' && 'message' in e.body
-        ? String((e.body as { message: string }).message)
-        : 'Could not update blacklist.';
-    notify({ id: 'bl-add', type: 'error', title: 'Blacklist', description: msg });
+    notifyApiError(e, {
+      id: 'bl-add',
+      title: 'Blacklist',
+      fallbackMessage: 'Could not update blacklist.',
+    });
   } finally {
     savingBlacklist.value = false;
   }
@@ -646,11 +636,11 @@ async function saveChannelDiscoverySettings(): Promise<void> {
       description: 'Settings saved.',
     });
   } catch (e: unknown) {
-    const msg =
-      e instanceof ApiError && e.body && typeof e.body === 'object' && 'message' in e.body
-        ? String((e.body as { message: string }).message)
-        : 'Could not save channel discovery settings.';
-    notify({ id: 'channel-discovery-settings', type: 'error', title: 'Channel discovery', description: msg });
+    notifyApiError(e, {
+      id: 'channel-discovery-settings',
+      title: 'Channel discovery',
+      fallbackMessage: 'Could not save channel discovery settings.',
+    });
   } finally {
     savingDiscovery.value = false;
   }
@@ -843,7 +833,7 @@ const filteredChannelBlacklist = computed(() => {
         </p>
         <form class="row" @submit.prevent="addChannel">
           <input v-model="newChannel.name" placeholder="channel name" required />
-          <SubmitButton :loading="addingChannel">Add channel</SubmitButton>
+          <Button native-type="submit" :loading="addingChannel">Add channel</Button>
         </form>
         <div class="row channels-controls">
           <input v-model="channelsFilter" type="text" placeholder="Filter channels" autocomplete="off" />
@@ -925,7 +915,7 @@ const filteredChannelBlacklist = computed(() => {
             <input v-model.number="enrichmentCooldownHours" type="number" min="1" max="168" required />
           </label>
           <p class="row-actions">
-            <SubmitButton :loading="savingIrcMonitor">Save IRC settings</SubmitButton>
+            <Button native-type="submit" :loading="savingIrcMonitor">Save IRC settings</Button>
           </p>
         </form>
 
@@ -991,7 +981,7 @@ const filteredChannelBlacklist = computed(() => {
             <textarea v-model="discoveryTagsText" rows="5" placeholder="One Twitch stream tag per line" />
           </label>
           <p class="row-actions">
-            <SubmitButton :loading="savingDiscovery">Save discovery settings</SubmitButton>
+            <Button native-type="submit" :loading="savingDiscovery">Save discovery settings</Button>
           </p>
         </form>
 
@@ -1033,7 +1023,7 @@ const filteredChannelBlacklist = computed(() => {
         <h3 class="subh">Channel blacklist</h3>
         <form class="row bl-add" @submit.prevent="addBlacklistEntry">
           <input v-model="newBlacklistLogin" placeholder="channel login" autocomplete="off" />
-          <SubmitButton :loading="savingBlacklist">Add</SubmitButton>
+          <Button native-type="submit" :loading="savingBlacklist">Add</Button>
         </form>
         <div class="row bl-controls">
           <input v-model="blacklistFilter" type="text" placeholder="Filter blacklisted channels" autocomplete="off" />
@@ -1085,7 +1075,7 @@ const filteredChannelBlacklist = computed(() => {
             <input v-model.number="suspicionDraft.max_gql_follow_pages" type="number" min="1" max="500" required />
           </label>
           <p class="row-actions">
-            <SubmitButton :loading="savingSuspicion">Save thresholds</SubmitButton>
+            <Button native-type="submit" :loading="savingSuspicion">Save thresholds</Button>
           </p>
         </form>
       </section>
@@ -1110,7 +1100,7 @@ const filteredChannelBlacklist = computed(() => {
             <span v-if="aiHasToken" class="muted small">Stored token ends with …{{ aiTokenLast4 }}</span>
           </label>
           <p class="row-actions">
-            <SubmitButton :loading="savingAi">Save AI settings</SubmitButton>
+            <Button native-type="submit" :loading="savingAi">Save AI settings</Button>
           </p>
         </form>
       </section>
@@ -1187,7 +1177,7 @@ const filteredChannelBlacklist = computed(() => {
         </template>
         <footer class="modal-actions">
           <button type="button" class="btn-secondary" @click="notifModalOpen = false">Cancel</button>
-          <SubmitButton :loading="savingNotif">Save</SubmitButton>
+          <Button native-type="submit" :loading="savingNotif">Save</Button>
         </footer>
       </form>
     </AppModal>
@@ -1278,10 +1268,6 @@ h2 {
 
 .channels-limit-hint {
   color: rgba(255, 193, 7, 0.92);
-}
-
-.muted {
-  color: var(--text-muted);
 }
 
 .small {

@@ -85,3 +85,16 @@ body {
   border-radius: 50%;
   animation: btn-spin 0.55s linear infinite;
 }
+
+/* Muted / secondary text (avoid redefining in scoped SFCs) */
+.muted {
+  color: var(--text-muted);
+}
+
+.muted--body {
+  font-size: 0.88rem;
+}
+
+.muted--compact {
+  font-size: 0.85rem;
+}
