@@ -1,7 +1,7 @@
 import { useLocalStorage } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import { configureApi } from '../api/client';
+import { configureApi, withPendingAuthToken } from '../api/client';
 import { DefaultService } from '../api/generated';
 import type { Account } from '../api/generated';
 
@@ -30,8 +30,10 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(email: string, password: string): Promise<void> {
     configureApi();
     const res = await DefaultService.login({ requestBody: { email, password } });
-    token.value = res.token;
-    user.value = await DefaultService.me();
+    await withPendingAuthToken(res.token, async () => {
+      token.value = res.token;
+      user.value = await DefaultService.me();
+    });
   }
 
   function logout(): void {

@@ -88,6 +88,7 @@ function onInput(event: Event): void {
         :aria-describedby="describedBy"
         :class="controlClass"
         @input="onInput"
+        @change="onInput"
       />
     </label>
     <input
@@ -107,6 +108,7 @@ function onInput(event: Event): void {
       :aria-describedby="describedBy"
       :class="controlClass"
       @input="onInput"
+      @change="onInput"
     />
     <p v-if="error" :id="`${inputId}-error`" role="alert" class="text-input-error">{{ error }}</p>
   </div>
