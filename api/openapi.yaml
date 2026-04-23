@@ -9,7 +9,7 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /auth/login:
+  /api/v1/auth/login:
     post:
       operationId: login
       requestBody:
@@ -27,7 +27,7 @@ paths:
                 $ref: "#/components/schemas/LoginResponse"
         "401":
           description: Unauthorized
-  /me:
+  /api/v1/me:
     get:
       operationId: me
       security:
@@ -41,7 +41,7 @@ paths:
                 $ref: "#/components/schemas/Account"
         "401":
           description: Unauthorized
-  /settings/twitch-users:
+  /api/v1/settings/twitch-users:
     get:
       operationId: listTwitchUsers
       security:
@@ -85,7 +85,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/twitch-users/update:
+  /api/v1/settings/twitch-users/update:
     post:
       operationId: updateTwitchUser
       security:
@@ -115,7 +115,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/channel-blacklist:
+  /api/v1/settings/channel-blacklist:
     get:
       operationId: listChannelBlacklist
       security:
@@ -148,7 +148,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/suspicion-settings:
+  /api/v1/settings/suspicion-settings:
     get:
       operationId: getSuspicionSettings
       security:
@@ -177,7 +177,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SuspicionSettings"
-  /settings/irc-monitor-settings:
+  /api/v1/settings/irc-monitor-settings:
     get:
       operationId: getIrcMonitorSettings
       security:
@@ -206,7 +206,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IrcMonitorSettings"
-  /settings/channel-discovery:
+  /api/v1/settings/channel-discovery:
     get:
       operationId: getChannelDiscoverySettings
       security:
@@ -241,7 +241,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/channel-discovery/candidates:
+  /api/v1/settings/channel-discovery/candidates:
     get:
       operationId: listChannelDiscoveryCandidates
       security:
@@ -255,7 +255,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/DiscoveryCandidate"
-  /settings/channel-discovery/candidates/{twitch_user_id}/approve:
+  /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve:
     post:
       operationId: approveChannelDiscoveryCandidate
       security:
@@ -286,7 +286,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/channel-discovery/candidates/{twitch_user_id}/deny:
+  /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny:
     post:
       operationId: denyChannelDiscoveryCandidate
       security:
@@ -307,7 +307,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/rules:
+  /api/v1/settings/rules:
     get:
       operationId: listRules
       security:
@@ -338,7 +338,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Rule"
-  /settings/rules/count:
+  /api/v1/settings/rules/count:
     get:
       operationId: countRules
       security:
@@ -350,7 +350,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CountResponse"
-  /settings/rules/template-variables:
+  /api/v1/settings/rules/template-variables:
     get:
       operationId: listRuleTemplateVariables
       security:
@@ -365,7 +365,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RuleTemplateVariablesResponse"
-  /settings/rules/update:
+  /api/v1/settings/rules/update:
     post:
       operationId: updateRule
       security:
@@ -389,7 +389,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/rules/delete:
+  /api/v1/settings/rules/delete:
     post:
       operationId: deleteRule
       security:
@@ -409,7 +409,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/rules/test-regex:
+  /api/v1/settings/rules/test-regex:
     post:
       operationId: testRuleRegex
       security:
@@ -427,7 +427,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TestRuleRegexResponse"
-  /settings/rule-triggers:
+  /api/v1/settings/rule-triggers:
     get:
       operationId: listRuleTriggers
       security:
@@ -461,7 +461,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/RuleTrigger"
-  /settings/notifications:
+  /api/v1/settings/notifications:
     get:
       operationId: listNotifications
       security:
@@ -512,7 +512,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotificationEntry"
-  /settings/notifications/update:
+  /api/v1/settings/notifications/update:
     post:
       operationId: updateNotification
       security:
@@ -536,7 +536,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/notifications/delete:
+  /api/v1/settings/notifications/delete:
     post:
       operationId: deleteNotification
       security:
@@ -556,7 +556,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/twitch-accounts:
+  /api/v1/settings/twitch-accounts:
     get:
       operationId: listTwitchAccounts
       security:
@@ -587,7 +587,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TwitchAccount"
-  /settings/twitch-accounts/count:
+  /api/v1/settings/twitch-accounts/count:
     get:
       operationId: countTwitchAccounts
       security:
@@ -599,7 +599,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CountResponse"
-  /settings/twitch-accounts/update:
+  /api/v1/settings/twitch-accounts/update:
     post:
       operationId: updateTwitchAccount
       security:
@@ -623,7 +623,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/twitch-accounts/delete:
+  /api/v1/settings/twitch-accounts/delete:
     post:
       operationId: deleteTwitchAccount
       security:
@@ -643,7 +643,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /settings/twitch-accounts/oauth/start:
+  /api/v1/settings/twitch-accounts/oauth/start:
     post:
       operationId: startTwitchOAuth
       summary: Start Twitch authorization (browser) to link an account without pasting a refresh token
@@ -662,7 +662,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StartTwitchOAuthResponse"
-  /twitch/send:
+  /api/v1/twitch/send:
     post:
       operationId: sendMessage
       security:
@@ -700,7 +700,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ClientNotice"
-  /twitch/chat/history:
+  /api/v1/twitch/chat/history:
     get:
       operationId: listChatHistory
       security:
@@ -733,7 +733,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/messages:
+  /api/v1/twitch/messages:
     get:
       operationId: listTwitchMessages
       security:
@@ -798,7 +798,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ChatHistoryEntry"
-  /twitch/messages/count:
+  /api/v1/twitch/messages/count:
     get:
       operationId: countTwitchMessages
       security:
@@ -839,7 +839,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CountResponse"
-  /twitch/users:
+  /api/v1/twitch/users:
     get:
       operationId: listTwitchDirectoryUsers
       security:
@@ -879,7 +879,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TwitchUser"
-  /twitch/users/count:
+  /api/v1/twitch/users/count:
     get:
       operationId: countTwitchDirectoryUsers
       security:
@@ -902,7 +902,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CountResponse"
-  /twitch/users/profile:
+  /api/v1/twitch/users/profile:
     post:
       operationId: getTwitchUserProfile
       security:
@@ -926,7 +926,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/channels/live:
+  /api/v1/twitch/channels/live:
     post:
       operationId: getChannelLive
       security:
@@ -950,7 +950,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/channels/chatters:
+  /api/v1/twitch/channels/chatters:
     post:
       operationId: listChannelChatters
       security:
@@ -976,7 +976,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/watch/hints:
+  /api/v1/twitch/watch/hints:
     get:
       operationId: getWatchUiHints
       security:
@@ -988,7 +988,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WatchUiHints"
-  /twitch/irc-monitor/status:
+  /api/v1/twitch/irc-monitor/status:
     get:
       operationId: getIrcMonitorStatus
       security:
@@ -1000,7 +1000,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IrcMonitorStatus"
-  /twitch/irc-monitor/joined-history:
+  /api/v1/twitch/irc-monitor/joined-history:
     get:
       operationId: listIrcMonitorJoinedHistory
       summary: Historical IRC joined channel counts (periodic samples)
@@ -1024,7 +1024,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/IrcJoinedSample"
-  /twitch/streams:
+  /api/v1/twitch/streams:
     get:
       operationId: listRecordedStreams
       security:
@@ -1063,7 +1063,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/RecordedStream"
-  /twitch/streams/{streamId}:
+  /api/v1/twitch/streams/{streamId}:
     get:
       operationId: getRecordedStream
       security:
@@ -1088,7 +1088,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/streams/{streamId}/messages:
+  /api/v1/twitch/streams/{streamId}/messages:
     get:
       operationId: listRecordedStreamMessages
       security:
@@ -1146,7 +1146,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/streams/{streamId}/activity:
+  /api/v1/twitch/streams/{streamId}/activity:
     get:
       operationId: listRecordedStreamActivity
       security:
@@ -1191,7 +1191,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/streams/{streamId}/leaderboard:
+  /api/v1/twitch/streams/{streamId}/leaderboard:
     get:
       operationId: getRecordedStreamLeaderboard
       security:
@@ -1227,7 +1227,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/users/activity:
+  /api/v1/twitch/users/activity:
     post:
       operationId: listTwitchUserActivity
       security:
@@ -1253,7 +1253,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /twitch/users/activity/timeline:
+  /api/v1/twitch/users/activity/timeline:
     post:
       operationId: getTwitchUserActivityTimeline
       security:
@@ -1279,7 +1279,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /ai/settings:
+  /api/v1/ai/settings:
     get:
       operationId: getAiSettings
       security:
@@ -1308,7 +1308,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AiSettings"
-  /ai/conversations:
+  /api/v1/ai/conversations:
     get:
       operationId: listAiConversations
       security:
@@ -1338,7 +1338,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AiConversation"
-  /ai/conversations/{conversationId}:
+  /api/v1/ai/conversations/{conversationId}:
     delete:
       operationId: deleteAiConversation
       security:
@@ -1359,7 +1359,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /ai/conversations/{conversationId}/messages:
+  /api/v1/ai/conversations/{conversationId}/messages:
     get:
       operationId: listAiMessages
       security:
@@ -1416,7 +1416,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /ai/conversations/{conversationId}/confirm:
+  /api/v1/ai/conversations/{conversationId}/confirm:
     post:
       operationId: confirmAiTool
       security:
@@ -1447,7 +1447,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorMessage"
-  /ai/conversations/{conversationId}/stop:
+  /api/v1/ai/conversations/{conversationId}/stop:
     post:
       operationId: stopAiAgent
       security:

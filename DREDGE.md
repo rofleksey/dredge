@@ -81,9 +81,9 @@ Requirements are grouped by capability. **FR IDs** are stable labels for traceab
 
 | ID | Priority | Requirement |
 | --- | --- | --- |
-| **FR-AUTH-01** | Must | Provide `POST /auth/login` accepting admin credentials and returning a JWT suitable for `Authorization: Bearer` on subsequent calls. |
-| **FR-AUTH-02** | Must | Provide `GET /me` for the authenticated principal (bootstrap / session validation); must **not** require admin beyond authentication. |
-| **FR-AUTH-03** | Must | Enforce **admin role** on all other OpenAPI operations and on `/ws`, except `POST /auth/login`, `GET /me`, and `GET /health`. |
+| **FR-AUTH-01** | Must | Provide `POST /api/v1/auth/login` accepting admin credentials and returning a JWT suitable for `Authorization: Bearer` on subsequent calls. |
+| **FR-AUTH-02** | Must | Provide `GET /api/v1/me` for the authenticated principal (bootstrap / session validation); must **not** require admin beyond authentication. |
+| **FR-AUTH-03** | Must | Enforce **admin role** on all other OpenAPI operations and on `/ws`, except `POST /api/v1/auth/login`, `GET /api/v1/me`, and `GET /health`. |
 | **FR-AUTH-04** | Should | Support configurable **login rate limiting** per client IP per rolling window to reduce brute-force risk. |
 | **FR-AUTH-05** | Could | Document WebSocket auth via `Authorization: Bearer` header **or** `?token=` query for browser clients that cannot set headers. |
 
@@ -112,7 +112,7 @@ Requirements are grouped by capability. **FR IDs** are stable labels for traceab
 | **FR-TWDISC-01** | Should | Operators can configure **enabled**, **poll interval** (seconds, minimum 60, default 3600), **Twitch Helix game id**, **minimum live viewers** (Helix stream `viewer_count`), **required stream tags** (empty = no filter; when non-empty, a stream must include **every** configured tag on its Helix `tags` list, **case-insensitive** trimmed match), and **max Helix stream pages per run** (100 streams per page). |
 | **FR-TWDISC-02** | Should | A background job runs discovery when enabled, upserts matching non-monitored channels as **candidates** (with tag/title/viewer snapshot), and skips channels on the **discovery deny list**. |
 | **FR-TWDISC-03** | Should | Operators can **approve** a candidate (sets `monitored=true`, removes candidate) or **deny** (records denial, removes candidate); denied channels are never suggested again by discovery. Discovery denial is **separate** from the global channel blacklist used for suspicion. |
-| **FR-TWDISC-04** | Should | Expose **GET/PATCH `/settings/channel-discovery`**, **GET `/settings/channel-discovery/candidates`**, **POST** approve/deny under `/settings/channel-discovery/candidates/{twitch_user_id}/…` (admin-gated, per OpenAPI). |
+| **FR-TWDISC-04** | Should | Expose **GET/PATCH `/api/v1/settings/channel-discovery`**, **GET `/api/v1/settings/channel-discovery/candidates`**, **POST** approve/deny under `/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/…` (admin-gated, per OpenAPI). |
 
 ### 5.4 IRC monitoring and presence
 
@@ -129,7 +129,7 @@ Requirements are grouped by capability. **FR IDs** are stable labels for traceab
 | **FR-CHAT-01** | Must | Persist chat messages with association to channel user, optional chatter user, optional stream session, timestamps, and metadata (e.g. badges, first-message flags) as defined by schema. |
 | **FR-CHAT-02** | Must | Provide **paginated/filtered** chat message listing and **counts** for UI and API consumers. |
 | **FR-CHAT-03** | Must | Provide **chat history** endpoints suitable for channel or context drill-down. |
-| **FR-CHAT-04** | Should | Support sending chat messages via authenticated Helix path where linked accounts and Twitch policy allow (`/twitch/send`). |
+| **FR-CHAT-04** | Should | Support sending chat messages via authenticated Helix path where linked accounts and Twitch policy allow (`/api/v1/twitch/send`). |
 
 ### 5.6 Streams and analytics-style views
 
@@ -245,10 +245,10 @@ All paths below are **admin-gated** unless noted. Full request/response schemas 
 
 | Area | Paths (summary) |
 | --- | --- |
-| Auth | `POST /auth/login` (public), `GET /me` (auth only) |
-| Settings | `/settings/twitch-users`, `…/update`, `…/channel-blacklist`, `…/suspicion-settings`, `…/irc-monitor-settings`, `…/channel-discovery`, `…/channel-discovery/candidates`, `…/rules*`, `…/rule-triggers`, `…/notifications*`, `…/twitch-accounts*` |
-| Twitch data | `/twitch/send`, `…/chat/history`, `…/messages`, `…/users`, `…/channels/live`, `…/channels/chatters`, `…/watch/hints`, `…/irc-monitor/status`, `…/irc-monitor/joined-history`, `…/streams`, `…/streams/{streamId}`, `…/streams/{streamId}/messages|activity|leaderboard`, `…/users/activity`, `…/users/activity/timeline` |
-| AI (optional) | `/ai/settings`, `/ai/conversations`, `/ai/conversations/{id}`, `…/messages`, `…/confirm`, `…/stop` |
+| Auth | `POST /api/v1/auth/login` (public), `GET /api/v1/me` (auth only) |
+| Settings | `/api/v1/settings/twitch-users`, `…/update`, `…/channel-blacklist`, `…/suspicion-settings`, `…/irc-monitor-settings`, `…/channel-discovery`, `…/channel-discovery/candidates`, `…/rules*`, `…/rule-triggers`, `…/notifications*`, `…/twitch-accounts*` |
+| Twitch data | `/api/v1/twitch/send`, `…/chat/history`, `…/messages`, `…/users`, `…/channels/live`, `…/channels/chatters`, `…/watch/hints`, `…/irc-monitor/status`, `…/irc-monitor/joined-history`, `…/streams`, `…/streams/{streamId}`, `…/streams/{streamId}/messages|activity|leaderboard`, `…/users/activity`, `…/users/activity/timeline` |
+| AI (optional) | `/api/v1/ai/settings`, `/api/v1/ai/conversations`, `/api/v1/ai/conversations/{id}`, `…/messages`, `…/confirm`, `…/stop` |
 | Non-OpenAPI | `GET /health` (public), `GET /ws` (admin), `GET/POST` Twitch OAuth callback route (see handler constants) |
 
 ---

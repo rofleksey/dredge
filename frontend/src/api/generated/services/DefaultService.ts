@@ -71,7 +71,7 @@ export class DefaultService {
     }): CancelablePromise<LoginResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/auth/login',
+            url: '/api/v1/auth/login',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -86,7 +86,7 @@ export class DefaultService {
     public static me(): CancelablePromise<Account> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/me',
+            url: '/api/v1/me',
             errors: {
                 401: `Unauthorized`,
             },
@@ -106,7 +106,7 @@ export class DefaultService {
     }): CancelablePromise<Array<TwitchUser>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/twitch-users',
+            url: '/api/v1/settings/twitch-users',
             query: {
                 'monitored_only': monitoredOnly,
             },
@@ -123,7 +123,7 @@ export class DefaultService {
     }): CancelablePromise<TwitchUser> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/twitch-users',
+            url: '/api/v1/settings/twitch-users',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -142,7 +142,7 @@ export class DefaultService {
     }): CancelablePromise<TwitchUser> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/twitch-users/update',
+            url: '/api/v1/settings/twitch-users/update',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -158,7 +158,7 @@ export class DefaultService {
     public static listChannelBlacklist(): CancelablePromise<Array<string>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/channel-blacklist',
+            url: '/api/v1/settings/channel-blacklist',
         });
     }
     /**
@@ -172,7 +172,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/channel-blacklist',
+            url: '/api/v1/settings/channel-blacklist',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -187,7 +187,7 @@ export class DefaultService {
     public static getSuspicionSettings(): CancelablePromise<SuspicionSettings> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/suspicion-settings',
+            url: '/api/v1/settings/suspicion-settings',
         });
     }
     /**
@@ -201,7 +201,7 @@ export class DefaultService {
     }): CancelablePromise<SuspicionSettings> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/settings/suspicion-settings',
+            url: '/api/v1/settings/suspicion-settings',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -213,7 +213,7 @@ export class DefaultService {
     public static getIrcMonitorSettings(): CancelablePromise<IrcMonitorSettings> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/irc-monitor-settings',
+            url: '/api/v1/settings/irc-monitor-settings',
         });
     }
     /**
@@ -227,7 +227,7 @@ export class DefaultService {
     }): CancelablePromise<IrcMonitorSettings> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/settings/irc-monitor-settings',
+            url: '/api/v1/settings/irc-monitor-settings',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -239,7 +239,7 @@ export class DefaultService {
     public static getChannelDiscoverySettings(): CancelablePromise<ChannelDiscoverySettings> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/channel-discovery',
+            url: '/api/v1/settings/channel-discovery',
         });
     }
     /**
@@ -253,7 +253,7 @@ export class DefaultService {
     }): CancelablePromise<ChannelDiscoverySettings> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/settings/channel-discovery',
+            url: '/api/v1/settings/channel-discovery',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -268,7 +268,7 @@ export class DefaultService {
     public static listChannelDiscoveryCandidates(): CancelablePromise<Array<DiscoveryCandidate>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/channel-discovery/candidates',
+            url: '/api/v1/settings/channel-discovery/candidates',
         });
     }
     /**
@@ -282,7 +282,7 @@ export class DefaultService {
     }): CancelablePromise<TwitchUser> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/channel-discovery/candidates/{twitch_user_id}/approve',
+            url: '/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve',
             path: {
                 'twitch_user_id': twitchUserId,
             },
@@ -303,7 +303,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/channel-discovery/candidates/{twitch_user_id}/deny',
+            url: '/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny',
             path: {
                 'twitch_user_id': twitchUserId,
             },
@@ -319,7 +319,7 @@ export class DefaultService {
     public static listRules(): CancelablePromise<Array<Rule>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/rules',
+            url: '/api/v1/settings/rules',
         });
     }
     /**
@@ -333,7 +333,7 @@ export class DefaultService {
     }): CancelablePromise<Rule> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/rules',
+            url: '/api/v1/settings/rules',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -345,7 +345,7 @@ export class DefaultService {
     public static countRules(): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/rules/count',
+            url: '/api/v1/settings/rules/count',
         });
     }
     /**
@@ -358,7 +358,7 @@ export class DefaultService {
     public static listRuleTemplateVariables(): CancelablePromise<RuleTemplateVariablesResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/rules/template-variables',
+            url: '/api/v1/settings/rules/template-variables',
         });
     }
     /**
@@ -372,7 +372,7 @@ export class DefaultService {
     }): CancelablePromise<Rule> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/rules/update',
+            url: '/api/v1/settings/rules/update',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -391,7 +391,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/rules/delete',
+            url: '/api/v1/settings/rules/delete',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -410,7 +410,7 @@ export class DefaultService {
     }): CancelablePromise<TestRuleRegexResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/rules/test-regex',
+            url: '/api/v1/settings/rules/test-regex',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -434,7 +434,7 @@ export class DefaultService {
     }): CancelablePromise<Array<RuleTrigger>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/rule-triggers',
+            url: '/api/v1/settings/rule-triggers',
             query: {
                 'limit': limit,
                 'cursor_created_at': cursorCreatedAt,
@@ -461,7 +461,7 @@ export class DefaultService {
     }): CancelablePromise<Array<NotificationEntry>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/notifications',
+            url: '/api/v1/settings/notifications',
             query: {
                 'limit': limit,
                 'cursor_created_at': cursorCreatedAt,
@@ -480,7 +480,7 @@ export class DefaultService {
     }): CancelablePromise<NotificationEntry> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/notifications',
+            url: '/api/v1/settings/notifications',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -496,7 +496,7 @@ export class DefaultService {
     }): CancelablePromise<NotificationEntry> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/notifications/update',
+            url: '/api/v1/settings/notifications/update',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -515,7 +515,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/notifications/delete',
+            url: '/api/v1/settings/notifications/delete',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -530,7 +530,7 @@ export class DefaultService {
     public static listTwitchAccounts(): CancelablePromise<Array<TwitchAccount>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/twitch-accounts',
+            url: '/api/v1/settings/twitch-accounts',
         });
     }
     /**
@@ -544,7 +544,7 @@ export class DefaultService {
     }): CancelablePromise<TwitchAccount> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/twitch-accounts',
+            url: '/api/v1/settings/twitch-accounts',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -556,7 +556,7 @@ export class DefaultService {
     public static countTwitchAccounts(): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/settings/twitch-accounts/count',
+            url: '/api/v1/settings/twitch-accounts/count',
         });
     }
     /**
@@ -570,7 +570,7 @@ export class DefaultService {
     }): CancelablePromise<TwitchAccount> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/twitch-accounts/update',
+            url: '/api/v1/settings/twitch-accounts/update',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -589,7 +589,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/twitch-accounts/delete',
+            url: '/api/v1/settings/twitch-accounts/delete',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -609,7 +609,7 @@ export class DefaultService {
     }): CancelablePromise<StartTwitchOAuthResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/settings/twitch-accounts/oauth/start',
+            url: '/api/v1/settings/twitch-accounts/oauth/start',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -625,7 +625,7 @@ export class DefaultService {
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/twitch/send',
+            url: '/api/v1/twitch/send',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -649,7 +649,7 @@ export class DefaultService {
     }): CancelablePromise<Array<ChatHistoryEntry>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/chat/history',
+            url: '/api/v1/twitch/chat/history',
             query: {
                 'channel': channel,
                 'limit': limit,
@@ -702,7 +702,7 @@ export class DefaultService {
     }): CancelablePromise<Array<ChatHistoryEntry>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/messages',
+            url: '/api/v1/twitch/messages',
             query: {
                 'limit': limit,
                 'cursor_created_at': cursorCreatedAt,
@@ -738,7 +738,7 @@ export class DefaultService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/messages/count',
+            url: '/api/v1/twitch/messages/count',
             query: {
                 'username': username,
                 'text': text,
@@ -776,7 +776,7 @@ export class DefaultService {
     }): CancelablePromise<Array<TwitchUser>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/users',
+            url: '/api/v1/twitch/users',
             query: {
                 'username': username,
                 'limit': limit,
@@ -801,7 +801,7 @@ export class DefaultService {
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/users/count',
+            url: '/api/v1/twitch/users/count',
             query: {
                 'username': username,
                 'monitored_only': monitoredOnly,
@@ -819,7 +819,7 @@ export class DefaultService {
     }): CancelablePromise<TwitchUserProfile> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/twitch/users/profile',
+            url: '/api/v1/twitch/users/profile',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -838,7 +838,7 @@ export class DefaultService {
     }): CancelablePromise<ChannelLive> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/twitch/channels/live',
+            url: '/api/v1/twitch/channels/live',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -857,7 +857,7 @@ export class DefaultService {
     }): CancelablePromise<Array<ChannelChatterEntry>> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/twitch/channels/chatters',
+            url: '/api/v1/twitch/channels/chatters',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -872,7 +872,7 @@ export class DefaultService {
     public static getWatchUiHints(): CancelablePromise<WatchUiHints> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/watch/hints',
+            url: '/api/v1/twitch/watch/hints',
         });
     }
     /**
@@ -882,7 +882,7 @@ export class DefaultService {
     public static getIrcMonitorStatus(): CancelablePromise<IrcMonitorStatus> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/irc-monitor/status',
+            url: '/api/v1/twitch/irc-monitor/status',
         });
     }
     /**
@@ -900,7 +900,7 @@ export class DefaultService {
     }): CancelablePromise<Array<IrcJoinedSample>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/irc-monitor/joined-history',
+            url: '/api/v1/twitch/irc-monitor/joined-history',
             query: {
                 'days': days,
             },
@@ -930,7 +930,7 @@ export class DefaultService {
     }): CancelablePromise<Array<RecordedStream>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/streams',
+            url: '/api/v1/twitch/streams',
             query: {
                 'channel_login': channelLogin,
                 'limit': limit,
@@ -950,7 +950,7 @@ export class DefaultService {
     }): CancelablePromise<RecordedStream> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/streams/{streamId}',
+            url: '/api/v1/twitch/streams/{streamId}',
             path: {
                 'streamId': streamId,
             },
@@ -983,7 +983,7 @@ export class DefaultService {
     }): CancelablePromise<Array<ChatHistoryEntry>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/streams/{streamId}/messages',
+            url: '/api/v1/twitch/streams/{streamId}/messages',
             path: {
                 'streamId': streamId,
             },
@@ -1018,7 +1018,7 @@ export class DefaultService {
     }): CancelablePromise<Array<UserActivityEvent>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/streams/{streamId}/activity',
+            url: '/api/v1/twitch/streams/{streamId}/activity',
             path: {
                 'streamId': streamId,
             },
@@ -1050,7 +1050,7 @@ export class DefaultService {
     }): CancelablePromise<Array<StreamLeaderboardEntry>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/twitch/streams/{streamId}/leaderboard',
+            url: '/api/v1/twitch/streams/{streamId}/leaderboard',
             path: {
                 'streamId': streamId,
             },
@@ -1074,7 +1074,7 @@ export class DefaultService {
     }): CancelablePromise<Array<UserActivityEvent>> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/twitch/users/activity',
+            url: '/api/v1/twitch/users/activity',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -1093,7 +1093,7 @@ export class DefaultService {
     }): CancelablePromise<Array<ActivityTimelineSegment>> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/twitch/users/activity/timeline',
+            url: '/api/v1/twitch/users/activity/timeline',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -1108,7 +1108,7 @@ export class DefaultService {
     public static getAiSettings(): CancelablePromise<AiSettings> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/ai/settings',
+            url: '/api/v1/ai/settings',
         });
     }
     /**
@@ -1122,7 +1122,7 @@ export class DefaultService {
     }): CancelablePromise<AiSettings> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/ai/settings',
+            url: '/api/v1/ai/settings',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -1134,7 +1134,7 @@ export class DefaultService {
     public static listAiConversations(): CancelablePromise<Array<AiConversation>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/ai/conversations',
+            url: '/api/v1/ai/conversations',
         });
     }
     /**
@@ -1148,7 +1148,7 @@ export class DefaultService {
     }): CancelablePromise<AiConversation> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/ai/conversations',
+            url: '/api/v1/ai/conversations',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -1164,7 +1164,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/ai/conversations/{conversationId}',
+            url: '/api/v1/ai/conversations/{conversationId}',
             path: {
                 'conversationId': conversationId,
             },
@@ -1184,7 +1184,7 @@ export class DefaultService {
     }): CancelablePromise<Array<AiMessage>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/ai/conversations/{conversationId}/messages',
+            url: '/api/v1/ai/conversations/{conversationId}/messages',
             path: {
                 'conversationId': conversationId,
             },
@@ -1206,7 +1206,7 @@ export class DefaultService {
     }): CancelablePromise<AiRunAccepted> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/ai/conversations/{conversationId}/messages',
+            url: '/api/v1/ai/conversations/{conversationId}/messages',
             path: {
                 'conversationId': conversationId,
             },
@@ -1230,7 +1230,7 @@ export class DefaultService {
     }): CancelablePromise<AiRunAccepted> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/ai/conversations/{conversationId}/confirm',
+            url: '/api/v1/ai/conversations/{conversationId}/confirm',
             path: {
                 'conversationId': conversationId,
             },
@@ -1252,7 +1252,7 @@ export class DefaultService {
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/ai/conversations/{conversationId}/stop',
+            url: '/api/v1/ai/conversations/{conversationId}/stop',
             path: {
                 'conversationId': conversationId,
             },

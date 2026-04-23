@@ -11,6 +11,7 @@ export function getToken(): string {
 
 /** Call once at app startup (after env is available). */
 export function configureApi(): void {
+  // Generated client paths include `/api/v1`, so BASE should be origin-only.
   OpenAPI.BASE = import.meta.env.VITE_API_BASE ?? '';
   OpenAPI.TOKEN = async () => getToken();
 }

@@ -30,273 +30,273 @@ func trimTrailingSlashes(u *url.URL) {
 type Invoker interface {
 	// ApproveChannelDiscoveryCandidate invokes approveChannelDiscoveryCandidate operation.
 	//
-	// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+	// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve
 	ApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (ApproveChannelDiscoveryCandidateRes, error)
 	// ConfirmAiTool invokes confirmAiTool operation.
 	//
-	// POST /ai/conversations/{conversationId}/confirm
+	// POST /api/v1/ai/conversations/{conversationId}/confirm
 	ConfirmAiTool(ctx context.Context, request *ConfirmAiToolRequest, params ConfirmAiToolParams) (ConfirmAiToolRes, error)
 	// CountRules invokes countRules operation.
 	//
-	// GET /settings/rules/count
+	// GET /api/v1/settings/rules/count
 	CountRules(ctx context.Context) (*CountResponse, error)
 	// CountTwitchAccounts invokes countTwitchAccounts operation.
 	//
-	// GET /settings/twitch-accounts/count
+	// GET /api/v1/settings/twitch-accounts/count
 	CountTwitchAccounts(ctx context.Context) (*CountResponse, error)
 	// CountTwitchDirectoryUsers invokes countTwitchDirectoryUsers operation.
 	//
-	// GET /twitch/users/count
+	// GET /api/v1/twitch/users/count
 	CountTwitchDirectoryUsers(ctx context.Context, params CountTwitchDirectoryUsersParams) (*CountResponse, error)
 	// CountTwitchMessages invokes countTwitchMessages operation.
 	//
 	// Count messages matching the same filters as list (ignores limit/cursor).
 	//
-	// GET /twitch/messages/count
+	// GET /api/v1/twitch/messages/count
 	CountTwitchMessages(ctx context.Context, params CountTwitchMessagesParams) (*CountResponse, error)
 	// CreateAiConversation invokes createAiConversation operation.
 	//
-	// POST /ai/conversations
+	// POST /api/v1/ai/conversations
 	CreateAiConversation(ctx context.Context, request OptCreateAiConversationRequest) (*AiConversation, error)
 	// CreateAiMessage invokes createAiMessage operation.
 	//
-	// POST /ai/conversations/{conversationId}/messages
+	// POST /api/v1/ai/conversations/{conversationId}/messages
 	CreateAiMessage(ctx context.Context, request *CreateAiMessageRequest, params CreateAiMessageParams) (CreateAiMessageRes, error)
 	// CreateNotification invokes createNotification operation.
 	//
-	// POST /settings/notifications
+	// POST /api/v1/settings/notifications
 	CreateNotification(ctx context.Context, request *CreateNotificationRequest) (*NotificationEntry, error)
 	// CreateRule invokes createRule operation.
 	//
-	// POST /settings/rules
+	// POST /api/v1/settings/rules
 	CreateRule(ctx context.Context, request *CreateRuleRequest) (*Rule, error)
 	// CreateTwitchAccount invokes createTwitchAccount operation.
 	//
-	// POST /settings/twitch-accounts
+	// POST /api/v1/settings/twitch-accounts
 	CreateTwitchAccount(ctx context.Context, request *CreateTwitchAccountRequest) (*TwitchAccount, error)
 	// CreateTwitchUser invokes createTwitchUser operation.
 	//
-	// POST /settings/twitch-users
+	// POST /api/v1/settings/twitch-users
 	CreateTwitchUser(ctx context.Context, request *CreateTwitchUserRequest) (CreateTwitchUserRes, error)
 	// DeleteAiConversation invokes deleteAiConversation operation.
 	//
-	// DELETE /ai/conversations/{conversationId}
+	// DELETE /api/v1/ai/conversations/{conversationId}
 	DeleteAiConversation(ctx context.Context, params DeleteAiConversationParams) (DeleteAiConversationRes, error)
 	// DeleteNotification invokes deleteNotification operation.
 	//
-	// POST /settings/notifications/delete
+	// POST /api/v1/settings/notifications/delete
 	DeleteNotification(ctx context.Context, request *DeleteByIDRequest) (DeleteNotificationRes, error)
 	// DeleteRule invokes deleteRule operation.
 	//
-	// POST /settings/rules/delete
+	// POST /api/v1/settings/rules/delete
 	DeleteRule(ctx context.Context, request *DeleteByIDRequest) (DeleteRuleRes, error)
 	// DeleteTwitchAccount invokes deleteTwitchAccount operation.
 	//
-	// POST /settings/twitch-accounts/delete
+	// POST /api/v1/settings/twitch-accounts/delete
 	DeleteTwitchAccount(ctx context.Context, request *DeleteByIDRequest) (DeleteTwitchAccountRes, error)
 	// DenyChannelDiscoveryCandidate invokes denyChannelDiscoveryCandidate operation.
 	//
-	// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+	// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny
 	DenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (DenyChannelDiscoveryCandidateRes, error)
 	// GetAiSettings invokes getAiSettings operation.
 	//
-	// GET /ai/settings
+	// GET /api/v1/ai/settings
 	GetAiSettings(ctx context.Context) (*AiSettings, error)
 	// GetChannelDiscoverySettings invokes getChannelDiscoverySettings operation.
 	//
-	// GET /settings/channel-discovery
+	// GET /api/v1/settings/channel-discovery
 	GetChannelDiscoverySettings(ctx context.Context) (*ChannelDiscoverySettings, error)
 	// GetChannelLive invokes getChannelLive operation.
 	//
-	// POST /twitch/channels/live
+	// POST /api/v1/twitch/channels/live
 	GetChannelLive(ctx context.Context, request *GetChannelLiveRequest) (GetChannelLiveRes, error)
 	// GetIrcMonitorSettings invokes getIrcMonitorSettings operation.
 	//
-	// GET /settings/irc-monitor-settings
+	// GET /api/v1/settings/irc-monitor-settings
 	GetIrcMonitorSettings(ctx context.Context) (*IrcMonitorSettings, error)
 	// GetIrcMonitorStatus invokes getIrcMonitorStatus operation.
 	//
-	// GET /twitch/irc-monitor/status
+	// GET /api/v1/twitch/irc-monitor/status
 	GetIrcMonitorStatus(ctx context.Context) (*IrcMonitorStatus, error)
 	// GetRecordedStream invokes getRecordedStream operation.
 	//
-	// GET /twitch/streams/{streamId}
+	// GET /api/v1/twitch/streams/{streamId}
 	GetRecordedStream(ctx context.Context, params GetRecordedStreamParams) (GetRecordedStreamRes, error)
 	// GetRecordedStreamLeaderboard invokes getRecordedStreamLeaderboard operation.
 	//
-	// GET /twitch/streams/{streamId}/leaderboard
+	// GET /api/v1/twitch/streams/{streamId}/leaderboard
 	GetRecordedStreamLeaderboard(ctx context.Context, params GetRecordedStreamLeaderboardParams) (GetRecordedStreamLeaderboardRes, error)
 	// GetSuspicionSettings invokes getSuspicionSettings operation.
 	//
-	// GET /settings/suspicion-settings
+	// GET /api/v1/settings/suspicion-settings
 	GetSuspicionSettings(ctx context.Context) (*SuspicionSettings, error)
 	// GetTwitchUserActivityTimeline invokes getTwitchUserActivityTimeline operation.
 	//
-	// POST /twitch/users/activity/timeline
+	// POST /api/v1/twitch/users/activity/timeline
 	GetTwitchUserActivityTimeline(ctx context.Context, request *GetTwitchUserActivityTimelineRequest) (GetTwitchUserActivityTimelineRes, error)
 	// GetTwitchUserProfile invokes getTwitchUserProfile operation.
 	//
-	// POST /twitch/users/profile
+	// POST /api/v1/twitch/users/profile
 	GetTwitchUserProfile(ctx context.Context, request *GetTwitchUserProfileRequest) (GetTwitchUserProfileRes, error)
 	// GetWatchUiHints invokes getWatchUiHints operation.
 	//
-	// GET /twitch/watch/hints
+	// GET /api/v1/twitch/watch/hints
 	GetWatchUiHints(ctx context.Context) (*WatchUiHints, error)
 	// ListAiConversations invokes listAiConversations operation.
 	//
-	// GET /ai/conversations
+	// GET /api/v1/ai/conversations
 	ListAiConversations(ctx context.Context) ([]AiConversation, error)
 	// ListAiMessages invokes listAiMessages operation.
 	//
-	// GET /ai/conversations/{conversationId}/messages
+	// GET /api/v1/ai/conversations/{conversationId}/messages
 	ListAiMessages(ctx context.Context, params ListAiMessagesParams) (ListAiMessagesRes, error)
 	// ListChannelBlacklist invokes listChannelBlacklist operation.
 	//
-	// GET /settings/channel-blacklist
+	// GET /api/v1/settings/channel-blacklist
 	ListChannelBlacklist(ctx context.Context) ([]string, error)
 	// ListChannelChatters invokes listChannelChatters operation.
 	//
-	// POST /twitch/channels/chatters
+	// POST /api/v1/twitch/channels/chatters
 	ListChannelChatters(ctx context.Context, request *ListChannelChattersRequest) (ListChannelChattersRes, error)
 	// ListChannelDiscoveryCandidates invokes listChannelDiscoveryCandidates operation.
 	//
-	// GET /settings/channel-discovery/candidates
+	// GET /api/v1/settings/channel-discovery/candidates
 	ListChannelDiscoveryCandidates(ctx context.Context) ([]DiscoveryCandidate, error)
 	// ListChatHistory invokes listChatHistory operation.
 	//
-	// GET /twitch/chat/history
+	// GET /api/v1/twitch/chat/history
 	ListChatHistory(ctx context.Context, params ListChatHistoryParams) (ListChatHistoryRes, error)
 	// ListIrcMonitorJoinedHistory invokes listIrcMonitorJoinedHistory operation.
 	//
 	// Historical IRC joined channel counts (periodic samples).
 	//
-	// GET /twitch/irc-monitor/joined-history
+	// GET /api/v1/twitch/irc-monitor/joined-history
 	ListIrcMonitorJoinedHistory(ctx context.Context, params ListIrcMonitorJoinedHistoryParams) ([]IrcJoinedSample, error)
 	// ListNotifications invokes listNotifications operation.
 	//
 	// List notification entries (newest first) with cursor-based incremental loading.
 	//
-	// GET /settings/notifications
+	// GET /api/v1/settings/notifications
 	ListNotifications(ctx context.Context, params ListNotificationsParams) ([]NotificationEntry, error)
 	// ListRecordedStreamActivity invokes listRecordedStreamActivity operation.
 	//
 	// Non-message activity in the stream time window (newest first).
 	//
-	// GET /twitch/streams/{streamId}/activity
+	// GET /api/v1/twitch/streams/{streamId}/activity
 	ListRecordedStreamActivity(ctx context.Context, params ListRecordedStreamActivityParams) (ListRecordedStreamActivityRes, error)
 	// ListRecordedStreamMessages invokes listRecordedStreamMessages operation.
 	//
 	// Chat messages tagged with this stream (newest first).
 	//
-	// GET /twitch/streams/{streamId}/messages
+	// GET /api/v1/twitch/streams/{streamId}/messages
 	ListRecordedStreamMessages(ctx context.Context, params ListRecordedStreamMessagesParams) (ListRecordedStreamMessagesRes, error)
 	// ListRecordedStreams invokes listRecordedStreams operation.
 	//
 	// Recorded stream sessions for monitored channels (newest first).
 	//
-	// GET /twitch/streams
+	// GET /api/v1/twitch/streams
 	ListRecordedStreams(ctx context.Context, params ListRecordedStreamsParams) ([]RecordedStream, error)
 	// ListRuleTemplateVariables invokes listRuleTemplateVariables operation.
 	//
 	// Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
 	//
-	// GET /settings/rules/template-variables
+	// GET /api/v1/settings/rules/template-variables
 	ListRuleTemplateVariables(ctx context.Context) (*RuleTemplateVariablesResponse, error)
 	// ListRuleTriggers invokes listRuleTriggers operation.
 	//
 	// List rule trigger events (newest first) with cursor-based incremental loading.
 	//
-	// GET /settings/rule-triggers
+	// GET /api/v1/settings/rule-triggers
 	ListRuleTriggers(ctx context.Context, params ListRuleTriggersParams) ([]RuleTrigger, error)
 	// ListRules invokes listRules operation.
 	//
-	// GET /settings/rules
+	// GET /api/v1/settings/rules
 	ListRules(ctx context.Context) ([]Rule, error)
 	// ListTwitchAccounts invokes listTwitchAccounts operation.
 	//
-	// GET /settings/twitch-accounts
+	// GET /api/v1/settings/twitch-accounts
 	ListTwitchAccounts(ctx context.Context) ([]TwitchAccount, error)
 	// ListTwitchDirectoryUsers invokes listTwitchDirectoryUsers operation.
 	//
 	// List known Twitch users (chatters and channels) for directory search.
 	//
-	// GET /twitch/users
+	// GET /api/v1/twitch/users
 	ListTwitchDirectoryUsers(ctx context.Context, params ListTwitchDirectoryUsersParams) ([]TwitchUser, error)
 	// ListTwitchMessages invokes listTwitchMessages operation.
 	//
 	// Search persisted chat messages (newest first). Omit filters to list recent messages.
 	//
-	// GET /twitch/messages
+	// GET /api/v1/twitch/messages
 	ListTwitchMessages(ctx context.Context, params ListTwitchMessagesParams) ([]ChatHistoryEntry, error)
 	// ListTwitchUserActivity invokes listTwitchUserActivity operation.
 	//
-	// POST /twitch/users/activity
+	// POST /api/v1/twitch/users/activity
 	ListTwitchUserActivity(ctx context.Context, request *ListTwitchUserActivityRequest) (ListTwitchUserActivityRes, error)
 	// ListTwitchUsers invokes listTwitchUsers operation.
 	//
-	// GET /settings/twitch-users
+	// GET /api/v1/settings/twitch-users
 	ListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) ([]TwitchUser, error)
 	// Login invokes login operation.
 	//
-	// POST /auth/login
+	// POST /api/v1/auth/login
 	Login(ctx context.Context, request *LoginRequest) (LoginRes, error)
 	// Me invokes me operation.
 	//
-	// GET /me
+	// GET /api/v1/me
 	Me(ctx context.Context) (MeRes, error)
 	// PatchAiSettings invokes patchAiSettings operation.
 	//
-	// PATCH /ai/settings
+	// PATCH /api/v1/ai/settings
 	PatchAiSettings(ctx context.Context, request *PatchAiSettingsRequest) (*AiSettings, error)
 	// SendMessage invokes sendMessage operation.
 	//
-	// POST /twitch/send
+	// POST /api/v1/twitch/send
 	SendMessage(ctx context.Context, request *SendMessageRequest) (SendMessageRes, error)
 	// SetChannelBlacklist invokes setChannelBlacklist operation.
 	//
-	// POST /settings/channel-blacklist
+	// POST /api/v1/settings/channel-blacklist
 	SetChannelBlacklist(ctx context.Context, request *ChannelBlacklistChange) (SetChannelBlacklistRes, error)
 	// StartTwitchOAuth invokes startTwitchOAuth operation.
 	//
 	// Start Twitch authorization (browser) to link an account without pasting a refresh token.
 	//
-	// POST /settings/twitch-accounts/oauth/start
+	// POST /api/v1/settings/twitch-accounts/oauth/start
 	StartTwitchOAuth(ctx context.Context, request OptStartTwitchOAuthRequest) (*StartTwitchOAuthResponse, error)
 	// StopAiAgent invokes stopAiAgent operation.
 	//
-	// POST /ai/conversations/{conversationId}/stop
+	// POST /api/v1/ai/conversations/{conversationId}/stop
 	StopAiAgent(ctx context.Context, params StopAiAgentParams) (StopAiAgentRes, error)
 	// TestRuleRegex invokes testRuleRegex operation.
 	//
-	// POST /settings/rules/test-regex
+	// POST /api/v1/settings/rules/test-regex
 	TestRuleRegex(ctx context.Context, request *TestRuleRegexRequest) (*TestRuleRegexResponse, error)
 	// UpdateChannelDiscoverySettings invokes updateChannelDiscoverySettings operation.
 	//
-	// PATCH /settings/channel-discovery
+	// PATCH /api/v1/settings/channel-discovery
 	UpdateChannelDiscoverySettings(ctx context.Context, request *ChannelDiscoverySettings) (UpdateChannelDiscoverySettingsRes, error)
 	// UpdateIrcMonitorSettings invokes updateIrcMonitorSettings operation.
 	//
-	// PATCH /settings/irc-monitor-settings
+	// PATCH /api/v1/settings/irc-monitor-settings
 	UpdateIrcMonitorSettings(ctx context.Context, request *IrcMonitorSettings) (*IrcMonitorSettings, error)
 	// UpdateNotification invokes updateNotification operation.
 	//
-	// POST /settings/notifications/update
+	// POST /api/v1/settings/notifications/update
 	UpdateNotification(ctx context.Context, request *UpdateNotificationPostRequest) (UpdateNotificationRes, error)
 	// UpdateRule invokes updateRule operation.
 	//
-	// POST /settings/rules/update
+	// POST /api/v1/settings/rules/update
 	UpdateRule(ctx context.Context, request *UpdateRulePostRequest) (UpdateRuleRes, error)
 	// UpdateSuspicionSettings invokes updateSuspicionSettings operation.
 	//
-	// PATCH /settings/suspicion-settings
+	// PATCH /api/v1/settings/suspicion-settings
 	UpdateSuspicionSettings(ctx context.Context, request *SuspicionSettings) (*SuspicionSettings, error)
 	// UpdateTwitchAccount invokes updateTwitchAccount operation.
 	//
-	// POST /settings/twitch-accounts/update
+	// POST /api/v1/settings/twitch-accounts/update
 	UpdateTwitchAccount(ctx context.Context, request *UpdateTwitchAccountPostRequest) (UpdateTwitchAccountRes, error)
 	// UpdateTwitchUser invokes updateTwitchUser operation.
 	//
-	// POST /settings/twitch-users/update
+	// POST /api/v1/settings/twitch-users/update
 	UpdateTwitchUser(ctx context.Context, request *UpdateTwitchUserPostRequest) (UpdateTwitchUserRes, error)
 }
 
@@ -343,7 +343,7 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 
 // ApproveChannelDiscoveryCandidate invokes approveChannelDiscoveryCandidate operation.
 //
-// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve
 func (c *Client) ApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (ApproveChannelDiscoveryCandidateRes, error) {
 	res, err := c.sendApproveChannelDiscoveryCandidate(ctx, params)
 	return res, err
@@ -353,7 +353,7 @@ func (c *Client) sendApproveChannelDiscoveryCandidate(ctx context.Context, param
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("approveChannelDiscoveryCandidate"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/channel-discovery/candidates/{twitch_user_id}/approve"),
+		semconv.URLTemplateKey.String("/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -387,7 +387,7 @@ func (c *Client) sendApproveChannelDiscoveryCandidate(ctx context.Context, param
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/settings/channel-discovery/candidates/"
+	pathParts[0] = "/api/v1/settings/channel-discovery/candidates/"
 	{
 		// Encode "twitch_user_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -467,7 +467,7 @@ func (c *Client) sendApproveChannelDiscoveryCandidate(ctx context.Context, param
 
 // ConfirmAiTool invokes confirmAiTool operation.
 //
-// POST /ai/conversations/{conversationId}/confirm
+// POST /api/v1/ai/conversations/{conversationId}/confirm
 func (c *Client) ConfirmAiTool(ctx context.Context, request *ConfirmAiToolRequest, params ConfirmAiToolParams) (ConfirmAiToolRes, error) {
 	res, err := c.sendConfirmAiTool(ctx, request, params)
 	return res, err
@@ -477,7 +477,7 @@ func (c *Client) sendConfirmAiTool(ctx context.Context, request *ConfirmAiToolRe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("confirmAiTool"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/ai/conversations/{conversationId}/confirm"),
+		semconv.URLTemplateKey.String("/api/v1/ai/conversations/{conversationId}/confirm"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -511,7 +511,7 @@ func (c *Client) sendConfirmAiTool(ctx context.Context, request *ConfirmAiToolRe
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/ai/conversations/"
+	pathParts[0] = "/api/v1/ai/conversations/"
 	{
 		// Encode "conversationId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -594,7 +594,7 @@ func (c *Client) sendConfirmAiTool(ctx context.Context, request *ConfirmAiToolRe
 
 // CountRules invokes countRules operation.
 //
-// GET /settings/rules/count
+// GET /api/v1/settings/rules/count
 func (c *Client) CountRules(ctx context.Context) (*CountResponse, error) {
 	res, err := c.sendCountRules(ctx)
 	return res, err
@@ -604,7 +604,7 @@ func (c *Client) sendCountRules(ctx context.Context) (res *CountResponse, err er
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("countRules"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/rules/count"),
+		semconv.URLTemplateKey.String("/api/v1/settings/rules/count"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -638,7 +638,7 @@ func (c *Client) sendCountRules(ctx context.Context) (res *CountResponse, err er
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/rules/count"
+	pathParts[0] = "/api/v1/settings/rules/count"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -699,7 +699,7 @@ func (c *Client) sendCountRules(ctx context.Context) (res *CountResponse, err er
 
 // CountTwitchAccounts invokes countTwitchAccounts operation.
 //
-// GET /settings/twitch-accounts/count
+// GET /api/v1/settings/twitch-accounts/count
 func (c *Client) CountTwitchAccounts(ctx context.Context) (*CountResponse, error) {
 	res, err := c.sendCountTwitchAccounts(ctx)
 	return res, err
@@ -709,7 +709,7 @@ func (c *Client) sendCountTwitchAccounts(ctx context.Context) (res *CountRespons
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("countTwitchAccounts"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/twitch-accounts/count"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-accounts/count"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -743,7 +743,7 @@ func (c *Client) sendCountTwitchAccounts(ctx context.Context) (res *CountRespons
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-accounts/count"
+	pathParts[0] = "/api/v1/settings/twitch-accounts/count"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -804,7 +804,7 @@ func (c *Client) sendCountTwitchAccounts(ctx context.Context) (res *CountRespons
 
 // CountTwitchDirectoryUsers invokes countTwitchDirectoryUsers operation.
 //
-// GET /twitch/users/count
+// GET /api/v1/twitch/users/count
 func (c *Client) CountTwitchDirectoryUsers(ctx context.Context, params CountTwitchDirectoryUsersParams) (*CountResponse, error) {
 	res, err := c.sendCountTwitchDirectoryUsers(ctx, params)
 	return res, err
@@ -814,7 +814,7 @@ func (c *Client) sendCountTwitchDirectoryUsers(ctx context.Context, params Count
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("countTwitchDirectoryUsers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/users/count"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/users/count"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -848,7 +848,7 @@ func (c *Client) sendCountTwitchDirectoryUsers(ctx context.Context, params Count
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/users/count"
+	pathParts[0] = "/api/v1/twitch/users/count"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -949,7 +949,7 @@ func (c *Client) sendCountTwitchDirectoryUsers(ctx context.Context, params Count
 //
 // Count messages matching the same filters as list (ignores limit/cursor).
 //
-// GET /twitch/messages/count
+// GET /api/v1/twitch/messages/count
 func (c *Client) CountTwitchMessages(ctx context.Context, params CountTwitchMessagesParams) (*CountResponse, error) {
 	res, err := c.sendCountTwitchMessages(ctx, params)
 	return res, err
@@ -959,7 +959,7 @@ func (c *Client) sendCountTwitchMessages(ctx context.Context, params CountTwitch
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("countTwitchMessages"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/messages/count"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/messages/count"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -993,7 +993,7 @@ func (c *Client) sendCountTwitchMessages(ctx context.Context, params CountTwitch
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/messages/count"
+	pathParts[0] = "/api/v1/twitch/messages/count"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -1160,7 +1160,7 @@ func (c *Client) sendCountTwitchMessages(ctx context.Context, params CountTwitch
 
 // CreateAiConversation invokes createAiConversation operation.
 //
-// POST /ai/conversations
+// POST /api/v1/ai/conversations
 func (c *Client) CreateAiConversation(ctx context.Context, request OptCreateAiConversationRequest) (*AiConversation, error) {
 	res, err := c.sendCreateAiConversation(ctx, request)
 	return res, err
@@ -1170,7 +1170,7 @@ func (c *Client) sendCreateAiConversation(ctx context.Context, request OptCreate
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createAiConversation"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/ai/conversations"),
+		semconv.URLTemplateKey.String("/api/v1/ai/conversations"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -1204,7 +1204,7 @@ func (c *Client) sendCreateAiConversation(ctx context.Context, request OptCreate
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/ai/conversations"
+	pathParts[0] = "/api/v1/ai/conversations"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1268,7 +1268,7 @@ func (c *Client) sendCreateAiConversation(ctx context.Context, request OptCreate
 
 // CreateAiMessage invokes createAiMessage operation.
 //
-// POST /ai/conversations/{conversationId}/messages
+// POST /api/v1/ai/conversations/{conversationId}/messages
 func (c *Client) CreateAiMessage(ctx context.Context, request *CreateAiMessageRequest, params CreateAiMessageParams) (CreateAiMessageRes, error) {
 	res, err := c.sendCreateAiMessage(ctx, request, params)
 	return res, err
@@ -1278,7 +1278,7 @@ func (c *Client) sendCreateAiMessage(ctx context.Context, request *CreateAiMessa
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createAiMessage"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/ai/conversations/{conversationId}/messages"),
+		semconv.URLTemplateKey.String("/api/v1/ai/conversations/{conversationId}/messages"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -1312,7 +1312,7 @@ func (c *Client) sendCreateAiMessage(ctx context.Context, request *CreateAiMessa
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/ai/conversations/"
+	pathParts[0] = "/api/v1/ai/conversations/"
 	{
 		// Encode "conversationId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1395,7 +1395,7 @@ func (c *Client) sendCreateAiMessage(ctx context.Context, request *CreateAiMessa
 
 // CreateNotification invokes createNotification operation.
 //
-// POST /settings/notifications
+// POST /api/v1/settings/notifications
 func (c *Client) CreateNotification(ctx context.Context, request *CreateNotificationRequest) (*NotificationEntry, error) {
 	res, err := c.sendCreateNotification(ctx, request)
 	return res, err
@@ -1405,7 +1405,7 @@ func (c *Client) sendCreateNotification(ctx context.Context, request *CreateNoti
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createNotification"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/notifications"),
+		semconv.URLTemplateKey.String("/api/v1/settings/notifications"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -1439,7 +1439,7 @@ func (c *Client) sendCreateNotification(ctx context.Context, request *CreateNoti
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/notifications"
+	pathParts[0] = "/api/v1/settings/notifications"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1503,7 +1503,7 @@ func (c *Client) sendCreateNotification(ctx context.Context, request *CreateNoti
 
 // CreateRule invokes createRule operation.
 //
-// POST /settings/rules
+// POST /api/v1/settings/rules
 func (c *Client) CreateRule(ctx context.Context, request *CreateRuleRequest) (*Rule, error) {
 	res, err := c.sendCreateRule(ctx, request)
 	return res, err
@@ -1513,7 +1513,7 @@ func (c *Client) sendCreateRule(ctx context.Context, request *CreateRuleRequest)
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createRule"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/rules"),
+		semconv.URLTemplateKey.String("/api/v1/settings/rules"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -1547,7 +1547,7 @@ func (c *Client) sendCreateRule(ctx context.Context, request *CreateRuleRequest)
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/rules"
+	pathParts[0] = "/api/v1/settings/rules"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1611,7 +1611,7 @@ func (c *Client) sendCreateRule(ctx context.Context, request *CreateRuleRequest)
 
 // CreateTwitchAccount invokes createTwitchAccount operation.
 //
-// POST /settings/twitch-accounts
+// POST /api/v1/settings/twitch-accounts
 func (c *Client) CreateTwitchAccount(ctx context.Context, request *CreateTwitchAccountRequest) (*TwitchAccount, error) {
 	res, err := c.sendCreateTwitchAccount(ctx, request)
 	return res, err
@@ -1621,7 +1621,7 @@ func (c *Client) sendCreateTwitchAccount(ctx context.Context, request *CreateTwi
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createTwitchAccount"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/twitch-accounts"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-accounts"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -1655,7 +1655,7 @@ func (c *Client) sendCreateTwitchAccount(ctx context.Context, request *CreateTwi
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-accounts"
+	pathParts[0] = "/api/v1/settings/twitch-accounts"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1719,7 +1719,7 @@ func (c *Client) sendCreateTwitchAccount(ctx context.Context, request *CreateTwi
 
 // CreateTwitchUser invokes createTwitchUser operation.
 //
-// POST /settings/twitch-users
+// POST /api/v1/settings/twitch-users
 func (c *Client) CreateTwitchUser(ctx context.Context, request *CreateTwitchUserRequest) (CreateTwitchUserRes, error) {
 	res, err := c.sendCreateTwitchUser(ctx, request)
 	return res, err
@@ -1729,7 +1729,7 @@ func (c *Client) sendCreateTwitchUser(ctx context.Context, request *CreateTwitch
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createTwitchUser"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/twitch-users"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-users"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -1763,7 +1763,7 @@ func (c *Client) sendCreateTwitchUser(ctx context.Context, request *CreateTwitch
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-users"
+	pathParts[0] = "/api/v1/settings/twitch-users"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1827,7 +1827,7 @@ func (c *Client) sendCreateTwitchUser(ctx context.Context, request *CreateTwitch
 
 // DeleteAiConversation invokes deleteAiConversation operation.
 //
-// DELETE /ai/conversations/{conversationId}
+// DELETE /api/v1/ai/conversations/{conversationId}
 func (c *Client) DeleteAiConversation(ctx context.Context, params DeleteAiConversationParams) (DeleteAiConversationRes, error) {
 	res, err := c.sendDeleteAiConversation(ctx, params)
 	return res, err
@@ -1837,7 +1837,7 @@ func (c *Client) sendDeleteAiConversation(ctx context.Context, params DeleteAiCo
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteAiConversation"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.URLTemplateKey.String("/ai/conversations/{conversationId}"),
+		semconv.URLTemplateKey.String("/api/v1/ai/conversations/{conversationId}"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -1871,7 +1871,7 @@ func (c *Client) sendDeleteAiConversation(ctx context.Context, params DeleteAiCo
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/ai/conversations/"
+	pathParts[0] = "/api/v1/ai/conversations/"
 	{
 		// Encode "conversationId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1950,7 +1950,7 @@ func (c *Client) sendDeleteAiConversation(ctx context.Context, params DeleteAiCo
 
 // DeleteNotification invokes deleteNotification operation.
 //
-// POST /settings/notifications/delete
+// POST /api/v1/settings/notifications/delete
 func (c *Client) DeleteNotification(ctx context.Context, request *DeleteByIDRequest) (DeleteNotificationRes, error) {
 	res, err := c.sendDeleteNotification(ctx, request)
 	return res, err
@@ -1960,7 +1960,7 @@ func (c *Client) sendDeleteNotification(ctx context.Context, request *DeleteByID
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteNotification"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/notifications/delete"),
+		semconv.URLTemplateKey.String("/api/v1/settings/notifications/delete"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -1994,7 +1994,7 @@ func (c *Client) sendDeleteNotification(ctx context.Context, request *DeleteByID
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/notifications/delete"
+	pathParts[0] = "/api/v1/settings/notifications/delete"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2058,7 +2058,7 @@ func (c *Client) sendDeleteNotification(ctx context.Context, request *DeleteByID
 
 // DeleteRule invokes deleteRule operation.
 //
-// POST /settings/rules/delete
+// POST /api/v1/settings/rules/delete
 func (c *Client) DeleteRule(ctx context.Context, request *DeleteByIDRequest) (DeleteRuleRes, error) {
 	res, err := c.sendDeleteRule(ctx, request)
 	return res, err
@@ -2068,7 +2068,7 @@ func (c *Client) sendDeleteRule(ctx context.Context, request *DeleteByIDRequest)
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteRule"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/rules/delete"),
+		semconv.URLTemplateKey.String("/api/v1/settings/rules/delete"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2102,7 +2102,7 @@ func (c *Client) sendDeleteRule(ctx context.Context, request *DeleteByIDRequest)
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/rules/delete"
+	pathParts[0] = "/api/v1/settings/rules/delete"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2166,7 +2166,7 @@ func (c *Client) sendDeleteRule(ctx context.Context, request *DeleteByIDRequest)
 
 // DeleteTwitchAccount invokes deleteTwitchAccount operation.
 //
-// POST /settings/twitch-accounts/delete
+// POST /api/v1/settings/twitch-accounts/delete
 func (c *Client) DeleteTwitchAccount(ctx context.Context, request *DeleteByIDRequest) (DeleteTwitchAccountRes, error) {
 	res, err := c.sendDeleteTwitchAccount(ctx, request)
 	return res, err
@@ -2176,7 +2176,7 @@ func (c *Client) sendDeleteTwitchAccount(ctx context.Context, request *DeleteByI
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteTwitchAccount"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/twitch-accounts/delete"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-accounts/delete"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2210,7 +2210,7 @@ func (c *Client) sendDeleteTwitchAccount(ctx context.Context, request *DeleteByI
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-accounts/delete"
+	pathParts[0] = "/api/v1/settings/twitch-accounts/delete"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2274,7 +2274,7 @@ func (c *Client) sendDeleteTwitchAccount(ctx context.Context, request *DeleteByI
 
 // DenyChannelDiscoveryCandidate invokes denyChannelDiscoveryCandidate operation.
 //
-// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny
 func (c *Client) DenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (DenyChannelDiscoveryCandidateRes, error) {
 	res, err := c.sendDenyChannelDiscoveryCandidate(ctx, params)
 	return res, err
@@ -2284,7 +2284,7 @@ func (c *Client) sendDenyChannelDiscoveryCandidate(ctx context.Context, params D
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("denyChannelDiscoveryCandidate"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/channel-discovery/candidates/{twitch_user_id}/deny"),
+		semconv.URLTemplateKey.String("/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2318,7 +2318,7 @@ func (c *Client) sendDenyChannelDiscoveryCandidate(ctx context.Context, params D
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/settings/channel-discovery/candidates/"
+	pathParts[0] = "/api/v1/settings/channel-discovery/candidates/"
 	{
 		// Encode "twitch_user_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -2398,7 +2398,7 @@ func (c *Client) sendDenyChannelDiscoveryCandidate(ctx context.Context, params D
 
 // GetAiSettings invokes getAiSettings operation.
 //
-// GET /ai/settings
+// GET /api/v1/ai/settings
 func (c *Client) GetAiSettings(ctx context.Context) (*AiSettings, error) {
 	res, err := c.sendGetAiSettings(ctx)
 	return res, err
@@ -2408,7 +2408,7 @@ func (c *Client) sendGetAiSettings(ctx context.Context) (res *AiSettings, err er
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAiSettings"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/ai/settings"),
+		semconv.URLTemplateKey.String("/api/v1/ai/settings"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2442,7 +2442,7 @@ func (c *Client) sendGetAiSettings(ctx context.Context) (res *AiSettings, err er
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/ai/settings"
+	pathParts[0] = "/api/v1/ai/settings"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2503,7 +2503,7 @@ func (c *Client) sendGetAiSettings(ctx context.Context) (res *AiSettings, err er
 
 // GetChannelDiscoverySettings invokes getChannelDiscoverySettings operation.
 //
-// GET /settings/channel-discovery
+// GET /api/v1/settings/channel-discovery
 func (c *Client) GetChannelDiscoverySettings(ctx context.Context) (*ChannelDiscoverySettings, error) {
 	res, err := c.sendGetChannelDiscoverySettings(ctx)
 	return res, err
@@ -2513,7 +2513,7 @@ func (c *Client) sendGetChannelDiscoverySettings(ctx context.Context) (res *Chan
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getChannelDiscoverySettings"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/channel-discovery"),
+		semconv.URLTemplateKey.String("/api/v1/settings/channel-discovery"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2547,7 +2547,7 @@ func (c *Client) sendGetChannelDiscoverySettings(ctx context.Context) (res *Chan
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/channel-discovery"
+	pathParts[0] = "/api/v1/settings/channel-discovery"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2608,7 +2608,7 @@ func (c *Client) sendGetChannelDiscoverySettings(ctx context.Context) (res *Chan
 
 // GetChannelLive invokes getChannelLive operation.
 //
-// POST /twitch/channels/live
+// POST /api/v1/twitch/channels/live
 func (c *Client) GetChannelLive(ctx context.Context, request *GetChannelLiveRequest) (GetChannelLiveRes, error) {
 	res, err := c.sendGetChannelLive(ctx, request)
 	return res, err
@@ -2618,7 +2618,7 @@ func (c *Client) sendGetChannelLive(ctx context.Context, request *GetChannelLive
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getChannelLive"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/twitch/channels/live"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/channels/live"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2652,7 +2652,7 @@ func (c *Client) sendGetChannelLive(ctx context.Context, request *GetChannelLive
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/channels/live"
+	pathParts[0] = "/api/v1/twitch/channels/live"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2716,7 +2716,7 @@ func (c *Client) sendGetChannelLive(ctx context.Context, request *GetChannelLive
 
 // GetIrcMonitorSettings invokes getIrcMonitorSettings operation.
 //
-// GET /settings/irc-monitor-settings
+// GET /api/v1/settings/irc-monitor-settings
 func (c *Client) GetIrcMonitorSettings(ctx context.Context) (*IrcMonitorSettings, error) {
 	res, err := c.sendGetIrcMonitorSettings(ctx)
 	return res, err
@@ -2726,7 +2726,7 @@ func (c *Client) sendGetIrcMonitorSettings(ctx context.Context) (res *IrcMonitor
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getIrcMonitorSettings"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/irc-monitor-settings"),
+		semconv.URLTemplateKey.String("/api/v1/settings/irc-monitor-settings"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2760,7 +2760,7 @@ func (c *Client) sendGetIrcMonitorSettings(ctx context.Context) (res *IrcMonitor
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/irc-monitor-settings"
+	pathParts[0] = "/api/v1/settings/irc-monitor-settings"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2821,7 +2821,7 @@ func (c *Client) sendGetIrcMonitorSettings(ctx context.Context) (res *IrcMonitor
 
 // GetIrcMonitorStatus invokes getIrcMonitorStatus operation.
 //
-// GET /twitch/irc-monitor/status
+// GET /api/v1/twitch/irc-monitor/status
 func (c *Client) GetIrcMonitorStatus(ctx context.Context) (*IrcMonitorStatus, error) {
 	res, err := c.sendGetIrcMonitorStatus(ctx)
 	return res, err
@@ -2831,7 +2831,7 @@ func (c *Client) sendGetIrcMonitorStatus(ctx context.Context) (res *IrcMonitorSt
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getIrcMonitorStatus"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/irc-monitor/status"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/irc-monitor/status"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2865,7 +2865,7 @@ func (c *Client) sendGetIrcMonitorStatus(ctx context.Context) (res *IrcMonitorSt
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/irc-monitor/status"
+	pathParts[0] = "/api/v1/twitch/irc-monitor/status"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2926,7 +2926,7 @@ func (c *Client) sendGetIrcMonitorStatus(ctx context.Context) (res *IrcMonitorSt
 
 // GetRecordedStream invokes getRecordedStream operation.
 //
-// GET /twitch/streams/{streamId}
+// GET /api/v1/twitch/streams/{streamId}
 func (c *Client) GetRecordedStream(ctx context.Context, params GetRecordedStreamParams) (GetRecordedStreamRes, error) {
 	res, err := c.sendGetRecordedStream(ctx, params)
 	return res, err
@@ -2936,7 +2936,7 @@ func (c *Client) sendGetRecordedStream(ctx context.Context, params GetRecordedSt
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRecordedStream"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/streams/{streamId}"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/streams/{streamId}"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -2970,7 +2970,7 @@ func (c *Client) sendGetRecordedStream(ctx context.Context, params GetRecordedSt
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/twitch/streams/"
+	pathParts[0] = "/api/v1/twitch/streams/"
 	{
 		// Encode "streamId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -3049,7 +3049,7 @@ func (c *Client) sendGetRecordedStream(ctx context.Context, params GetRecordedSt
 
 // GetRecordedStreamLeaderboard invokes getRecordedStreamLeaderboard operation.
 //
-// GET /twitch/streams/{streamId}/leaderboard
+// GET /api/v1/twitch/streams/{streamId}/leaderboard
 func (c *Client) GetRecordedStreamLeaderboard(ctx context.Context, params GetRecordedStreamLeaderboardParams) (GetRecordedStreamLeaderboardRes, error) {
 	res, err := c.sendGetRecordedStreamLeaderboard(ctx, params)
 	return res, err
@@ -3059,7 +3059,7 @@ func (c *Client) sendGetRecordedStreamLeaderboard(ctx context.Context, params Ge
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRecordedStreamLeaderboard"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/streams/{streamId}/leaderboard"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/streams/{streamId}/leaderboard"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -3093,7 +3093,7 @@ func (c *Client) sendGetRecordedStreamLeaderboard(ctx context.Context, params Ge
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/twitch/streams/"
+	pathParts[0] = "/api/v1/twitch/streams/"
 	{
 		// Encode "streamId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -3211,7 +3211,7 @@ func (c *Client) sendGetRecordedStreamLeaderboard(ctx context.Context, params Ge
 
 // GetSuspicionSettings invokes getSuspicionSettings operation.
 //
-// GET /settings/suspicion-settings
+// GET /api/v1/settings/suspicion-settings
 func (c *Client) GetSuspicionSettings(ctx context.Context) (*SuspicionSettings, error) {
 	res, err := c.sendGetSuspicionSettings(ctx)
 	return res, err
@@ -3221,7 +3221,7 @@ func (c *Client) sendGetSuspicionSettings(ctx context.Context) (res *SuspicionSe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getSuspicionSettings"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/suspicion-settings"),
+		semconv.URLTemplateKey.String("/api/v1/settings/suspicion-settings"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -3255,7 +3255,7 @@ func (c *Client) sendGetSuspicionSettings(ctx context.Context) (res *SuspicionSe
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/suspicion-settings"
+	pathParts[0] = "/api/v1/settings/suspicion-settings"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -3316,7 +3316,7 @@ func (c *Client) sendGetSuspicionSettings(ctx context.Context) (res *SuspicionSe
 
 // GetTwitchUserActivityTimeline invokes getTwitchUserActivityTimeline operation.
 //
-// POST /twitch/users/activity/timeline
+// POST /api/v1/twitch/users/activity/timeline
 func (c *Client) GetTwitchUserActivityTimeline(ctx context.Context, request *GetTwitchUserActivityTimelineRequest) (GetTwitchUserActivityTimelineRes, error) {
 	res, err := c.sendGetTwitchUserActivityTimeline(ctx, request)
 	return res, err
@@ -3326,7 +3326,7 @@ func (c *Client) sendGetTwitchUserActivityTimeline(ctx context.Context, request 
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTwitchUserActivityTimeline"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/twitch/users/activity/timeline"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/users/activity/timeline"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -3360,7 +3360,7 @@ func (c *Client) sendGetTwitchUserActivityTimeline(ctx context.Context, request 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/users/activity/timeline"
+	pathParts[0] = "/api/v1/twitch/users/activity/timeline"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -3424,7 +3424,7 @@ func (c *Client) sendGetTwitchUserActivityTimeline(ctx context.Context, request 
 
 // GetTwitchUserProfile invokes getTwitchUserProfile operation.
 //
-// POST /twitch/users/profile
+// POST /api/v1/twitch/users/profile
 func (c *Client) GetTwitchUserProfile(ctx context.Context, request *GetTwitchUserProfileRequest) (GetTwitchUserProfileRes, error) {
 	res, err := c.sendGetTwitchUserProfile(ctx, request)
 	return res, err
@@ -3434,7 +3434,7 @@ func (c *Client) sendGetTwitchUserProfile(ctx context.Context, request *GetTwitc
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTwitchUserProfile"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/twitch/users/profile"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/users/profile"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -3468,7 +3468,7 @@ func (c *Client) sendGetTwitchUserProfile(ctx context.Context, request *GetTwitc
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/users/profile"
+	pathParts[0] = "/api/v1/twitch/users/profile"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -3532,7 +3532,7 @@ func (c *Client) sendGetTwitchUserProfile(ctx context.Context, request *GetTwitc
 
 // GetWatchUiHints invokes getWatchUiHints operation.
 //
-// GET /twitch/watch/hints
+// GET /api/v1/twitch/watch/hints
 func (c *Client) GetWatchUiHints(ctx context.Context) (*WatchUiHints, error) {
 	res, err := c.sendGetWatchUiHints(ctx)
 	return res, err
@@ -3542,7 +3542,7 @@ func (c *Client) sendGetWatchUiHints(ctx context.Context) (res *WatchUiHints, er
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getWatchUiHints"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/watch/hints"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/watch/hints"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -3576,7 +3576,7 @@ func (c *Client) sendGetWatchUiHints(ctx context.Context) (res *WatchUiHints, er
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/watch/hints"
+	pathParts[0] = "/api/v1/twitch/watch/hints"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -3637,7 +3637,7 @@ func (c *Client) sendGetWatchUiHints(ctx context.Context) (res *WatchUiHints, er
 
 // ListAiConversations invokes listAiConversations operation.
 //
-// GET /ai/conversations
+// GET /api/v1/ai/conversations
 func (c *Client) ListAiConversations(ctx context.Context) ([]AiConversation, error) {
 	res, err := c.sendListAiConversations(ctx)
 	return res, err
@@ -3647,7 +3647,7 @@ func (c *Client) sendListAiConversations(ctx context.Context) (res []AiConversat
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listAiConversations"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/ai/conversations"),
+		semconv.URLTemplateKey.String("/api/v1/ai/conversations"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -3681,7 +3681,7 @@ func (c *Client) sendListAiConversations(ctx context.Context) (res []AiConversat
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/ai/conversations"
+	pathParts[0] = "/api/v1/ai/conversations"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -3742,7 +3742,7 @@ func (c *Client) sendListAiConversations(ctx context.Context) (res []AiConversat
 
 // ListAiMessages invokes listAiMessages operation.
 //
-// GET /ai/conversations/{conversationId}/messages
+// GET /api/v1/ai/conversations/{conversationId}/messages
 func (c *Client) ListAiMessages(ctx context.Context, params ListAiMessagesParams) (ListAiMessagesRes, error) {
 	res, err := c.sendListAiMessages(ctx, params)
 	return res, err
@@ -3752,7 +3752,7 @@ func (c *Client) sendListAiMessages(ctx context.Context, params ListAiMessagesPa
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listAiMessages"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/ai/conversations/{conversationId}/messages"),
+		semconv.URLTemplateKey.String("/api/v1/ai/conversations/{conversationId}/messages"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -3786,7 +3786,7 @@ func (c *Client) sendListAiMessages(ctx context.Context, params ListAiMessagesPa
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/ai/conversations/"
+	pathParts[0] = "/api/v1/ai/conversations/"
 	{
 		// Encode "conversationId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -3866,7 +3866,7 @@ func (c *Client) sendListAiMessages(ctx context.Context, params ListAiMessagesPa
 
 // ListChannelBlacklist invokes listChannelBlacklist operation.
 //
-// GET /settings/channel-blacklist
+// GET /api/v1/settings/channel-blacklist
 func (c *Client) ListChannelBlacklist(ctx context.Context) ([]string, error) {
 	res, err := c.sendListChannelBlacklist(ctx)
 	return res, err
@@ -3876,7 +3876,7 @@ func (c *Client) sendListChannelBlacklist(ctx context.Context) (res []string, er
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listChannelBlacklist"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/channel-blacklist"),
+		semconv.URLTemplateKey.String("/api/v1/settings/channel-blacklist"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -3910,7 +3910,7 @@ func (c *Client) sendListChannelBlacklist(ctx context.Context) (res []string, er
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/channel-blacklist"
+	pathParts[0] = "/api/v1/settings/channel-blacklist"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -3971,7 +3971,7 @@ func (c *Client) sendListChannelBlacklist(ctx context.Context) (res []string, er
 
 // ListChannelChatters invokes listChannelChatters operation.
 //
-// POST /twitch/channels/chatters
+// POST /api/v1/twitch/channels/chatters
 func (c *Client) ListChannelChatters(ctx context.Context, request *ListChannelChattersRequest) (ListChannelChattersRes, error) {
 	res, err := c.sendListChannelChatters(ctx, request)
 	return res, err
@@ -3981,7 +3981,7 @@ func (c *Client) sendListChannelChatters(ctx context.Context, request *ListChann
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listChannelChatters"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/twitch/channels/chatters"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/channels/chatters"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -4015,7 +4015,7 @@ func (c *Client) sendListChannelChatters(ctx context.Context, request *ListChann
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/channels/chatters"
+	pathParts[0] = "/api/v1/twitch/channels/chatters"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -4079,7 +4079,7 @@ func (c *Client) sendListChannelChatters(ctx context.Context, request *ListChann
 
 // ListChannelDiscoveryCandidates invokes listChannelDiscoveryCandidates operation.
 //
-// GET /settings/channel-discovery/candidates
+// GET /api/v1/settings/channel-discovery/candidates
 func (c *Client) ListChannelDiscoveryCandidates(ctx context.Context) ([]DiscoveryCandidate, error) {
 	res, err := c.sendListChannelDiscoveryCandidates(ctx)
 	return res, err
@@ -4089,7 +4089,7 @@ func (c *Client) sendListChannelDiscoveryCandidates(ctx context.Context) (res []
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listChannelDiscoveryCandidates"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/channel-discovery/candidates"),
+		semconv.URLTemplateKey.String("/api/v1/settings/channel-discovery/candidates"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -4123,7 +4123,7 @@ func (c *Client) sendListChannelDiscoveryCandidates(ctx context.Context) (res []
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/channel-discovery/candidates"
+	pathParts[0] = "/api/v1/settings/channel-discovery/candidates"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -4184,7 +4184,7 @@ func (c *Client) sendListChannelDiscoveryCandidates(ctx context.Context) (res []
 
 // ListChatHistory invokes listChatHistory operation.
 //
-// GET /twitch/chat/history
+// GET /api/v1/twitch/chat/history
 func (c *Client) ListChatHistory(ctx context.Context, params ListChatHistoryParams) (ListChatHistoryRes, error) {
 	res, err := c.sendListChatHistory(ctx, params)
 	return res, err
@@ -4194,7 +4194,7 @@ func (c *Client) sendListChatHistory(ctx context.Context, params ListChatHistory
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listChatHistory"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/chat/history"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/chat/history"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -4228,7 +4228,7 @@ func (c *Client) sendListChatHistory(ctx context.Context, params ListChatHistory
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/chat/history"
+	pathParts[0] = "/api/v1/twitch/chat/history"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -4326,7 +4326,7 @@ func (c *Client) sendListChatHistory(ctx context.Context, params ListChatHistory
 //
 // Historical IRC joined channel counts (periodic samples).
 //
-// GET /twitch/irc-monitor/joined-history
+// GET /api/v1/twitch/irc-monitor/joined-history
 func (c *Client) ListIrcMonitorJoinedHistory(ctx context.Context, params ListIrcMonitorJoinedHistoryParams) ([]IrcJoinedSample, error) {
 	res, err := c.sendListIrcMonitorJoinedHistory(ctx, params)
 	return res, err
@@ -4336,7 +4336,7 @@ func (c *Client) sendListIrcMonitorJoinedHistory(ctx context.Context, params Lis
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listIrcMonitorJoinedHistory"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/irc-monitor/joined-history"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/irc-monitor/joined-history"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -4370,7 +4370,7 @@ func (c *Client) sendListIrcMonitorJoinedHistory(ctx context.Context, params Lis
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/irc-monitor/joined-history"
+	pathParts[0] = "/api/v1/twitch/irc-monitor/joined-history"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -4454,7 +4454,7 @@ func (c *Client) sendListIrcMonitorJoinedHistory(ctx context.Context, params Lis
 //
 // List notification entries (newest first) with cursor-based incremental loading.
 //
-// GET /settings/notifications
+// GET /api/v1/settings/notifications
 func (c *Client) ListNotifications(ctx context.Context, params ListNotificationsParams) ([]NotificationEntry, error) {
 	res, err := c.sendListNotifications(ctx, params)
 	return res, err
@@ -4464,7 +4464,7 @@ func (c *Client) sendListNotifications(ctx context.Context, params ListNotificat
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listNotifications"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/notifications"),
+		semconv.URLTemplateKey.String("/api/v1/settings/notifications"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -4498,7 +4498,7 @@ func (c *Client) sendListNotifications(ctx context.Context, params ListNotificat
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/notifications"
+	pathParts[0] = "/api/v1/settings/notifications"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -4616,7 +4616,7 @@ func (c *Client) sendListNotifications(ctx context.Context, params ListNotificat
 //
 // Non-message activity in the stream time window (newest first).
 //
-// GET /twitch/streams/{streamId}/activity
+// GET /api/v1/twitch/streams/{streamId}/activity
 func (c *Client) ListRecordedStreamActivity(ctx context.Context, params ListRecordedStreamActivityParams) (ListRecordedStreamActivityRes, error) {
 	res, err := c.sendListRecordedStreamActivity(ctx, params)
 	return res, err
@@ -4626,7 +4626,7 @@ func (c *Client) sendListRecordedStreamActivity(ctx context.Context, params List
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRecordedStreamActivity"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/streams/{streamId}/activity"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/streams/{streamId}/activity"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -4660,7 +4660,7 @@ func (c *Client) sendListRecordedStreamActivity(ctx context.Context, params List
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/twitch/streams/"
+	pathParts[0] = "/api/v1/twitch/streams/"
 	{
 		// Encode "streamId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -4797,7 +4797,7 @@ func (c *Client) sendListRecordedStreamActivity(ctx context.Context, params List
 //
 // Chat messages tagged with this stream (newest first).
 //
-// GET /twitch/streams/{streamId}/messages
+// GET /api/v1/twitch/streams/{streamId}/messages
 func (c *Client) ListRecordedStreamMessages(ctx context.Context, params ListRecordedStreamMessagesParams) (ListRecordedStreamMessagesRes, error) {
 	res, err := c.sendListRecordedStreamMessages(ctx, params)
 	return res, err
@@ -4807,7 +4807,7 @@ func (c *Client) sendListRecordedStreamMessages(ctx context.Context, params List
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRecordedStreamMessages"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/streams/{streamId}/messages"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/streams/{streamId}/messages"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -4841,7 +4841,7 @@ func (c *Client) sendListRecordedStreamMessages(ctx context.Context, params List
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/twitch/streams/"
+	pathParts[0] = "/api/v1/twitch/streams/"
 	{
 		// Encode "streamId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -5029,7 +5029,7 @@ func (c *Client) sendListRecordedStreamMessages(ctx context.Context, params List
 //
 // Recorded stream sessions for monitored channels (newest first).
 //
-// GET /twitch/streams
+// GET /api/v1/twitch/streams
 func (c *Client) ListRecordedStreams(ctx context.Context, params ListRecordedStreamsParams) ([]RecordedStream, error) {
 	res, err := c.sendListRecordedStreams(ctx, params)
 	return res, err
@@ -5039,7 +5039,7 @@ func (c *Client) sendListRecordedStreams(ctx context.Context, params ListRecorde
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRecordedStreams"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/streams"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/streams"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -5073,7 +5073,7 @@ func (c *Client) sendListRecordedStreams(ctx context.Context, params ListRecorde
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/streams"
+	pathParts[0] = "/api/v1/twitch/streams"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -5208,7 +5208,7 @@ func (c *Client) sendListRecordedStreams(ctx context.Context, params ListRecorde
 //
 // Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
 //
-// GET /settings/rules/template-variables
+// GET /api/v1/settings/rules/template-variables
 func (c *Client) ListRuleTemplateVariables(ctx context.Context) (*RuleTemplateVariablesResponse, error) {
 	res, err := c.sendListRuleTemplateVariables(ctx)
 	return res, err
@@ -5218,7 +5218,7 @@ func (c *Client) sendListRuleTemplateVariables(ctx context.Context) (res *RuleTe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRuleTemplateVariables"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/rules/template-variables"),
+		semconv.URLTemplateKey.String("/api/v1/settings/rules/template-variables"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -5252,7 +5252,7 @@ func (c *Client) sendListRuleTemplateVariables(ctx context.Context) (res *RuleTe
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/rules/template-variables"
+	pathParts[0] = "/api/v1/settings/rules/template-variables"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -5315,7 +5315,7 @@ func (c *Client) sendListRuleTemplateVariables(ctx context.Context) (res *RuleTe
 //
 // List rule trigger events (newest first) with cursor-based incremental loading.
 //
-// GET /settings/rule-triggers
+// GET /api/v1/settings/rule-triggers
 func (c *Client) ListRuleTriggers(ctx context.Context, params ListRuleTriggersParams) ([]RuleTrigger, error) {
 	res, err := c.sendListRuleTriggers(ctx, params)
 	return res, err
@@ -5325,7 +5325,7 @@ func (c *Client) sendListRuleTriggers(ctx context.Context, params ListRuleTrigge
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRuleTriggers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/rule-triggers"),
+		semconv.URLTemplateKey.String("/api/v1/settings/rule-triggers"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -5359,7 +5359,7 @@ func (c *Client) sendListRuleTriggers(ctx context.Context, params ListRuleTrigge
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/rule-triggers"
+	pathParts[0] = "/api/v1/settings/rule-triggers"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -5475,7 +5475,7 @@ func (c *Client) sendListRuleTriggers(ctx context.Context, params ListRuleTrigge
 
 // ListRules invokes listRules operation.
 //
-// GET /settings/rules
+// GET /api/v1/settings/rules
 func (c *Client) ListRules(ctx context.Context) ([]Rule, error) {
 	res, err := c.sendListRules(ctx)
 	return res, err
@@ -5485,7 +5485,7 @@ func (c *Client) sendListRules(ctx context.Context) (res []Rule, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRules"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/rules"),
+		semconv.URLTemplateKey.String("/api/v1/settings/rules"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -5519,7 +5519,7 @@ func (c *Client) sendListRules(ctx context.Context) (res []Rule, err error) {
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/rules"
+	pathParts[0] = "/api/v1/settings/rules"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -5580,7 +5580,7 @@ func (c *Client) sendListRules(ctx context.Context) (res []Rule, err error) {
 
 // ListTwitchAccounts invokes listTwitchAccounts operation.
 //
-// GET /settings/twitch-accounts
+// GET /api/v1/settings/twitch-accounts
 func (c *Client) ListTwitchAccounts(ctx context.Context) ([]TwitchAccount, error) {
 	res, err := c.sendListTwitchAccounts(ctx)
 	return res, err
@@ -5590,7 +5590,7 @@ func (c *Client) sendListTwitchAccounts(ctx context.Context) (res []TwitchAccoun
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchAccounts"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/twitch-accounts"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-accounts"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -5624,7 +5624,7 @@ func (c *Client) sendListTwitchAccounts(ctx context.Context) (res []TwitchAccoun
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-accounts"
+	pathParts[0] = "/api/v1/settings/twitch-accounts"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -5687,7 +5687,7 @@ func (c *Client) sendListTwitchAccounts(ctx context.Context) (res []TwitchAccoun
 //
 // List known Twitch users (chatters and channels) for directory search.
 //
-// GET /twitch/users
+// GET /api/v1/twitch/users
 func (c *Client) ListTwitchDirectoryUsers(ctx context.Context, params ListTwitchDirectoryUsersParams) ([]TwitchUser, error) {
 	res, err := c.sendListTwitchDirectoryUsers(ctx, params)
 	return res, err
@@ -5697,7 +5697,7 @@ func (c *Client) sendListTwitchDirectoryUsers(ctx context.Context, params ListTw
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchDirectoryUsers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/users"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/users"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -5731,7 +5731,7 @@ func (c *Client) sendListTwitchDirectoryUsers(ctx context.Context, params ListTw
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/users"
+	pathParts[0] = "/api/v1/twitch/users"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -5866,7 +5866,7 @@ func (c *Client) sendListTwitchDirectoryUsers(ctx context.Context, params ListTw
 //
 // Search persisted chat messages (newest first). Omit filters to list recent messages.
 //
-// GET /twitch/messages
+// GET /api/v1/twitch/messages
 func (c *Client) ListTwitchMessages(ctx context.Context, params ListTwitchMessagesParams) ([]ChatHistoryEntry, error) {
 	res, err := c.sendListTwitchMessages(ctx, params)
 	return res, err
@@ -5876,7 +5876,7 @@ func (c *Client) sendListTwitchMessages(ctx context.Context, params ListTwitchMe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchMessages"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/twitch/messages"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/messages"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -5910,7 +5910,7 @@ func (c *Client) sendListTwitchMessages(ctx context.Context, params ListTwitchMe
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/messages"
+	pathParts[0] = "/api/v1/twitch/messages"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -6128,7 +6128,7 @@ func (c *Client) sendListTwitchMessages(ctx context.Context, params ListTwitchMe
 
 // ListTwitchUserActivity invokes listTwitchUserActivity operation.
 //
-// POST /twitch/users/activity
+// POST /api/v1/twitch/users/activity
 func (c *Client) ListTwitchUserActivity(ctx context.Context, request *ListTwitchUserActivityRequest) (ListTwitchUserActivityRes, error) {
 	res, err := c.sendListTwitchUserActivity(ctx, request)
 	return res, err
@@ -6138,7 +6138,7 @@ func (c *Client) sendListTwitchUserActivity(ctx context.Context, request *ListTw
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchUserActivity"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/twitch/users/activity"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/users/activity"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6172,7 +6172,7 @@ func (c *Client) sendListTwitchUserActivity(ctx context.Context, request *ListTw
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/users/activity"
+	pathParts[0] = "/api/v1/twitch/users/activity"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -6236,7 +6236,7 @@ func (c *Client) sendListTwitchUserActivity(ctx context.Context, request *ListTw
 
 // ListTwitchUsers invokes listTwitchUsers operation.
 //
-// GET /settings/twitch-users
+// GET /api/v1/settings/twitch-users
 func (c *Client) ListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) ([]TwitchUser, error) {
 	res, err := c.sendListTwitchUsers(ctx, params)
 	return res, err
@@ -6246,7 +6246,7 @@ func (c *Client) sendListTwitchUsers(ctx context.Context, params ListTwitchUsers
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchUsers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/settings/twitch-users"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-users"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6280,7 +6280,7 @@ func (c *Client) sendListTwitchUsers(ctx context.Context, params ListTwitchUsers
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-users"
+	pathParts[0] = "/api/v1/settings/twitch-users"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -6362,7 +6362,7 @@ func (c *Client) sendListTwitchUsers(ctx context.Context, params ListTwitchUsers
 
 // Login invokes login operation.
 //
-// POST /auth/login
+// POST /api/v1/auth/login
 func (c *Client) Login(ctx context.Context, request *LoginRequest) (LoginRes, error) {
 	res, err := c.sendLogin(ctx, request)
 	return res, err
@@ -6372,7 +6372,7 @@ func (c *Client) sendLogin(ctx context.Context, request *LoginRequest) (res Logi
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("login"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/auth/login"),
+		semconv.URLTemplateKey.String("/api/v1/auth/login"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6406,7 +6406,7 @@ func (c *Client) sendLogin(ctx context.Context, request *LoginRequest) (res Logi
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/auth/login"
+	pathParts[0] = "/api/v1/auth/login"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -6437,7 +6437,7 @@ func (c *Client) sendLogin(ctx context.Context, request *LoginRequest) (res Logi
 
 // Me invokes me operation.
 //
-// GET /me
+// GET /api/v1/me
 func (c *Client) Me(ctx context.Context) (MeRes, error) {
 	res, err := c.sendMe(ctx)
 	return res, err
@@ -6447,7 +6447,7 @@ func (c *Client) sendMe(ctx context.Context) (res MeRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("me"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/me"),
+		semconv.URLTemplateKey.String("/api/v1/me"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6481,7 +6481,7 @@ func (c *Client) sendMe(ctx context.Context) (res MeRes, err error) {
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/me"
+	pathParts[0] = "/api/v1/me"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -6542,7 +6542,7 @@ func (c *Client) sendMe(ctx context.Context) (res MeRes, err error) {
 
 // PatchAiSettings invokes patchAiSettings operation.
 //
-// PATCH /ai/settings
+// PATCH /api/v1/ai/settings
 func (c *Client) PatchAiSettings(ctx context.Context, request *PatchAiSettingsRequest) (*AiSettings, error) {
 	res, err := c.sendPatchAiSettings(ctx, request)
 	return res, err
@@ -6552,7 +6552,7 @@ func (c *Client) sendPatchAiSettings(ctx context.Context, request *PatchAiSettin
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("patchAiSettings"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.URLTemplateKey.String("/ai/settings"),
+		semconv.URLTemplateKey.String("/api/v1/ai/settings"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6586,7 +6586,7 @@ func (c *Client) sendPatchAiSettings(ctx context.Context, request *PatchAiSettin
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/ai/settings"
+	pathParts[0] = "/api/v1/ai/settings"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -6650,7 +6650,7 @@ func (c *Client) sendPatchAiSettings(ctx context.Context, request *PatchAiSettin
 
 // SendMessage invokes sendMessage operation.
 //
-// POST /twitch/send
+// POST /api/v1/twitch/send
 func (c *Client) SendMessage(ctx context.Context, request *SendMessageRequest) (SendMessageRes, error) {
 	res, err := c.sendSendMessage(ctx, request)
 	return res, err
@@ -6660,7 +6660,7 @@ func (c *Client) sendSendMessage(ctx context.Context, request *SendMessageReques
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("sendMessage"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/twitch/send"),
+		semconv.URLTemplateKey.String("/api/v1/twitch/send"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6694,7 +6694,7 @@ func (c *Client) sendSendMessage(ctx context.Context, request *SendMessageReques
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/twitch/send"
+	pathParts[0] = "/api/v1/twitch/send"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -6758,7 +6758,7 @@ func (c *Client) sendSendMessage(ctx context.Context, request *SendMessageReques
 
 // SetChannelBlacklist invokes setChannelBlacklist operation.
 //
-// POST /settings/channel-blacklist
+// POST /api/v1/settings/channel-blacklist
 func (c *Client) SetChannelBlacklist(ctx context.Context, request *ChannelBlacklistChange) (SetChannelBlacklistRes, error) {
 	res, err := c.sendSetChannelBlacklist(ctx, request)
 	return res, err
@@ -6768,7 +6768,7 @@ func (c *Client) sendSetChannelBlacklist(ctx context.Context, request *ChannelBl
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("setChannelBlacklist"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/channel-blacklist"),
+		semconv.URLTemplateKey.String("/api/v1/settings/channel-blacklist"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6802,7 +6802,7 @@ func (c *Client) sendSetChannelBlacklist(ctx context.Context, request *ChannelBl
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/channel-blacklist"
+	pathParts[0] = "/api/v1/settings/channel-blacklist"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -6868,7 +6868,7 @@ func (c *Client) sendSetChannelBlacklist(ctx context.Context, request *ChannelBl
 //
 // Start Twitch authorization (browser) to link an account without pasting a refresh token.
 //
-// POST /settings/twitch-accounts/oauth/start
+// POST /api/v1/settings/twitch-accounts/oauth/start
 func (c *Client) StartTwitchOAuth(ctx context.Context, request OptStartTwitchOAuthRequest) (*StartTwitchOAuthResponse, error) {
 	res, err := c.sendStartTwitchOAuth(ctx, request)
 	return res, err
@@ -6878,7 +6878,7 @@ func (c *Client) sendStartTwitchOAuth(ctx context.Context, request OptStartTwitc
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("startTwitchOAuth"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/twitch-accounts/oauth/start"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-accounts/oauth/start"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6912,7 +6912,7 @@ func (c *Client) sendStartTwitchOAuth(ctx context.Context, request OptStartTwitc
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-accounts/oauth/start"
+	pathParts[0] = "/api/v1/settings/twitch-accounts/oauth/start"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -6976,7 +6976,7 @@ func (c *Client) sendStartTwitchOAuth(ctx context.Context, request OptStartTwitc
 
 // StopAiAgent invokes stopAiAgent operation.
 //
-// POST /ai/conversations/{conversationId}/stop
+// POST /api/v1/ai/conversations/{conversationId}/stop
 func (c *Client) StopAiAgent(ctx context.Context, params StopAiAgentParams) (StopAiAgentRes, error) {
 	res, err := c.sendStopAiAgent(ctx, params)
 	return res, err
@@ -6986,7 +6986,7 @@ func (c *Client) sendStopAiAgent(ctx context.Context, params StopAiAgentParams) 
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("stopAiAgent"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/ai/conversations/{conversationId}/stop"),
+		semconv.URLTemplateKey.String("/api/v1/ai/conversations/{conversationId}/stop"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7020,7 +7020,7 @@ func (c *Client) sendStopAiAgent(ctx context.Context, params StopAiAgentParams) 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/ai/conversations/"
+	pathParts[0] = "/api/v1/ai/conversations/"
 	{
 		// Encode "conversationId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -7100,7 +7100,7 @@ func (c *Client) sendStopAiAgent(ctx context.Context, params StopAiAgentParams) 
 
 // TestRuleRegex invokes testRuleRegex operation.
 //
-// POST /settings/rules/test-regex
+// POST /api/v1/settings/rules/test-regex
 func (c *Client) TestRuleRegex(ctx context.Context, request *TestRuleRegexRequest) (*TestRuleRegexResponse, error) {
 	res, err := c.sendTestRuleRegex(ctx, request)
 	return res, err
@@ -7110,7 +7110,7 @@ func (c *Client) sendTestRuleRegex(ctx context.Context, request *TestRuleRegexRe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("testRuleRegex"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/rules/test-regex"),
+		semconv.URLTemplateKey.String("/api/v1/settings/rules/test-regex"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7144,7 +7144,7 @@ func (c *Client) sendTestRuleRegex(ctx context.Context, request *TestRuleRegexRe
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/rules/test-regex"
+	pathParts[0] = "/api/v1/settings/rules/test-regex"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -7208,7 +7208,7 @@ func (c *Client) sendTestRuleRegex(ctx context.Context, request *TestRuleRegexRe
 
 // UpdateChannelDiscoverySettings invokes updateChannelDiscoverySettings operation.
 //
-// PATCH /settings/channel-discovery
+// PATCH /api/v1/settings/channel-discovery
 func (c *Client) UpdateChannelDiscoverySettings(ctx context.Context, request *ChannelDiscoverySettings) (UpdateChannelDiscoverySettingsRes, error) {
 	res, err := c.sendUpdateChannelDiscoverySettings(ctx, request)
 	return res, err
@@ -7218,7 +7218,7 @@ func (c *Client) sendUpdateChannelDiscoverySettings(ctx context.Context, request
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateChannelDiscoverySettings"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.URLTemplateKey.String("/settings/channel-discovery"),
+		semconv.URLTemplateKey.String("/api/v1/settings/channel-discovery"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7252,7 +7252,7 @@ func (c *Client) sendUpdateChannelDiscoverySettings(ctx context.Context, request
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/channel-discovery"
+	pathParts[0] = "/api/v1/settings/channel-discovery"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -7316,7 +7316,7 @@ func (c *Client) sendUpdateChannelDiscoverySettings(ctx context.Context, request
 
 // UpdateIrcMonitorSettings invokes updateIrcMonitorSettings operation.
 //
-// PATCH /settings/irc-monitor-settings
+// PATCH /api/v1/settings/irc-monitor-settings
 func (c *Client) UpdateIrcMonitorSettings(ctx context.Context, request *IrcMonitorSettings) (*IrcMonitorSettings, error) {
 	res, err := c.sendUpdateIrcMonitorSettings(ctx, request)
 	return res, err
@@ -7326,7 +7326,7 @@ func (c *Client) sendUpdateIrcMonitorSettings(ctx context.Context, request *IrcM
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateIrcMonitorSettings"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.URLTemplateKey.String("/settings/irc-monitor-settings"),
+		semconv.URLTemplateKey.String("/api/v1/settings/irc-monitor-settings"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7360,7 +7360,7 @@ func (c *Client) sendUpdateIrcMonitorSettings(ctx context.Context, request *IrcM
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/irc-monitor-settings"
+	pathParts[0] = "/api/v1/settings/irc-monitor-settings"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -7424,7 +7424,7 @@ func (c *Client) sendUpdateIrcMonitorSettings(ctx context.Context, request *IrcM
 
 // UpdateNotification invokes updateNotification operation.
 //
-// POST /settings/notifications/update
+// POST /api/v1/settings/notifications/update
 func (c *Client) UpdateNotification(ctx context.Context, request *UpdateNotificationPostRequest) (UpdateNotificationRes, error) {
 	res, err := c.sendUpdateNotification(ctx, request)
 	return res, err
@@ -7434,7 +7434,7 @@ func (c *Client) sendUpdateNotification(ctx context.Context, request *UpdateNoti
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateNotification"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/notifications/update"),
+		semconv.URLTemplateKey.String("/api/v1/settings/notifications/update"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7468,7 +7468,7 @@ func (c *Client) sendUpdateNotification(ctx context.Context, request *UpdateNoti
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/notifications/update"
+	pathParts[0] = "/api/v1/settings/notifications/update"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -7532,7 +7532,7 @@ func (c *Client) sendUpdateNotification(ctx context.Context, request *UpdateNoti
 
 // UpdateRule invokes updateRule operation.
 //
-// POST /settings/rules/update
+// POST /api/v1/settings/rules/update
 func (c *Client) UpdateRule(ctx context.Context, request *UpdateRulePostRequest) (UpdateRuleRes, error) {
 	res, err := c.sendUpdateRule(ctx, request)
 	return res, err
@@ -7542,7 +7542,7 @@ func (c *Client) sendUpdateRule(ctx context.Context, request *UpdateRulePostRequ
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateRule"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/rules/update"),
+		semconv.URLTemplateKey.String("/api/v1/settings/rules/update"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7576,7 +7576,7 @@ func (c *Client) sendUpdateRule(ctx context.Context, request *UpdateRulePostRequ
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/rules/update"
+	pathParts[0] = "/api/v1/settings/rules/update"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -7640,7 +7640,7 @@ func (c *Client) sendUpdateRule(ctx context.Context, request *UpdateRulePostRequ
 
 // UpdateSuspicionSettings invokes updateSuspicionSettings operation.
 //
-// PATCH /settings/suspicion-settings
+// PATCH /api/v1/settings/suspicion-settings
 func (c *Client) UpdateSuspicionSettings(ctx context.Context, request *SuspicionSettings) (*SuspicionSettings, error) {
 	res, err := c.sendUpdateSuspicionSettings(ctx, request)
 	return res, err
@@ -7650,7 +7650,7 @@ func (c *Client) sendUpdateSuspicionSettings(ctx context.Context, request *Suspi
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateSuspicionSettings"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.URLTemplateKey.String("/settings/suspicion-settings"),
+		semconv.URLTemplateKey.String("/api/v1/settings/suspicion-settings"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7684,7 +7684,7 @@ func (c *Client) sendUpdateSuspicionSettings(ctx context.Context, request *Suspi
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/suspicion-settings"
+	pathParts[0] = "/api/v1/settings/suspicion-settings"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -7748,7 +7748,7 @@ func (c *Client) sendUpdateSuspicionSettings(ctx context.Context, request *Suspi
 
 // UpdateTwitchAccount invokes updateTwitchAccount operation.
 //
-// POST /settings/twitch-accounts/update
+// POST /api/v1/settings/twitch-accounts/update
 func (c *Client) UpdateTwitchAccount(ctx context.Context, request *UpdateTwitchAccountPostRequest) (UpdateTwitchAccountRes, error) {
 	res, err := c.sendUpdateTwitchAccount(ctx, request)
 	return res, err
@@ -7758,7 +7758,7 @@ func (c *Client) sendUpdateTwitchAccount(ctx context.Context, request *UpdateTwi
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateTwitchAccount"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/twitch-accounts/update"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-accounts/update"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7792,7 +7792,7 @@ func (c *Client) sendUpdateTwitchAccount(ctx context.Context, request *UpdateTwi
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-accounts/update"
+	pathParts[0] = "/api/v1/settings/twitch-accounts/update"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -7856,7 +7856,7 @@ func (c *Client) sendUpdateTwitchAccount(ctx context.Context, request *UpdateTwi
 
 // UpdateTwitchUser invokes updateTwitchUser operation.
 //
-// POST /settings/twitch-users/update
+// POST /api/v1/settings/twitch-users/update
 func (c *Client) UpdateTwitchUser(ctx context.Context, request *UpdateTwitchUserPostRequest) (UpdateTwitchUserRes, error) {
 	res, err := c.sendUpdateTwitchUser(ctx, request)
 	return res, err
@@ -7866,7 +7866,7 @@ func (c *Client) sendUpdateTwitchUser(ctx context.Context, request *UpdateTwitch
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateTwitchUser"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/settings/twitch-users/update"),
+		semconv.URLTemplateKey.String("/api/v1/settings/twitch-users/update"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -7900,7 +7900,7 @@ func (c *Client) sendUpdateTwitchUser(ctx context.Context, request *UpdateTwitch
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/settings/twitch-users/update"
+	pathParts[0] = "/api/v1/settings/twitch-users/update"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"

@@ -15,11 +15,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/auth': { target, changeOrigin: true },
-      '/me': { target, changeOrigin: true },
-      '/users': { target, changeOrigin: true },
-      '/settings': { target, changeOrigin: true },
-      '/twitch': { target, changeOrigin: true },
+      '/api/v1': { target, changeOrigin: true },
       '/metrics': { target, changeOrigin: true },
       '/ws': { target: 'ws://localhost:8080', ws: true, changeOrigin: true },
     },

@@ -4,7 +4,7 @@
 
 **Run / wiring:** `cmd/dredge/main.go` · FX `internal/app/fx.go` · module `github.com/rofleksey/dredge` (Go 1.25+).
 
-**Admin gate:** Every OpenAPI operation and `GET /ws` needs an admin JWT except `POST /auth/login`, `GET /me` (`operationId: me`; Bearer, not admin-gated), `GET /health`. Do not drift that list without updating **OpenAPI**, **ogen admin middleware**, **`LiveWebsocketHandler`**, and **`DREDGE.md`** in one go.
+**Admin gate:** Every OpenAPI operation and `GET /ws` needs an admin JWT except `POST /api/v1/auth/login`, `GET /api/v1/me` (`operationId: me`; Bearer, not admin-gated), `GET /health`. Do not drift that list without updating **OpenAPI**, **ogen admin middleware**, **`LiveWebsocketHandler`**, and **`DREDGE.md`** in one go.
 
 **Never hand-edit:** `internal/http/gen/`, `internal/repository/mocks/`, or anything `make clean-generated` removes. Regen from `api/openapi.yaml`: `make gen` or `make generate` → `internal/http/gen` (`package gen`). After `internal/repository/store.go`: `make mocks`.
 

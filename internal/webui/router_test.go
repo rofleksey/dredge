@@ -27,7 +27,7 @@ func TestNewMux_routesAPIAndStatic(t *testing.T) {
 	mux := NewMux(api)
 
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/me", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/me", nil)
 	mux.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusNoContent, rec.Code)
 	assert.Equal(t, 1, apiHits)
@@ -45,15 +45,17 @@ func TestIsAPIPath(t *testing.T) {
 		path string
 		want bool
 	}{
-		{"/auth/login", true},
-		{"/auth/x", true},
-		{"/me", true},
-		{"/me/foo", true},
-		{"/settings/x", true},
-		{"/twitch/foo", true},
-		{"/ai/settings", true},
-		{"/ai/conversations", true},
+		{"/api/v1/auth/login", true},
+		{"/api/v1/auth/x", true},
+		{"/api/v1/me", true},
+		{"/api/v1/me/foo", true},
+		{"/api/v1/settings/x", true},
+		{"/api/v1/twitch/foo", true},
+		{"/api/v1/ai/settings", true},
+		{"/api/v1/ai/conversations", true},
 		{"/", false},
+		{"/auth/login", false},
+		{"/me", false},
 		{"/index.html", false},
 		{"/assets/app.js", false},
 	}

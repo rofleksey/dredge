@@ -18,15 +18,17 @@ func TestIsAPIPath(t *testing.T) {
 		path string
 		want bool
 	}{
-		{"/auth/login", true},
-		{"/me", true},
-		{"/me/x", true},
-		{"/settings/rules", true},
-		{"/twitch/users", true},
-		{"/ai/settings", true},
-		{"/ai/conversations", true},
-		{"/ai/conversations/1/messages", true},
+		{"/api/v1/auth/login", true},
+		{"/api/v1/me", true},
+		{"/api/v1/me/x", true},
+		{"/api/v1/settings/rules", true},
+		{"/api/v1/twitch/users", true},
+		{"/api/v1/ai/settings", true},
+		{"/api/v1/ai/conversations", true},
+		{"/api/v1/ai/conversations/1/messages", true},
 		{"/", false},
+		{"/auth/login", false},
+		{"/me", false},
 		{"/assets/foo.js", false},
 	}
 	for _, tc := range cases {

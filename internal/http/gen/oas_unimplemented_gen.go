@@ -15,35 +15,35 @@ var _ Handler = UnimplementedHandler{}
 
 // ApproveChannelDiscoveryCandidate implements approveChannelDiscoveryCandidate operation.
 //
-// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve
 func (UnimplementedHandler) ApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (r ApproveChannelDiscoveryCandidateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ConfirmAiTool implements confirmAiTool operation.
 //
-// POST /ai/conversations/{conversationId}/confirm
+// POST /api/v1/ai/conversations/{conversationId}/confirm
 func (UnimplementedHandler) ConfirmAiTool(ctx context.Context, req *ConfirmAiToolRequest, params ConfirmAiToolParams) (r ConfirmAiToolRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CountRules implements countRules operation.
 //
-// GET /settings/rules/count
+// GET /api/v1/settings/rules/count
 func (UnimplementedHandler) CountRules(ctx context.Context) (r *CountResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CountTwitchAccounts implements countTwitchAccounts operation.
 //
-// GET /settings/twitch-accounts/count
+// GET /api/v1/settings/twitch-accounts/count
 func (UnimplementedHandler) CountTwitchAccounts(ctx context.Context) (r *CountResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CountTwitchDirectoryUsers implements countTwitchDirectoryUsers operation.
 //
-// GET /twitch/users/count
+// GET /api/v1/twitch/users/count
 func (UnimplementedHandler) CountTwitchDirectoryUsers(ctx context.Context, params CountTwitchDirectoryUsersParams) (r *CountResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -52,203 +52,203 @@ func (UnimplementedHandler) CountTwitchDirectoryUsers(ctx context.Context, param
 //
 // Count messages matching the same filters as list (ignores limit/cursor).
 //
-// GET /twitch/messages/count
+// GET /api/v1/twitch/messages/count
 func (UnimplementedHandler) CountTwitchMessages(ctx context.Context, params CountTwitchMessagesParams) (r *CountResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CreateAiConversation implements createAiConversation operation.
 //
-// POST /ai/conversations
+// POST /api/v1/ai/conversations
 func (UnimplementedHandler) CreateAiConversation(ctx context.Context, req OptCreateAiConversationRequest) (r *AiConversation, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CreateAiMessage implements createAiMessage operation.
 //
-// POST /ai/conversations/{conversationId}/messages
+// POST /api/v1/ai/conversations/{conversationId}/messages
 func (UnimplementedHandler) CreateAiMessage(ctx context.Context, req *CreateAiMessageRequest, params CreateAiMessageParams) (r CreateAiMessageRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CreateNotification implements createNotification operation.
 //
-// POST /settings/notifications
+// POST /api/v1/settings/notifications
 func (UnimplementedHandler) CreateNotification(ctx context.Context, req *CreateNotificationRequest) (r *NotificationEntry, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CreateRule implements createRule operation.
 //
-// POST /settings/rules
+// POST /api/v1/settings/rules
 func (UnimplementedHandler) CreateRule(ctx context.Context, req *CreateRuleRequest) (r *Rule, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CreateTwitchAccount implements createTwitchAccount operation.
 //
-// POST /settings/twitch-accounts
+// POST /api/v1/settings/twitch-accounts
 func (UnimplementedHandler) CreateTwitchAccount(ctx context.Context, req *CreateTwitchAccountRequest) (r *TwitchAccount, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // CreateTwitchUser implements createTwitchUser operation.
 //
-// POST /settings/twitch-users
+// POST /api/v1/settings/twitch-users
 func (UnimplementedHandler) CreateTwitchUser(ctx context.Context, req *CreateTwitchUserRequest) (r CreateTwitchUserRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // DeleteAiConversation implements deleteAiConversation operation.
 //
-// DELETE /ai/conversations/{conversationId}
+// DELETE /api/v1/ai/conversations/{conversationId}
 func (UnimplementedHandler) DeleteAiConversation(ctx context.Context, params DeleteAiConversationParams) (r DeleteAiConversationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // DeleteNotification implements deleteNotification operation.
 //
-// POST /settings/notifications/delete
+// POST /api/v1/settings/notifications/delete
 func (UnimplementedHandler) DeleteNotification(ctx context.Context, req *DeleteByIDRequest) (r DeleteNotificationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // DeleteRule implements deleteRule operation.
 //
-// POST /settings/rules/delete
+// POST /api/v1/settings/rules/delete
 func (UnimplementedHandler) DeleteRule(ctx context.Context, req *DeleteByIDRequest) (r DeleteRuleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // DeleteTwitchAccount implements deleteTwitchAccount operation.
 //
-// POST /settings/twitch-accounts/delete
+// POST /api/v1/settings/twitch-accounts/delete
 func (UnimplementedHandler) DeleteTwitchAccount(ctx context.Context, req *DeleteByIDRequest) (r DeleteTwitchAccountRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // DenyChannelDiscoveryCandidate implements denyChannelDiscoveryCandidate operation.
 //
-// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny
 func (UnimplementedHandler) DenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (r DenyChannelDiscoveryCandidateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetAiSettings implements getAiSettings operation.
 //
-// GET /ai/settings
+// GET /api/v1/ai/settings
 func (UnimplementedHandler) GetAiSettings(ctx context.Context) (r *AiSettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetChannelDiscoverySettings implements getChannelDiscoverySettings operation.
 //
-// GET /settings/channel-discovery
+// GET /api/v1/settings/channel-discovery
 func (UnimplementedHandler) GetChannelDiscoverySettings(ctx context.Context) (r *ChannelDiscoverySettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetChannelLive implements getChannelLive operation.
 //
-// POST /twitch/channels/live
+// POST /api/v1/twitch/channels/live
 func (UnimplementedHandler) GetChannelLive(ctx context.Context, req *GetChannelLiveRequest) (r GetChannelLiveRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetIrcMonitorSettings implements getIrcMonitorSettings operation.
 //
-// GET /settings/irc-monitor-settings
+// GET /api/v1/settings/irc-monitor-settings
 func (UnimplementedHandler) GetIrcMonitorSettings(ctx context.Context) (r *IrcMonitorSettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetIrcMonitorStatus implements getIrcMonitorStatus operation.
 //
-// GET /twitch/irc-monitor/status
+// GET /api/v1/twitch/irc-monitor/status
 func (UnimplementedHandler) GetIrcMonitorStatus(ctx context.Context) (r *IrcMonitorStatus, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetRecordedStream implements getRecordedStream operation.
 //
-// GET /twitch/streams/{streamId}
+// GET /api/v1/twitch/streams/{streamId}
 func (UnimplementedHandler) GetRecordedStream(ctx context.Context, params GetRecordedStreamParams) (r GetRecordedStreamRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetRecordedStreamLeaderboard implements getRecordedStreamLeaderboard operation.
 //
-// GET /twitch/streams/{streamId}/leaderboard
+// GET /api/v1/twitch/streams/{streamId}/leaderboard
 func (UnimplementedHandler) GetRecordedStreamLeaderboard(ctx context.Context, params GetRecordedStreamLeaderboardParams) (r GetRecordedStreamLeaderboardRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetSuspicionSettings implements getSuspicionSettings operation.
 //
-// GET /settings/suspicion-settings
+// GET /api/v1/settings/suspicion-settings
 func (UnimplementedHandler) GetSuspicionSettings(ctx context.Context) (r *SuspicionSettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetTwitchUserActivityTimeline implements getTwitchUserActivityTimeline operation.
 //
-// POST /twitch/users/activity/timeline
+// POST /api/v1/twitch/users/activity/timeline
 func (UnimplementedHandler) GetTwitchUserActivityTimeline(ctx context.Context, req *GetTwitchUserActivityTimelineRequest) (r GetTwitchUserActivityTimelineRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetTwitchUserProfile implements getTwitchUserProfile operation.
 //
-// POST /twitch/users/profile
+// POST /api/v1/twitch/users/profile
 func (UnimplementedHandler) GetTwitchUserProfile(ctx context.Context, req *GetTwitchUserProfileRequest) (r GetTwitchUserProfileRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetWatchUiHints implements getWatchUiHints operation.
 //
-// GET /twitch/watch/hints
+// GET /api/v1/twitch/watch/hints
 func (UnimplementedHandler) GetWatchUiHints(ctx context.Context) (r *WatchUiHints, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListAiConversations implements listAiConversations operation.
 //
-// GET /ai/conversations
+// GET /api/v1/ai/conversations
 func (UnimplementedHandler) ListAiConversations(ctx context.Context) (r []AiConversation, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListAiMessages implements listAiMessages operation.
 //
-// GET /ai/conversations/{conversationId}/messages
+// GET /api/v1/ai/conversations/{conversationId}/messages
 func (UnimplementedHandler) ListAiMessages(ctx context.Context, params ListAiMessagesParams) (r ListAiMessagesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListChannelBlacklist implements listChannelBlacklist operation.
 //
-// GET /settings/channel-blacklist
+// GET /api/v1/settings/channel-blacklist
 func (UnimplementedHandler) ListChannelBlacklist(ctx context.Context) (r []string, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListChannelChatters implements listChannelChatters operation.
 //
-// POST /twitch/channels/chatters
+// POST /api/v1/twitch/channels/chatters
 func (UnimplementedHandler) ListChannelChatters(ctx context.Context, req *ListChannelChattersRequest) (r ListChannelChattersRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListChannelDiscoveryCandidates implements listChannelDiscoveryCandidates operation.
 //
-// GET /settings/channel-discovery/candidates
+// GET /api/v1/settings/channel-discovery/candidates
 func (UnimplementedHandler) ListChannelDiscoveryCandidates(ctx context.Context) (r []DiscoveryCandidate, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListChatHistory implements listChatHistory operation.
 //
-// GET /twitch/chat/history
+// GET /api/v1/twitch/chat/history
 func (UnimplementedHandler) ListChatHistory(ctx context.Context, params ListChatHistoryParams) (r ListChatHistoryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -257,7 +257,7 @@ func (UnimplementedHandler) ListChatHistory(ctx context.Context, params ListChat
 //
 // Historical IRC joined channel counts (periodic samples).
 //
-// GET /twitch/irc-monitor/joined-history
+// GET /api/v1/twitch/irc-monitor/joined-history
 func (UnimplementedHandler) ListIrcMonitorJoinedHistory(ctx context.Context, params ListIrcMonitorJoinedHistoryParams) (r []IrcJoinedSample, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -266,7 +266,7 @@ func (UnimplementedHandler) ListIrcMonitorJoinedHistory(ctx context.Context, par
 //
 // List notification entries (newest first) with cursor-based incremental loading.
 //
-// GET /settings/notifications
+// GET /api/v1/settings/notifications
 func (UnimplementedHandler) ListNotifications(ctx context.Context, params ListNotificationsParams) (r []NotificationEntry, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -275,7 +275,7 @@ func (UnimplementedHandler) ListNotifications(ctx context.Context, params ListNo
 //
 // Non-message activity in the stream time window (newest first).
 //
-// GET /twitch/streams/{streamId}/activity
+// GET /api/v1/twitch/streams/{streamId}/activity
 func (UnimplementedHandler) ListRecordedStreamActivity(ctx context.Context, params ListRecordedStreamActivityParams) (r ListRecordedStreamActivityRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -284,7 +284,7 @@ func (UnimplementedHandler) ListRecordedStreamActivity(ctx context.Context, para
 //
 // Chat messages tagged with this stream (newest first).
 //
-// GET /twitch/streams/{streamId}/messages
+// GET /api/v1/twitch/streams/{streamId}/messages
 func (UnimplementedHandler) ListRecordedStreamMessages(ctx context.Context, params ListRecordedStreamMessagesParams) (r ListRecordedStreamMessagesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -293,7 +293,7 @@ func (UnimplementedHandler) ListRecordedStreamMessages(ctx context.Context, para
 //
 // Recorded stream sessions for monitored channels (newest first).
 //
-// GET /twitch/streams
+// GET /api/v1/twitch/streams
 func (UnimplementedHandler) ListRecordedStreams(ctx context.Context, params ListRecordedStreamsParams) (r []RecordedStream, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -302,7 +302,7 @@ func (UnimplementedHandler) ListRecordedStreams(ctx context.Context, params List
 //
 // Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
 //
-// GET /settings/rules/template-variables
+// GET /api/v1/settings/rules/template-variables
 func (UnimplementedHandler) ListRuleTemplateVariables(ctx context.Context) (r *RuleTemplateVariablesResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -311,21 +311,21 @@ func (UnimplementedHandler) ListRuleTemplateVariables(ctx context.Context) (r *R
 //
 // List rule trigger events (newest first) with cursor-based incremental loading.
 //
-// GET /settings/rule-triggers
+// GET /api/v1/settings/rule-triggers
 func (UnimplementedHandler) ListRuleTriggers(ctx context.Context, params ListRuleTriggersParams) (r []RuleTrigger, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListRules implements listRules operation.
 //
-// GET /settings/rules
+// GET /api/v1/settings/rules
 func (UnimplementedHandler) ListRules(ctx context.Context) (r []Rule, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListTwitchAccounts implements listTwitchAccounts operation.
 //
-// GET /settings/twitch-accounts
+// GET /api/v1/settings/twitch-accounts
 func (UnimplementedHandler) ListTwitchAccounts(ctx context.Context) (r []TwitchAccount, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -334,7 +334,7 @@ func (UnimplementedHandler) ListTwitchAccounts(ctx context.Context) (r []TwitchA
 //
 // List known Twitch users (chatters and channels) for directory search.
 //
-// GET /twitch/users
+// GET /api/v1/twitch/users
 func (UnimplementedHandler) ListTwitchDirectoryUsers(ctx context.Context, params ListTwitchDirectoryUsersParams) (r []TwitchUser, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -343,56 +343,56 @@ func (UnimplementedHandler) ListTwitchDirectoryUsers(ctx context.Context, params
 //
 // Search persisted chat messages (newest first). Omit filters to list recent messages.
 //
-// GET /twitch/messages
+// GET /api/v1/twitch/messages
 func (UnimplementedHandler) ListTwitchMessages(ctx context.Context, params ListTwitchMessagesParams) (r []ChatHistoryEntry, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListTwitchUserActivity implements listTwitchUserActivity operation.
 //
-// POST /twitch/users/activity
+// POST /api/v1/twitch/users/activity
 func (UnimplementedHandler) ListTwitchUserActivity(ctx context.Context, req *ListTwitchUserActivityRequest) (r ListTwitchUserActivityRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListTwitchUsers implements listTwitchUsers operation.
 //
-// GET /settings/twitch-users
+// GET /api/v1/settings/twitch-users
 func (UnimplementedHandler) ListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) (r []TwitchUser, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // Login implements login operation.
 //
-// POST /auth/login
+// POST /api/v1/auth/login
 func (UnimplementedHandler) Login(ctx context.Context, req *LoginRequest) (r LoginRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // Me implements me operation.
 //
-// GET /me
+// GET /api/v1/me
 func (UnimplementedHandler) Me(ctx context.Context) (r MeRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // PatchAiSettings implements patchAiSettings operation.
 //
-// PATCH /ai/settings
+// PATCH /api/v1/ai/settings
 func (UnimplementedHandler) PatchAiSettings(ctx context.Context, req *PatchAiSettingsRequest) (r *AiSettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // SendMessage implements sendMessage operation.
 //
-// POST /twitch/send
+// POST /api/v1/twitch/send
 func (UnimplementedHandler) SendMessage(ctx context.Context, req *SendMessageRequest) (r SendMessageRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // SetChannelBlacklist implements setChannelBlacklist operation.
 //
-// POST /settings/channel-blacklist
+// POST /api/v1/settings/channel-blacklist
 func (UnimplementedHandler) SetChannelBlacklist(ctx context.Context, req *ChannelBlacklistChange) (r SetChannelBlacklistRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -401,70 +401,70 @@ func (UnimplementedHandler) SetChannelBlacklist(ctx context.Context, req *Channe
 //
 // Start Twitch authorization (browser) to link an account without pasting a refresh token.
 //
-// POST /settings/twitch-accounts/oauth/start
+// POST /api/v1/settings/twitch-accounts/oauth/start
 func (UnimplementedHandler) StartTwitchOAuth(ctx context.Context, req OptStartTwitchOAuthRequest) (r *StartTwitchOAuthResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // StopAiAgent implements stopAiAgent operation.
 //
-// POST /ai/conversations/{conversationId}/stop
+// POST /api/v1/ai/conversations/{conversationId}/stop
 func (UnimplementedHandler) StopAiAgent(ctx context.Context, params StopAiAgentParams) (r StopAiAgentRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // TestRuleRegex implements testRuleRegex operation.
 //
-// POST /settings/rules/test-regex
+// POST /api/v1/settings/rules/test-regex
 func (UnimplementedHandler) TestRuleRegex(ctx context.Context, req *TestRuleRegexRequest) (r *TestRuleRegexResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateChannelDiscoverySettings implements updateChannelDiscoverySettings operation.
 //
-// PATCH /settings/channel-discovery
+// PATCH /api/v1/settings/channel-discovery
 func (UnimplementedHandler) UpdateChannelDiscoverySettings(ctx context.Context, req *ChannelDiscoverySettings) (r UpdateChannelDiscoverySettingsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateIrcMonitorSettings implements updateIrcMonitorSettings operation.
 //
-// PATCH /settings/irc-monitor-settings
+// PATCH /api/v1/settings/irc-monitor-settings
 func (UnimplementedHandler) UpdateIrcMonitorSettings(ctx context.Context, req *IrcMonitorSettings) (r *IrcMonitorSettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateNotification implements updateNotification operation.
 //
-// POST /settings/notifications/update
+// POST /api/v1/settings/notifications/update
 func (UnimplementedHandler) UpdateNotification(ctx context.Context, req *UpdateNotificationPostRequest) (r UpdateNotificationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateRule implements updateRule operation.
 //
-// POST /settings/rules/update
+// POST /api/v1/settings/rules/update
 func (UnimplementedHandler) UpdateRule(ctx context.Context, req *UpdateRulePostRequest) (r UpdateRuleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateSuspicionSettings implements updateSuspicionSettings operation.
 //
-// PATCH /settings/suspicion-settings
+// PATCH /api/v1/settings/suspicion-settings
 func (UnimplementedHandler) UpdateSuspicionSettings(ctx context.Context, req *SuspicionSettings) (r *SuspicionSettings, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateTwitchAccount implements updateTwitchAccount operation.
 //
-// POST /settings/twitch-accounts/update
+// POST /api/v1/settings/twitch-accounts/update
 func (UnimplementedHandler) UpdateTwitchAccount(ctx context.Context, req *UpdateTwitchAccountPostRequest) (r UpdateTwitchAccountRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateTwitchUser implements updateTwitchUser operation.
 //
-// POST /settings/twitch-users/update
+// POST /api/v1/settings/twitch-users/update
 func (UnimplementedHandler) UpdateTwitchUser(ctx context.Context, req *UpdateTwitchUserPostRequest) (r UpdateTwitchUserRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

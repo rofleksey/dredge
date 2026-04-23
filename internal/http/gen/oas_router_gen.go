@@ -216,9 +216,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/"
+		case '/': // Prefix: "/api/v1/"
 
-			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+			if l := len("/api/v1/"); len(elem) >= l && elem[0:l] == "/api/v1/" {
 				elem = elem[l:]
 			} else {
 				break
@@ -1955,9 +1955,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/"
+		case '/': // Prefix: "/api/v1/"
 
-			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+			if l := len("/api/v1/"); len(elem) >= l && elem[0:l] == "/api/v1/" {
 				elem = elem[l:]
 			} else {
 				break
@@ -2006,7 +2006,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "listAiConversations"
 								r.operationGroup = ""
-								r.pathPattern = "/ai/conversations"
+								r.pathPattern = "/api/v1/ai/conversations"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2015,7 +2015,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "createAiConversation"
 								r.operationGroup = ""
-								r.pathPattern = "/ai/conversations"
+								r.pathPattern = "/api/v1/ai/conversations"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2048,7 +2048,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "deleteAiConversation"
 									r.operationGroup = ""
-									r.pathPattern = "/ai/conversations/{conversationId}"
+									r.pathPattern = "/api/v1/ai/conversations/{conversationId}"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -2085,7 +2085,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "confirmAiTool"
 											r.operationGroup = ""
-											r.pathPattern = "/ai/conversations/{conversationId}/confirm"
+											r.pathPattern = "/api/v1/ai/conversations/{conversationId}/confirm"
 											r.args = args
 											r.count = 1
 											return r, true
@@ -2110,7 +2110,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "listAiMessages"
 											r.operationGroup = ""
-											r.pathPattern = "/ai/conversations/{conversationId}/messages"
+											r.pathPattern = "/api/v1/ai/conversations/{conversationId}/messages"
 											r.args = args
 											r.count = 1
 											return r, true
@@ -2119,7 +2119,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "createAiMessage"
 											r.operationGroup = ""
-											r.pathPattern = "/ai/conversations/{conversationId}/messages"
+											r.pathPattern = "/api/v1/ai/conversations/{conversationId}/messages"
 											r.args = args
 											r.count = 1
 											return r, true
@@ -2144,7 +2144,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "stopAiAgent"
 											r.operationGroup = ""
-											r.pathPattern = "/ai/conversations/{conversationId}/stop"
+											r.pathPattern = "/api/v1/ai/conversations/{conversationId}/stop"
 											r.args = args
 											r.count = 1
 											return r, true
@@ -2175,7 +2175,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "getAiSettings"
 								r.operationGroup = ""
-								r.pathPattern = "/ai/settings"
+								r.pathPattern = "/api/v1/ai/settings"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2184,7 +2184,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "patchAiSettings"
 								r.operationGroup = ""
-								r.pathPattern = "/ai/settings"
+								r.pathPattern = "/api/v1/ai/settings"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2211,7 +2211,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "login"
 							r.operationGroup = ""
-							r.pathPattern = "/auth/login"
+							r.pathPattern = "/api/v1/auth/login"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -2238,7 +2238,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.summary = ""
 						r.operationID = "me"
 						r.operationGroup = ""
-						r.pathPattern = "/me"
+						r.pathPattern = "/api/v1/me"
 						r.args = args
 						r.count = 0
 						return r, true
@@ -2287,7 +2287,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "listChannelBlacklist"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/channel-blacklist"
+								r.pathPattern = "/api/v1/settings/channel-blacklist"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2296,7 +2296,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "setChannelBlacklist"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/channel-blacklist"
+								r.pathPattern = "/api/v1/settings/channel-blacklist"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2320,7 +2320,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "getChannelDiscoverySettings"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/channel-discovery"
+								r.pathPattern = "/api/v1/settings/channel-discovery"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2329,7 +2329,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "updateChannelDiscoverySettings"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/channel-discovery"
+								r.pathPattern = "/api/v1/settings/channel-discovery"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2353,7 +2353,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "listChannelDiscoveryCandidates"
 									r.operationGroup = ""
-									r.pathPattern = "/settings/channel-discovery/candidates"
+									r.pathPattern = "/api/v1/settings/channel-discovery/candidates"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -2411,7 +2411,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 												r.summary = ""
 												r.operationID = "approveChannelDiscoveryCandidate"
 												r.operationGroup = ""
-												r.pathPattern = "/settings/channel-discovery/candidates/{twitch_user_id}/approve"
+												r.pathPattern = "/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve"
 												r.args = args
 												r.count = 1
 												return r, true
@@ -2436,7 +2436,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 												r.summary = ""
 												r.operationID = "denyChannelDiscoveryCandidate"
 												r.operationGroup = ""
-												r.pathPattern = "/settings/channel-discovery/candidates/{twitch_user_id}/deny"
+												r.pathPattern = "/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny"
 												r.args = args
 												r.count = 1
 												return r, true
@@ -2471,7 +2471,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "getIrcMonitorSettings"
 							r.operationGroup = ""
-							r.pathPattern = "/settings/irc-monitor-settings"
+							r.pathPattern = "/api/v1/settings/irc-monitor-settings"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -2480,7 +2480,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "updateIrcMonitorSettings"
 							r.operationGroup = ""
-							r.pathPattern = "/settings/irc-monitor-settings"
+							r.pathPattern = "/api/v1/settings/irc-monitor-settings"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -2504,7 +2504,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "listNotifications"
 							r.operationGroup = ""
-							r.pathPattern = "/settings/notifications"
+							r.pathPattern = "/api/v1/settings/notifications"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -2513,7 +2513,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "createNotification"
 							r.operationGroup = ""
-							r.pathPattern = "/settings/notifications"
+							r.pathPattern = "/api/v1/settings/notifications"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -2550,7 +2550,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "deleteNotification"
 									r.operationGroup = ""
-									r.pathPattern = "/settings/notifications/delete"
+									r.pathPattern = "/api/v1/settings/notifications/delete"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -2575,7 +2575,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "updateNotification"
 									r.operationGroup = ""
-									r.pathPattern = "/settings/notifications/update"
+									r.pathPattern = "/api/v1/settings/notifications/update"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -2616,7 +2616,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "listRuleTriggers"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/rule-triggers"
+								r.pathPattern = "/api/v1/settings/rule-triggers"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2640,7 +2640,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "listRules"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/rules"
+								r.pathPattern = "/api/v1/settings/rules"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2649,7 +2649,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "createRule"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/rules"
+								r.pathPattern = "/api/v1/settings/rules"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2686,7 +2686,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = ""
 										r.operationID = "countRules"
 										r.operationGroup = ""
-										r.pathPattern = "/settings/rules/count"
+										r.pathPattern = "/api/v1/settings/rules/count"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -2711,7 +2711,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = ""
 										r.operationID = "deleteRule"
 										r.operationGroup = ""
-										r.pathPattern = "/settings/rules/delete"
+										r.pathPattern = "/api/v1/settings/rules/delete"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -2748,7 +2748,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = "List rule message template placeholders"
 											r.operationID = "listRuleTemplateVariables"
 											r.operationGroup = ""
-											r.pathPattern = "/settings/rules/template-variables"
+											r.pathPattern = "/api/v1/settings/rules/template-variables"
 											r.args = args
 											r.count = 0
 											return r, true
@@ -2773,7 +2773,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "testRuleRegex"
 											r.operationGroup = ""
-											r.pathPattern = "/settings/rules/test-regex"
+											r.pathPattern = "/api/v1/settings/rules/test-regex"
 											r.args = args
 											r.count = 0
 											return r, true
@@ -2800,7 +2800,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = ""
 										r.operationID = "updateRule"
 										r.operationGroup = ""
-										r.pathPattern = "/settings/rules/update"
+										r.pathPattern = "/api/v1/settings/rules/update"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -2831,7 +2831,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "getSuspicionSettings"
 							r.operationGroup = ""
-							r.pathPattern = "/settings/suspicion-settings"
+							r.pathPattern = "/api/v1/settings/suspicion-settings"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -2840,7 +2840,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "updateSuspicionSettings"
 							r.operationGroup = ""
-							r.pathPattern = "/settings/suspicion-settings"
+							r.pathPattern = "/api/v1/settings/suspicion-settings"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -2876,7 +2876,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "listTwitchAccounts"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/twitch-accounts"
+								r.pathPattern = "/api/v1/settings/twitch-accounts"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2885,7 +2885,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "createTwitchAccount"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/twitch-accounts"
+								r.pathPattern = "/api/v1/settings/twitch-accounts"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2922,7 +2922,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = ""
 										r.operationID = "countTwitchAccounts"
 										r.operationGroup = ""
-										r.pathPattern = "/settings/twitch-accounts/count"
+										r.pathPattern = "/api/v1/settings/twitch-accounts/count"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -2947,7 +2947,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = ""
 										r.operationID = "deleteTwitchAccount"
 										r.operationGroup = ""
-										r.pathPattern = "/settings/twitch-accounts/delete"
+										r.pathPattern = "/api/v1/settings/twitch-accounts/delete"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -2972,7 +2972,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = "Start Twitch authorization (browser) to link an account without pasting a refresh token"
 										r.operationID = "startTwitchOAuth"
 										r.operationGroup = ""
-										r.pathPattern = "/settings/twitch-accounts/oauth/start"
+										r.pathPattern = "/api/v1/settings/twitch-accounts/oauth/start"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -2997,7 +2997,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = ""
 										r.operationID = "updateTwitchAccount"
 										r.operationGroup = ""
-										r.pathPattern = "/settings/twitch-accounts/update"
+										r.pathPattern = "/api/v1/settings/twitch-accounts/update"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -3025,7 +3025,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "listTwitchUsers"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/twitch-users"
+								r.pathPattern = "/api/v1/settings/twitch-users"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -3034,7 +3034,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "createTwitchUser"
 								r.operationGroup = ""
-								r.pathPattern = "/settings/twitch-users"
+								r.pathPattern = "/api/v1/settings/twitch-users"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -3059,7 +3059,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "updateTwitchUser"
 									r.operationGroup = ""
-									r.pathPattern = "/settings/twitch-users/update"
+									r.pathPattern = "/api/v1/settings/twitch-users/update"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -3126,7 +3126,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "listChannelChatters"
 									r.operationGroup = ""
-									r.pathPattern = "/twitch/channels/chatters"
+									r.pathPattern = "/api/v1/twitch/channels/chatters"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -3151,7 +3151,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "getChannelLive"
 									r.operationGroup = ""
-									r.pathPattern = "/twitch/channels/live"
+									r.pathPattern = "/api/v1/twitch/channels/live"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -3178,7 +3178,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "listChatHistory"
 								r.operationGroup = ""
-								r.pathPattern = "/twitch/chat/history"
+								r.pathPattern = "/api/v1/twitch/chat/history"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -3217,7 +3217,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = "Historical IRC joined channel counts (periodic samples)"
 								r.operationID = "listIrcMonitorJoinedHistory"
 								r.operationGroup = ""
-								r.pathPattern = "/twitch/irc-monitor/joined-history"
+								r.pathPattern = "/api/v1/twitch/irc-monitor/joined-history"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -3242,7 +3242,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "getIrcMonitorStatus"
 								r.operationGroup = ""
-								r.pathPattern = "/twitch/irc-monitor/status"
+								r.pathPattern = "/api/v1/twitch/irc-monitor/status"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -3268,7 +3268,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "listTwitchMessages"
 							r.operationGroup = ""
-							r.pathPattern = "/twitch/messages"
+							r.pathPattern = "/api/v1/twitch/messages"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -3293,7 +3293,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "countTwitchMessages"
 								r.operationGroup = ""
-								r.pathPattern = "/twitch/messages/count"
+								r.pathPattern = "/api/v1/twitch/messages/count"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -3332,7 +3332,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "sendMessage"
 								r.operationGroup = ""
-								r.pathPattern = "/twitch/send"
+								r.pathPattern = "/api/v1/twitch/send"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -3356,7 +3356,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = ""
 								r.operationID = "listRecordedStreams"
 								r.operationGroup = ""
-								r.pathPattern = "/twitch/streams"
+								r.pathPattern = "/api/v1/twitch/streams"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -3389,7 +3389,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "getRecordedStream"
 									r.operationGroup = ""
-									r.pathPattern = "/twitch/streams/{streamId}"
+									r.pathPattern = "/api/v1/twitch/streams/{streamId}"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -3426,7 +3426,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "listRecordedStreamActivity"
 											r.operationGroup = ""
-											r.pathPattern = "/twitch/streams/{streamId}/activity"
+											r.pathPattern = "/api/v1/twitch/streams/{streamId}/activity"
 											r.args = args
 											r.count = 1
 											return r, true
@@ -3451,7 +3451,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "getRecordedStreamLeaderboard"
 											r.operationGroup = ""
-											r.pathPattern = "/twitch/streams/{streamId}/leaderboard"
+											r.pathPattern = "/api/v1/twitch/streams/{streamId}/leaderboard"
 											r.args = args
 											r.count = 1
 											return r, true
@@ -3476,7 +3476,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = ""
 											r.operationID = "listRecordedStreamMessages"
 											r.operationGroup = ""
-											r.pathPattern = "/twitch/streams/{streamId}/messages"
+											r.pathPattern = "/api/v1/twitch/streams/{streamId}/messages"
 											r.args = args
 											r.count = 1
 											return r, true
@@ -3508,7 +3508,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "listTwitchDirectoryUsers"
 							r.operationGroup = ""
-							r.pathPattern = "/twitch/users"
+							r.pathPattern = "/api/v1/twitch/users"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -3544,7 +3544,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "listTwitchUserActivity"
 									r.operationGroup = ""
-									r.pathPattern = "/twitch/users/activity"
+									r.pathPattern = "/api/v1/twitch/users/activity"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -3569,7 +3569,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = ""
 										r.operationID = "getTwitchUserActivityTimeline"
 										r.operationGroup = ""
-										r.pathPattern = "/twitch/users/activity/timeline"
+										r.pathPattern = "/api/v1/twitch/users/activity/timeline"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -3596,7 +3596,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "countTwitchDirectoryUsers"
 									r.operationGroup = ""
-									r.pathPattern = "/twitch/users/count"
+									r.pathPattern = "/api/v1/twitch/users/count"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -3621,7 +3621,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = ""
 									r.operationID = "getTwitchUserProfile"
 									r.operationGroup = ""
-									r.pathPattern = "/twitch/users/profile"
+									r.pathPattern = "/api/v1/twitch/users/profile"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -3650,7 +3650,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "getWatchUiHints"
 							r.operationGroup = ""
-							r.pathPattern = "/twitch/watch/hints"
+							r.pathPattern = "/api/v1/twitch/watch/hints"
 							r.args = args
 							r.count = 0
 							return r, true

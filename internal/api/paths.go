@@ -4,27 +4,15 @@ import "strings"
 
 // API route prefixes (see api/openapi.yaml). Used by the SPA mux to route to ogen.
 const (
-	PrefixAI       = "/ai/"
-	PrefixAuth     = "/auth/"
-	PrefixMe       = "/me"
-	PrefixSettings = "/settings/"
-	PrefixTwitch   = "/twitch/"
+	PrefixAPI      = "/api/v1/"
+	PrefixAI       = PrefixAPI + "ai/"
+	PrefixAuth     = PrefixAPI + "auth/"
+	PrefixMe       = PrefixAPI + "me"
+	PrefixSettings = PrefixAPI + "settings/"
+	PrefixTwitch   = PrefixAPI + "twitch/"
 )
 
 // IsAPIPath reports whether the request path is served by the OpenAPI HTTP API (not static files).
 func IsAPIPath(p string) bool {
-	switch {
-	case strings.HasPrefix(p, PrefixAI):
-		return true
-	case strings.HasPrefix(p, PrefixAuth):
-		return true
-	case p == PrefixMe || strings.HasPrefix(p, PrefixMe+"/"):
-		return true
-	case strings.HasPrefix(p, PrefixSettings):
-		return true
-	case strings.HasPrefix(p, PrefixTwitch):
-		return true
-	default:
-		return false
-	}
+	return strings.HasPrefix(p, PrefixAPI)
 }

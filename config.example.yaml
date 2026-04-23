@@ -4,7 +4,7 @@ server:
   base_url: "http://localhost:5173"
   # Prometheus metrics listen address only (main server does not expose /metrics).
   metrics_address: ":9090"
-  # POST /auth/login attempts per client IP per rolling minute (0 = unlimited).
+  # POST /api/v1/auth/login attempts per client IP per rolling minute (0 = unlimited).
   login_rate_limit_per_minute: 10
 database:
   dsn: "postgres://postgres:postgres@127.0.0.1:5432/dredge?sslmode=disable"

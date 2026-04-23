@@ -35,14 +35,14 @@ func (c *codeRecorder) Unwrap() http.ResponseWriter {
 
 // handleApproveChannelDiscoveryCandidateRequest handles approveChannelDiscoveryCandidate operation.
 //
-// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve
 func (s *Server) handleApproveChannelDiscoveryCandidateRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("approveChannelDiscoveryCandidate"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/channel-discovery/candidates/{twitch_user_id}/approve"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -220,14 +220,14 @@ func (s *Server) handleApproveChannelDiscoveryCandidateRequest(args [1]string, a
 
 // handleConfirmAiToolRequest handles confirmAiTool operation.
 //
-// POST /ai/conversations/{conversationId}/confirm
+// POST /api/v1/ai/conversations/{conversationId}/confirm
 func (s *Server) handleConfirmAiToolRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("confirmAiTool"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/ai/conversations/{conversationId}/confirm"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/conversations/{conversationId}/confirm"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -420,14 +420,14 @@ func (s *Server) handleConfirmAiToolRequest(args [1]string, argsEscaped bool, w 
 
 // handleCountRulesRequest handles countRules operation.
 //
-// GET /settings/rules/count
+// GET /api/v1/settings/rules/count
 func (s *Server) handleCountRulesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("countRules"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/rules/count"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/rules/count"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -590,14 +590,14 @@ func (s *Server) handleCountRulesRequest(args [0]string, argsEscaped bool, w htt
 
 // handleCountTwitchAccountsRequest handles countTwitchAccounts operation.
 //
-// GET /settings/twitch-accounts/count
+// GET /api/v1/settings/twitch-accounts/count
 func (s *Server) handleCountTwitchAccountsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("countTwitchAccounts"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/twitch-accounts/count"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-accounts/count"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -760,14 +760,14 @@ func (s *Server) handleCountTwitchAccountsRequest(args [0]string, argsEscaped bo
 
 // handleCountTwitchDirectoryUsersRequest handles countTwitchDirectoryUsers operation.
 //
-// GET /twitch/users/count
+// GET /api/v1/twitch/users/count
 func (s *Server) handleCountTwitchDirectoryUsersRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("countTwitchDirectoryUsers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/users/count"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/users/count"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -951,14 +951,14 @@ func (s *Server) handleCountTwitchDirectoryUsersRequest(args [0]string, argsEsca
 //
 // Count messages matching the same filters as list (ignores limit/cursor).
 //
-// GET /twitch/messages/count
+// GET /api/v1/twitch/messages/count
 func (s *Server) handleCountTwitchMessagesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("countTwitchMessages"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/messages/count"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/messages/count"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -1156,14 +1156,14 @@ func (s *Server) handleCountTwitchMessagesRequest(args [0]string, argsEscaped bo
 
 // handleCreateAiConversationRequest handles createAiConversation operation.
 //
-// POST /ai/conversations
+// POST /api/v1/ai/conversations
 func (s *Server) handleCreateAiConversationRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createAiConversation"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/ai/conversations"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/conversations"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -1341,14 +1341,14 @@ func (s *Server) handleCreateAiConversationRequest(args [0]string, argsEscaped b
 
 // handleCreateAiMessageRequest handles createAiMessage operation.
 //
-// POST /ai/conversations/{conversationId}/messages
+// POST /api/v1/ai/conversations/{conversationId}/messages
 func (s *Server) handleCreateAiMessageRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createAiMessage"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/ai/conversations/{conversationId}/messages"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/conversations/{conversationId}/messages"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -1541,14 +1541,14 @@ func (s *Server) handleCreateAiMessageRequest(args [1]string, argsEscaped bool, 
 
 // handleCreateNotificationRequest handles createNotification operation.
 //
-// POST /settings/notifications
+// POST /api/v1/settings/notifications
 func (s *Server) handleCreateNotificationRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createNotification"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/notifications"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/notifications"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -1726,14 +1726,14 @@ func (s *Server) handleCreateNotificationRequest(args [0]string, argsEscaped boo
 
 // handleCreateRuleRequest handles createRule operation.
 //
-// POST /settings/rules
+// POST /api/v1/settings/rules
 func (s *Server) handleCreateRuleRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createRule"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/rules"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/rules"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -1911,14 +1911,14 @@ func (s *Server) handleCreateRuleRequest(args [0]string, argsEscaped bool, w htt
 
 // handleCreateTwitchAccountRequest handles createTwitchAccount operation.
 //
-// POST /settings/twitch-accounts
+// POST /api/v1/settings/twitch-accounts
 func (s *Server) handleCreateTwitchAccountRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createTwitchAccount"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/twitch-accounts"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-accounts"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -2096,14 +2096,14 @@ func (s *Server) handleCreateTwitchAccountRequest(args [0]string, argsEscaped bo
 
 // handleCreateTwitchUserRequest handles createTwitchUser operation.
 //
-// POST /settings/twitch-users
+// POST /api/v1/settings/twitch-users
 func (s *Server) handleCreateTwitchUserRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createTwitchUser"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/twitch-users"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-users"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -2281,14 +2281,14 @@ func (s *Server) handleCreateTwitchUserRequest(args [0]string, argsEscaped bool,
 
 // handleDeleteAiConversationRequest handles deleteAiConversation operation.
 //
-// DELETE /ai/conversations/{conversationId}
+// DELETE /api/v1/ai/conversations/{conversationId}
 func (s *Server) handleDeleteAiConversationRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteAiConversation"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/ai/conversations/{conversationId}"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/conversations/{conversationId}"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -2466,14 +2466,14 @@ func (s *Server) handleDeleteAiConversationRequest(args [1]string, argsEscaped b
 
 // handleDeleteNotificationRequest handles deleteNotification operation.
 //
-// POST /settings/notifications/delete
+// POST /api/v1/settings/notifications/delete
 func (s *Server) handleDeleteNotificationRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteNotification"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/notifications/delete"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/notifications/delete"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -2651,14 +2651,14 @@ func (s *Server) handleDeleteNotificationRequest(args [0]string, argsEscaped boo
 
 // handleDeleteRuleRequest handles deleteRule operation.
 //
-// POST /settings/rules/delete
+// POST /api/v1/settings/rules/delete
 func (s *Server) handleDeleteRuleRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteRule"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/rules/delete"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/rules/delete"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -2836,14 +2836,14 @@ func (s *Server) handleDeleteRuleRequest(args [0]string, argsEscaped bool, w htt
 
 // handleDeleteTwitchAccountRequest handles deleteTwitchAccount operation.
 //
-// POST /settings/twitch-accounts/delete
+// POST /api/v1/settings/twitch-accounts/delete
 func (s *Server) handleDeleteTwitchAccountRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteTwitchAccount"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/twitch-accounts/delete"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-accounts/delete"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -3021,14 +3021,14 @@ func (s *Server) handleDeleteTwitchAccountRequest(args [0]string, argsEscaped bo
 
 // handleDenyChannelDiscoveryCandidateRequest handles denyChannelDiscoveryCandidate operation.
 //
-// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny
 func (s *Server) handleDenyChannelDiscoveryCandidateRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("denyChannelDiscoveryCandidate"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/channel-discovery/candidates/{twitch_user_id}/deny"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -3206,14 +3206,14 @@ func (s *Server) handleDenyChannelDiscoveryCandidateRequest(args [1]string, args
 
 // handleGetAiSettingsRequest handles getAiSettings operation.
 //
-// GET /ai/settings
+// GET /api/v1/ai/settings
 func (s *Server) handleGetAiSettingsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAiSettings"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/ai/settings"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/settings"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -3376,14 +3376,14 @@ func (s *Server) handleGetAiSettingsRequest(args [0]string, argsEscaped bool, w 
 
 // handleGetChannelDiscoverySettingsRequest handles getChannelDiscoverySettings operation.
 //
-// GET /settings/channel-discovery
+// GET /api/v1/settings/channel-discovery
 func (s *Server) handleGetChannelDiscoverySettingsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getChannelDiscoverySettings"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/channel-discovery"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/channel-discovery"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -3546,14 +3546,14 @@ func (s *Server) handleGetChannelDiscoverySettingsRequest(args [0]string, argsEs
 
 // handleGetChannelLiveRequest handles getChannelLive operation.
 //
-// POST /twitch/channels/live
+// POST /api/v1/twitch/channels/live
 func (s *Server) handleGetChannelLiveRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getChannelLive"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/twitch/channels/live"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/channels/live"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -3731,14 +3731,14 @@ func (s *Server) handleGetChannelLiveRequest(args [0]string, argsEscaped bool, w
 
 // handleGetIrcMonitorSettingsRequest handles getIrcMonitorSettings operation.
 //
-// GET /settings/irc-monitor-settings
+// GET /api/v1/settings/irc-monitor-settings
 func (s *Server) handleGetIrcMonitorSettingsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getIrcMonitorSettings"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/irc-monitor-settings"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/irc-monitor-settings"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -3901,14 +3901,14 @@ func (s *Server) handleGetIrcMonitorSettingsRequest(args [0]string, argsEscaped 
 
 // handleGetIrcMonitorStatusRequest handles getIrcMonitorStatus operation.
 //
-// GET /twitch/irc-monitor/status
+// GET /api/v1/twitch/irc-monitor/status
 func (s *Server) handleGetIrcMonitorStatusRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getIrcMonitorStatus"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/irc-monitor/status"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/irc-monitor/status"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -4071,14 +4071,14 @@ func (s *Server) handleGetIrcMonitorStatusRequest(args [0]string, argsEscaped bo
 
 // handleGetRecordedStreamRequest handles getRecordedStream operation.
 //
-// GET /twitch/streams/{streamId}
+// GET /api/v1/twitch/streams/{streamId}
 func (s *Server) handleGetRecordedStreamRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRecordedStream"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/streams/{streamId}"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/streams/{streamId}"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -4256,14 +4256,14 @@ func (s *Server) handleGetRecordedStreamRequest(args [1]string, argsEscaped bool
 
 // handleGetRecordedStreamLeaderboardRequest handles getRecordedStreamLeaderboard operation.
 //
-// GET /twitch/streams/{streamId}/leaderboard
+// GET /api/v1/twitch/streams/{streamId}/leaderboard
 func (s *Server) handleGetRecordedStreamLeaderboardRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRecordedStreamLeaderboard"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/streams/{streamId}/leaderboard"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/streams/{streamId}/leaderboard"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -4449,14 +4449,14 @@ func (s *Server) handleGetRecordedStreamLeaderboardRequest(args [1]string, argsE
 
 // handleGetSuspicionSettingsRequest handles getSuspicionSettings operation.
 //
-// GET /settings/suspicion-settings
+// GET /api/v1/settings/suspicion-settings
 func (s *Server) handleGetSuspicionSettingsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getSuspicionSettings"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/suspicion-settings"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/suspicion-settings"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -4619,14 +4619,14 @@ func (s *Server) handleGetSuspicionSettingsRequest(args [0]string, argsEscaped b
 
 // handleGetTwitchUserActivityTimelineRequest handles getTwitchUserActivityTimeline operation.
 //
-// POST /twitch/users/activity/timeline
+// POST /api/v1/twitch/users/activity/timeline
 func (s *Server) handleGetTwitchUserActivityTimelineRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTwitchUserActivityTimeline"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/twitch/users/activity/timeline"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/users/activity/timeline"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -4804,14 +4804,14 @@ func (s *Server) handleGetTwitchUserActivityTimelineRequest(args [0]string, args
 
 // handleGetTwitchUserProfileRequest handles getTwitchUserProfile operation.
 //
-// POST /twitch/users/profile
+// POST /api/v1/twitch/users/profile
 func (s *Server) handleGetTwitchUserProfileRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getTwitchUserProfile"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/twitch/users/profile"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/users/profile"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -4989,14 +4989,14 @@ func (s *Server) handleGetTwitchUserProfileRequest(args [0]string, argsEscaped b
 
 // handleGetWatchUiHintsRequest handles getWatchUiHints operation.
 //
-// GET /twitch/watch/hints
+// GET /api/v1/twitch/watch/hints
 func (s *Server) handleGetWatchUiHintsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getWatchUiHints"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/watch/hints"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/watch/hints"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -5159,14 +5159,14 @@ func (s *Server) handleGetWatchUiHintsRequest(args [0]string, argsEscaped bool, 
 
 // handleListAiConversationsRequest handles listAiConversations operation.
 //
-// GET /ai/conversations
+// GET /api/v1/ai/conversations
 func (s *Server) handleListAiConversationsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listAiConversations"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/ai/conversations"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/conversations"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -5329,14 +5329,14 @@ func (s *Server) handleListAiConversationsRequest(args [0]string, argsEscaped bo
 
 // handleListAiMessagesRequest handles listAiMessages operation.
 //
-// GET /ai/conversations/{conversationId}/messages
+// GET /api/v1/ai/conversations/{conversationId}/messages
 func (s *Server) handleListAiMessagesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listAiMessages"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/ai/conversations/{conversationId}/messages"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/conversations/{conversationId}/messages"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -5514,14 +5514,14 @@ func (s *Server) handleListAiMessagesRequest(args [1]string, argsEscaped bool, w
 
 // handleListChannelBlacklistRequest handles listChannelBlacklist operation.
 //
-// GET /settings/channel-blacklist
+// GET /api/v1/settings/channel-blacklist
 func (s *Server) handleListChannelBlacklistRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listChannelBlacklist"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/channel-blacklist"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/channel-blacklist"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -5684,14 +5684,14 @@ func (s *Server) handleListChannelBlacklistRequest(args [0]string, argsEscaped b
 
 // handleListChannelChattersRequest handles listChannelChatters operation.
 //
-// POST /twitch/channels/chatters
+// POST /api/v1/twitch/channels/chatters
 func (s *Server) handleListChannelChattersRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listChannelChatters"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/twitch/channels/chatters"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/channels/chatters"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -5869,14 +5869,14 @@ func (s *Server) handleListChannelChattersRequest(args [0]string, argsEscaped bo
 
 // handleListChannelDiscoveryCandidatesRequest handles listChannelDiscoveryCandidates operation.
 //
-// GET /settings/channel-discovery/candidates
+// GET /api/v1/settings/channel-discovery/candidates
 func (s *Server) handleListChannelDiscoveryCandidatesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listChannelDiscoveryCandidates"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/channel-discovery/candidates"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/channel-discovery/candidates"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -6039,14 +6039,14 @@ func (s *Server) handleListChannelDiscoveryCandidatesRequest(args [0]string, arg
 
 // handleListChatHistoryRequest handles listChatHistory operation.
 //
-// GET /twitch/chat/history
+// GET /api/v1/twitch/chat/history
 func (s *Server) handleListChatHistoryRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listChatHistory"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/chat/history"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/chat/history"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -6230,14 +6230,14 @@ func (s *Server) handleListChatHistoryRequest(args [0]string, argsEscaped bool, 
 //
 // Historical IRC joined channel counts (periodic samples).
 //
-// GET /twitch/irc-monitor/joined-history
+// GET /api/v1/twitch/irc-monitor/joined-history
 func (s *Server) handleListIrcMonitorJoinedHistoryRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listIrcMonitorJoinedHistory"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/irc-monitor/joined-history"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/irc-monitor/joined-history"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -6417,14 +6417,14 @@ func (s *Server) handleListIrcMonitorJoinedHistoryRequest(args [0]string, argsEs
 //
 // List notification entries (newest first) with cursor-based incremental loading.
 //
-// GET /settings/notifications
+// GET /api/v1/settings/notifications
 func (s *Server) handleListNotificationsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listNotifications"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/notifications"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/notifications"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -6612,14 +6612,14 @@ func (s *Server) handleListNotificationsRequest(args [0]string, argsEscaped bool
 //
 // Non-message activity in the stream time window (newest first).
 //
-// GET /twitch/streams/{streamId}/activity
+// GET /api/v1/twitch/streams/{streamId}/activity
 func (s *Server) handleListRecordedStreamActivityRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRecordedStreamActivity"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/streams/{streamId}/activity"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/streams/{streamId}/activity"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -6811,14 +6811,14 @@ func (s *Server) handleListRecordedStreamActivityRequest(args [1]string, argsEsc
 //
 // Chat messages tagged with this stream (newest first).
 //
-// GET /twitch/streams/{streamId}/messages
+// GET /api/v1/twitch/streams/{streamId}/messages
 func (s *Server) handleListRecordedStreamMessagesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRecordedStreamMessages"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/streams/{streamId}/messages"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/streams/{streamId}/messages"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -7022,14 +7022,14 @@ func (s *Server) handleListRecordedStreamMessagesRequest(args [1]string, argsEsc
 //
 // Recorded stream sessions for monitored channels (newest first).
 //
-// GET /twitch/streams
+// GET /api/v1/twitch/streams
 func (s *Server) handleListRecordedStreamsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRecordedStreams"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/streams"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/streams"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -7221,14 +7221,14 @@ func (s *Server) handleListRecordedStreamsRequest(args [0]string, argsEscaped bo
 //
 // Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
 //
-// GET /settings/rules/template-variables
+// GET /api/v1/settings/rules/template-variables
 func (s *Server) handleListRuleTemplateVariablesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRuleTemplateVariables"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/rules/template-variables"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/rules/template-variables"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -7393,14 +7393,14 @@ func (s *Server) handleListRuleTemplateVariablesRequest(args [0]string, argsEsca
 //
 // List rule trigger events (newest first) with cursor-based incremental loading.
 //
-// GET /settings/rule-triggers
+// GET /api/v1/settings/rule-triggers
 func (s *Server) handleListRuleTriggersRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRuleTriggers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/rule-triggers"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/rule-triggers"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -7586,14 +7586,14 @@ func (s *Server) handleListRuleTriggersRequest(args [0]string, argsEscaped bool,
 
 // handleListRulesRequest handles listRules operation.
 //
-// GET /settings/rules
+// GET /api/v1/settings/rules
 func (s *Server) handleListRulesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listRules"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/rules"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/rules"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -7756,14 +7756,14 @@ func (s *Server) handleListRulesRequest(args [0]string, argsEscaped bool, w http
 
 // handleListTwitchAccountsRequest handles listTwitchAccounts operation.
 //
-// GET /settings/twitch-accounts
+// GET /api/v1/settings/twitch-accounts
 func (s *Server) handleListTwitchAccountsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchAccounts"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/twitch-accounts"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-accounts"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -7928,14 +7928,14 @@ func (s *Server) handleListTwitchAccountsRequest(args [0]string, argsEscaped boo
 //
 // List known Twitch users (chatters and channels) for directory search.
 //
-// GET /twitch/users
+// GET /api/v1/twitch/users
 func (s *Server) handleListTwitchDirectoryUsersRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchDirectoryUsers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/users"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/users"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -8127,14 +8127,14 @@ func (s *Server) handleListTwitchDirectoryUsersRequest(args [0]string, argsEscap
 //
 // Search persisted chat messages (newest first). Omit filters to list recent messages.
 //
-// GET /twitch/messages
+// GET /api/v1/twitch/messages
 func (s *Server) handleListTwitchMessagesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchMessages"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/twitch/messages"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/messages"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -8344,14 +8344,14 @@ func (s *Server) handleListTwitchMessagesRequest(args [0]string, argsEscaped boo
 
 // handleListTwitchUserActivityRequest handles listTwitchUserActivity operation.
 //
-// POST /twitch/users/activity
+// POST /api/v1/twitch/users/activity
 func (s *Server) handleListTwitchUserActivityRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchUserActivity"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/twitch/users/activity"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/users/activity"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -8529,14 +8529,14 @@ func (s *Server) handleListTwitchUserActivityRequest(args [0]string, argsEscaped
 
 // handleListTwitchUsersRequest handles listTwitchUsers operation.
 //
-// GET /settings/twitch-users
+// GET /api/v1/settings/twitch-users
 func (s *Server) handleListTwitchUsersRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listTwitchUsers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/settings/twitch-users"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-users"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -8714,14 +8714,14 @@ func (s *Server) handleListTwitchUsersRequest(args [0]string, argsEscaped bool, 
 
 // handleLoginRequest handles login operation.
 //
-// POST /auth/login
+// POST /api/v1/auth/login
 func (s *Server) handleLoginRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("login"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/auth/login"),
+		semconv.HTTPRouteKey.String("/api/v1/auth/login"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -8855,14 +8855,14 @@ func (s *Server) handleLoginRequest(args [0]string, argsEscaped bool, w http.Res
 
 // handleMeRequest handles me operation.
 //
-// GET /me
+// GET /api/v1/me
 func (s *Server) handleMeRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("me"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/me"),
+		semconv.HTTPRouteKey.String("/api/v1/me"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -9025,14 +9025,14 @@ func (s *Server) handleMeRequest(args [0]string, argsEscaped bool, w http.Respon
 
 // handlePatchAiSettingsRequest handles patchAiSettings operation.
 //
-// PATCH /ai/settings
+// PATCH /api/v1/ai/settings
 func (s *Server) handlePatchAiSettingsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("patchAiSettings"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.HTTPRouteKey.String("/ai/settings"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/settings"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -9210,14 +9210,14 @@ func (s *Server) handlePatchAiSettingsRequest(args [0]string, argsEscaped bool, 
 
 // handleSendMessageRequest handles sendMessage operation.
 //
-// POST /twitch/send
+// POST /api/v1/twitch/send
 func (s *Server) handleSendMessageRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("sendMessage"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/twitch/send"),
+		semconv.HTTPRouteKey.String("/api/v1/twitch/send"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -9395,14 +9395,14 @@ func (s *Server) handleSendMessageRequest(args [0]string, argsEscaped bool, w ht
 
 // handleSetChannelBlacklistRequest handles setChannelBlacklist operation.
 //
-// POST /settings/channel-blacklist
+// POST /api/v1/settings/channel-blacklist
 func (s *Server) handleSetChannelBlacklistRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("setChannelBlacklist"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/channel-blacklist"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/channel-blacklist"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -9582,14 +9582,14 @@ func (s *Server) handleSetChannelBlacklistRequest(args [0]string, argsEscaped bo
 //
 // Start Twitch authorization (browser) to link an account without pasting a refresh token.
 //
-// POST /settings/twitch-accounts/oauth/start
+// POST /api/v1/settings/twitch-accounts/oauth/start
 func (s *Server) handleStartTwitchOAuthRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("startTwitchOAuth"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/twitch-accounts/oauth/start"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-accounts/oauth/start"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -9767,14 +9767,14 @@ func (s *Server) handleStartTwitchOAuthRequest(args [0]string, argsEscaped bool,
 
 // handleStopAiAgentRequest handles stopAiAgent operation.
 //
-// POST /ai/conversations/{conversationId}/stop
+// POST /api/v1/ai/conversations/{conversationId}/stop
 func (s *Server) handleStopAiAgentRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("stopAiAgent"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/ai/conversations/{conversationId}/stop"),
+		semconv.HTTPRouteKey.String("/api/v1/ai/conversations/{conversationId}/stop"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -9952,14 +9952,14 @@ func (s *Server) handleStopAiAgentRequest(args [1]string, argsEscaped bool, w ht
 
 // handleTestRuleRegexRequest handles testRuleRegex operation.
 //
-// POST /settings/rules/test-regex
+// POST /api/v1/settings/rules/test-regex
 func (s *Server) handleTestRuleRegexRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("testRuleRegex"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/rules/test-regex"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/rules/test-regex"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -10137,14 +10137,14 @@ func (s *Server) handleTestRuleRegexRequest(args [0]string, argsEscaped bool, w 
 
 // handleUpdateChannelDiscoverySettingsRequest handles updateChannelDiscoverySettings operation.
 //
-// PATCH /settings/channel-discovery
+// PATCH /api/v1/settings/channel-discovery
 func (s *Server) handleUpdateChannelDiscoverySettingsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateChannelDiscoverySettings"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.HTTPRouteKey.String("/settings/channel-discovery"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/channel-discovery"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -10322,14 +10322,14 @@ func (s *Server) handleUpdateChannelDiscoverySettingsRequest(args [0]string, arg
 
 // handleUpdateIrcMonitorSettingsRequest handles updateIrcMonitorSettings operation.
 //
-// PATCH /settings/irc-monitor-settings
+// PATCH /api/v1/settings/irc-monitor-settings
 func (s *Server) handleUpdateIrcMonitorSettingsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateIrcMonitorSettings"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.HTTPRouteKey.String("/settings/irc-monitor-settings"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/irc-monitor-settings"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -10507,14 +10507,14 @@ func (s *Server) handleUpdateIrcMonitorSettingsRequest(args [0]string, argsEscap
 
 // handleUpdateNotificationRequest handles updateNotification operation.
 //
-// POST /settings/notifications/update
+// POST /api/v1/settings/notifications/update
 func (s *Server) handleUpdateNotificationRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateNotification"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/notifications/update"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/notifications/update"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -10692,14 +10692,14 @@ func (s *Server) handleUpdateNotificationRequest(args [0]string, argsEscaped boo
 
 // handleUpdateRuleRequest handles updateRule operation.
 //
-// POST /settings/rules/update
+// POST /api/v1/settings/rules/update
 func (s *Server) handleUpdateRuleRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateRule"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/rules/update"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/rules/update"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -10877,14 +10877,14 @@ func (s *Server) handleUpdateRuleRequest(args [0]string, argsEscaped bool, w htt
 
 // handleUpdateSuspicionSettingsRequest handles updateSuspicionSettings operation.
 //
-// PATCH /settings/suspicion-settings
+// PATCH /api/v1/settings/suspicion-settings
 func (s *Server) handleUpdateSuspicionSettingsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateSuspicionSettings"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.HTTPRouteKey.String("/settings/suspicion-settings"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/suspicion-settings"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -11062,14 +11062,14 @@ func (s *Server) handleUpdateSuspicionSettingsRequest(args [0]string, argsEscape
 
 // handleUpdateTwitchAccountRequest handles updateTwitchAccount operation.
 //
-// POST /settings/twitch-accounts/update
+// POST /api/v1/settings/twitch-accounts/update
 func (s *Server) handleUpdateTwitchAccountRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateTwitchAccount"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/twitch-accounts/update"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-accounts/update"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -11247,14 +11247,14 @@ func (s *Server) handleUpdateTwitchAccountRequest(args [0]string, argsEscaped bo
 
 // handleUpdateTwitchUserRequest handles updateTwitchUser operation.
 //
-// POST /settings/twitch-users/update
+// POST /api/v1/settings/twitch-users/update
 func (s *Server) handleUpdateTwitchUserRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateTwitchUser"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/settings/twitch-users/update"),
+		semconv.HTTPRouteKey.String("/api/v1/settings/twitch-users/update"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)

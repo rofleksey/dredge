@@ -10,273 +10,273 @@ import (
 type Handler interface {
 	// ApproveChannelDiscoveryCandidate implements approveChannelDiscoveryCandidate operation.
 	//
-	// POST /settings/channel-discovery/candidates/{twitch_user_id}/approve
+	// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/approve
 	ApproveChannelDiscoveryCandidate(ctx context.Context, params ApproveChannelDiscoveryCandidateParams) (ApproveChannelDiscoveryCandidateRes, error)
 	// ConfirmAiTool implements confirmAiTool operation.
 	//
-	// POST /ai/conversations/{conversationId}/confirm
+	// POST /api/v1/ai/conversations/{conversationId}/confirm
 	ConfirmAiTool(ctx context.Context, req *ConfirmAiToolRequest, params ConfirmAiToolParams) (ConfirmAiToolRes, error)
 	// CountRules implements countRules operation.
 	//
-	// GET /settings/rules/count
+	// GET /api/v1/settings/rules/count
 	CountRules(ctx context.Context) (*CountResponse, error)
 	// CountTwitchAccounts implements countTwitchAccounts operation.
 	//
-	// GET /settings/twitch-accounts/count
+	// GET /api/v1/settings/twitch-accounts/count
 	CountTwitchAccounts(ctx context.Context) (*CountResponse, error)
 	// CountTwitchDirectoryUsers implements countTwitchDirectoryUsers operation.
 	//
-	// GET /twitch/users/count
+	// GET /api/v1/twitch/users/count
 	CountTwitchDirectoryUsers(ctx context.Context, params CountTwitchDirectoryUsersParams) (*CountResponse, error)
 	// CountTwitchMessages implements countTwitchMessages operation.
 	//
 	// Count messages matching the same filters as list (ignores limit/cursor).
 	//
-	// GET /twitch/messages/count
+	// GET /api/v1/twitch/messages/count
 	CountTwitchMessages(ctx context.Context, params CountTwitchMessagesParams) (*CountResponse, error)
 	// CreateAiConversation implements createAiConversation operation.
 	//
-	// POST /ai/conversations
+	// POST /api/v1/ai/conversations
 	CreateAiConversation(ctx context.Context, req OptCreateAiConversationRequest) (*AiConversation, error)
 	// CreateAiMessage implements createAiMessage operation.
 	//
-	// POST /ai/conversations/{conversationId}/messages
+	// POST /api/v1/ai/conversations/{conversationId}/messages
 	CreateAiMessage(ctx context.Context, req *CreateAiMessageRequest, params CreateAiMessageParams) (CreateAiMessageRes, error)
 	// CreateNotification implements createNotification operation.
 	//
-	// POST /settings/notifications
+	// POST /api/v1/settings/notifications
 	CreateNotification(ctx context.Context, req *CreateNotificationRequest) (*NotificationEntry, error)
 	// CreateRule implements createRule operation.
 	//
-	// POST /settings/rules
+	// POST /api/v1/settings/rules
 	CreateRule(ctx context.Context, req *CreateRuleRequest) (*Rule, error)
 	// CreateTwitchAccount implements createTwitchAccount operation.
 	//
-	// POST /settings/twitch-accounts
+	// POST /api/v1/settings/twitch-accounts
 	CreateTwitchAccount(ctx context.Context, req *CreateTwitchAccountRequest) (*TwitchAccount, error)
 	// CreateTwitchUser implements createTwitchUser operation.
 	//
-	// POST /settings/twitch-users
+	// POST /api/v1/settings/twitch-users
 	CreateTwitchUser(ctx context.Context, req *CreateTwitchUserRequest) (CreateTwitchUserRes, error)
 	// DeleteAiConversation implements deleteAiConversation operation.
 	//
-	// DELETE /ai/conversations/{conversationId}
+	// DELETE /api/v1/ai/conversations/{conversationId}
 	DeleteAiConversation(ctx context.Context, params DeleteAiConversationParams) (DeleteAiConversationRes, error)
 	// DeleteNotification implements deleteNotification operation.
 	//
-	// POST /settings/notifications/delete
+	// POST /api/v1/settings/notifications/delete
 	DeleteNotification(ctx context.Context, req *DeleteByIDRequest) (DeleteNotificationRes, error)
 	// DeleteRule implements deleteRule operation.
 	//
-	// POST /settings/rules/delete
+	// POST /api/v1/settings/rules/delete
 	DeleteRule(ctx context.Context, req *DeleteByIDRequest) (DeleteRuleRes, error)
 	// DeleteTwitchAccount implements deleteTwitchAccount operation.
 	//
-	// POST /settings/twitch-accounts/delete
+	// POST /api/v1/settings/twitch-accounts/delete
 	DeleteTwitchAccount(ctx context.Context, req *DeleteByIDRequest) (DeleteTwitchAccountRes, error)
 	// DenyChannelDiscoveryCandidate implements denyChannelDiscoveryCandidate operation.
 	//
-	// POST /settings/channel-discovery/candidates/{twitch_user_id}/deny
+	// POST /api/v1/settings/channel-discovery/candidates/{twitch_user_id}/deny
 	DenyChannelDiscoveryCandidate(ctx context.Context, params DenyChannelDiscoveryCandidateParams) (DenyChannelDiscoveryCandidateRes, error)
 	// GetAiSettings implements getAiSettings operation.
 	//
-	// GET /ai/settings
+	// GET /api/v1/ai/settings
 	GetAiSettings(ctx context.Context) (*AiSettings, error)
 	// GetChannelDiscoverySettings implements getChannelDiscoverySettings operation.
 	//
-	// GET /settings/channel-discovery
+	// GET /api/v1/settings/channel-discovery
 	GetChannelDiscoverySettings(ctx context.Context) (*ChannelDiscoverySettings, error)
 	// GetChannelLive implements getChannelLive operation.
 	//
-	// POST /twitch/channels/live
+	// POST /api/v1/twitch/channels/live
 	GetChannelLive(ctx context.Context, req *GetChannelLiveRequest) (GetChannelLiveRes, error)
 	// GetIrcMonitorSettings implements getIrcMonitorSettings operation.
 	//
-	// GET /settings/irc-monitor-settings
+	// GET /api/v1/settings/irc-monitor-settings
 	GetIrcMonitorSettings(ctx context.Context) (*IrcMonitorSettings, error)
 	// GetIrcMonitorStatus implements getIrcMonitorStatus operation.
 	//
-	// GET /twitch/irc-monitor/status
+	// GET /api/v1/twitch/irc-monitor/status
 	GetIrcMonitorStatus(ctx context.Context) (*IrcMonitorStatus, error)
 	// GetRecordedStream implements getRecordedStream operation.
 	//
-	// GET /twitch/streams/{streamId}
+	// GET /api/v1/twitch/streams/{streamId}
 	GetRecordedStream(ctx context.Context, params GetRecordedStreamParams) (GetRecordedStreamRes, error)
 	// GetRecordedStreamLeaderboard implements getRecordedStreamLeaderboard operation.
 	//
-	// GET /twitch/streams/{streamId}/leaderboard
+	// GET /api/v1/twitch/streams/{streamId}/leaderboard
 	GetRecordedStreamLeaderboard(ctx context.Context, params GetRecordedStreamLeaderboardParams) (GetRecordedStreamLeaderboardRes, error)
 	// GetSuspicionSettings implements getSuspicionSettings operation.
 	//
-	// GET /settings/suspicion-settings
+	// GET /api/v1/settings/suspicion-settings
 	GetSuspicionSettings(ctx context.Context) (*SuspicionSettings, error)
 	// GetTwitchUserActivityTimeline implements getTwitchUserActivityTimeline operation.
 	//
-	// POST /twitch/users/activity/timeline
+	// POST /api/v1/twitch/users/activity/timeline
 	GetTwitchUserActivityTimeline(ctx context.Context, req *GetTwitchUserActivityTimelineRequest) (GetTwitchUserActivityTimelineRes, error)
 	// GetTwitchUserProfile implements getTwitchUserProfile operation.
 	//
-	// POST /twitch/users/profile
+	// POST /api/v1/twitch/users/profile
 	GetTwitchUserProfile(ctx context.Context, req *GetTwitchUserProfileRequest) (GetTwitchUserProfileRes, error)
 	// GetWatchUiHints implements getWatchUiHints operation.
 	//
-	// GET /twitch/watch/hints
+	// GET /api/v1/twitch/watch/hints
 	GetWatchUiHints(ctx context.Context) (*WatchUiHints, error)
 	// ListAiConversations implements listAiConversations operation.
 	//
-	// GET /ai/conversations
+	// GET /api/v1/ai/conversations
 	ListAiConversations(ctx context.Context) ([]AiConversation, error)
 	// ListAiMessages implements listAiMessages operation.
 	//
-	// GET /ai/conversations/{conversationId}/messages
+	// GET /api/v1/ai/conversations/{conversationId}/messages
 	ListAiMessages(ctx context.Context, params ListAiMessagesParams) (ListAiMessagesRes, error)
 	// ListChannelBlacklist implements listChannelBlacklist operation.
 	//
-	// GET /settings/channel-blacklist
+	// GET /api/v1/settings/channel-blacklist
 	ListChannelBlacklist(ctx context.Context) ([]string, error)
 	// ListChannelChatters implements listChannelChatters operation.
 	//
-	// POST /twitch/channels/chatters
+	// POST /api/v1/twitch/channels/chatters
 	ListChannelChatters(ctx context.Context, req *ListChannelChattersRequest) (ListChannelChattersRes, error)
 	// ListChannelDiscoveryCandidates implements listChannelDiscoveryCandidates operation.
 	//
-	// GET /settings/channel-discovery/candidates
+	// GET /api/v1/settings/channel-discovery/candidates
 	ListChannelDiscoveryCandidates(ctx context.Context) ([]DiscoveryCandidate, error)
 	// ListChatHistory implements listChatHistory operation.
 	//
-	// GET /twitch/chat/history
+	// GET /api/v1/twitch/chat/history
 	ListChatHistory(ctx context.Context, params ListChatHistoryParams) (ListChatHistoryRes, error)
 	// ListIrcMonitorJoinedHistory implements listIrcMonitorJoinedHistory operation.
 	//
 	// Historical IRC joined channel counts (periodic samples).
 	//
-	// GET /twitch/irc-monitor/joined-history
+	// GET /api/v1/twitch/irc-monitor/joined-history
 	ListIrcMonitorJoinedHistory(ctx context.Context, params ListIrcMonitorJoinedHistoryParams) ([]IrcJoinedSample, error)
 	// ListNotifications implements listNotifications operation.
 	//
 	// List notification entries (newest first) with cursor-based incremental loading.
 	//
-	// GET /settings/notifications
+	// GET /api/v1/settings/notifications
 	ListNotifications(ctx context.Context, params ListNotificationsParams) ([]NotificationEntry, error)
 	// ListRecordedStreamActivity implements listRecordedStreamActivity operation.
 	//
 	// Non-message activity in the stream time window (newest first).
 	//
-	// GET /twitch/streams/{streamId}/activity
+	// GET /api/v1/twitch/streams/{streamId}/activity
 	ListRecordedStreamActivity(ctx context.Context, params ListRecordedStreamActivityParams) (ListRecordedStreamActivityRes, error)
 	// ListRecordedStreamMessages implements listRecordedStreamMessages operation.
 	//
 	// Chat messages tagged with this stream (newest first).
 	//
-	// GET /twitch/streams/{streamId}/messages
+	// GET /api/v1/twitch/streams/{streamId}/messages
 	ListRecordedStreamMessages(ctx context.Context, params ListRecordedStreamMessagesParams) (ListRecordedStreamMessagesRes, error)
 	// ListRecordedStreams implements listRecordedStreams operation.
 	//
 	// Recorded stream sessions for monitored channels (newest first).
 	//
-	// GET /twitch/streams
+	// GET /api/v1/twitch/streams
 	ListRecordedStreams(ctx context.Context, params ListRecordedStreamsParams) ([]RecordedStream, error)
 	// ListRuleTemplateVariables implements listRuleTemplateVariables operation.
 	//
 	// Names and descriptions for `$NAME` placeholders in notify and send_chat message templates.
 	//
-	// GET /settings/rules/template-variables
+	// GET /api/v1/settings/rules/template-variables
 	ListRuleTemplateVariables(ctx context.Context) (*RuleTemplateVariablesResponse, error)
 	// ListRuleTriggers implements listRuleTriggers operation.
 	//
 	// List rule trigger events (newest first) with cursor-based incremental loading.
 	//
-	// GET /settings/rule-triggers
+	// GET /api/v1/settings/rule-triggers
 	ListRuleTriggers(ctx context.Context, params ListRuleTriggersParams) ([]RuleTrigger, error)
 	// ListRules implements listRules operation.
 	//
-	// GET /settings/rules
+	// GET /api/v1/settings/rules
 	ListRules(ctx context.Context) ([]Rule, error)
 	// ListTwitchAccounts implements listTwitchAccounts operation.
 	//
-	// GET /settings/twitch-accounts
+	// GET /api/v1/settings/twitch-accounts
 	ListTwitchAccounts(ctx context.Context) ([]TwitchAccount, error)
 	// ListTwitchDirectoryUsers implements listTwitchDirectoryUsers operation.
 	//
 	// List known Twitch users (chatters and channels) for directory search.
 	//
-	// GET /twitch/users
+	// GET /api/v1/twitch/users
 	ListTwitchDirectoryUsers(ctx context.Context, params ListTwitchDirectoryUsersParams) ([]TwitchUser, error)
 	// ListTwitchMessages implements listTwitchMessages operation.
 	//
 	// Search persisted chat messages (newest first). Omit filters to list recent messages.
 	//
-	// GET /twitch/messages
+	// GET /api/v1/twitch/messages
 	ListTwitchMessages(ctx context.Context, params ListTwitchMessagesParams) ([]ChatHistoryEntry, error)
 	// ListTwitchUserActivity implements listTwitchUserActivity operation.
 	//
-	// POST /twitch/users/activity
+	// POST /api/v1/twitch/users/activity
 	ListTwitchUserActivity(ctx context.Context, req *ListTwitchUserActivityRequest) (ListTwitchUserActivityRes, error)
 	// ListTwitchUsers implements listTwitchUsers operation.
 	//
-	// GET /settings/twitch-users
+	// GET /api/v1/settings/twitch-users
 	ListTwitchUsers(ctx context.Context, params ListTwitchUsersParams) ([]TwitchUser, error)
 	// Login implements login operation.
 	//
-	// POST /auth/login
+	// POST /api/v1/auth/login
 	Login(ctx context.Context, req *LoginRequest) (LoginRes, error)
 	// Me implements me operation.
 	//
-	// GET /me
+	// GET /api/v1/me
 	Me(ctx context.Context) (MeRes, error)
 	// PatchAiSettings implements patchAiSettings operation.
 	//
-	// PATCH /ai/settings
+	// PATCH /api/v1/ai/settings
 	PatchAiSettings(ctx context.Context, req *PatchAiSettingsRequest) (*AiSettings, error)
 	// SendMessage implements sendMessage operation.
 	//
-	// POST /twitch/send
+	// POST /api/v1/twitch/send
 	SendMessage(ctx context.Context, req *SendMessageRequest) (SendMessageRes, error)
 	// SetChannelBlacklist implements setChannelBlacklist operation.
 	//
-	// POST /settings/channel-blacklist
+	// POST /api/v1/settings/channel-blacklist
 	SetChannelBlacklist(ctx context.Context, req *ChannelBlacklistChange) (SetChannelBlacklistRes, error)
 	// StartTwitchOAuth implements startTwitchOAuth operation.
 	//
 	// Start Twitch authorization (browser) to link an account without pasting a refresh token.
 	//
-	// POST /settings/twitch-accounts/oauth/start
+	// POST /api/v1/settings/twitch-accounts/oauth/start
 	StartTwitchOAuth(ctx context.Context, req OptStartTwitchOAuthRequest) (*StartTwitchOAuthResponse, error)
 	// StopAiAgent implements stopAiAgent operation.
 	//
-	// POST /ai/conversations/{conversationId}/stop
+	// POST /api/v1/ai/conversations/{conversationId}/stop
 	StopAiAgent(ctx context.Context, params StopAiAgentParams) (StopAiAgentRes, error)
 	// TestRuleRegex implements testRuleRegex operation.
 	//
-	// POST /settings/rules/test-regex
+	// POST /api/v1/settings/rules/test-regex
 	TestRuleRegex(ctx context.Context, req *TestRuleRegexRequest) (*TestRuleRegexResponse, error)
 	// UpdateChannelDiscoverySettings implements updateChannelDiscoverySettings operation.
 	//
-	// PATCH /settings/channel-discovery
+	// PATCH /api/v1/settings/channel-discovery
 	UpdateChannelDiscoverySettings(ctx context.Context, req *ChannelDiscoverySettings) (UpdateChannelDiscoverySettingsRes, error)
 	// UpdateIrcMonitorSettings implements updateIrcMonitorSettings operation.
 	//
-	// PATCH /settings/irc-monitor-settings
+	// PATCH /api/v1/settings/irc-monitor-settings
 	UpdateIrcMonitorSettings(ctx context.Context, req *IrcMonitorSettings) (*IrcMonitorSettings, error)
 	// UpdateNotification implements updateNotification operation.
 	//
-	// POST /settings/notifications/update
+	// POST /api/v1/settings/notifications/update
 	UpdateNotification(ctx context.Context, req *UpdateNotificationPostRequest) (UpdateNotificationRes, error)
 	// UpdateRule implements updateRule operation.
 	//
-	// POST /settings/rules/update
+	// POST /api/v1/settings/rules/update
 	UpdateRule(ctx context.Context, req *UpdateRulePostRequest) (UpdateRuleRes, error)
 	// UpdateSuspicionSettings implements updateSuspicionSettings operation.
 	//
-	// PATCH /settings/suspicion-settings
+	// PATCH /api/v1/settings/suspicion-settings
 	UpdateSuspicionSettings(ctx context.Context, req *SuspicionSettings) (*SuspicionSettings, error)
 	// UpdateTwitchAccount implements updateTwitchAccount operation.
 	//
-	// POST /settings/twitch-accounts/update
+	// POST /api/v1/settings/twitch-accounts/update
 	UpdateTwitchAccount(ctx context.Context, req *UpdateTwitchAccountPostRequest) (UpdateTwitchAccountRes, error)
 	// UpdateTwitchUser implements updateTwitchUser operation.
 	//
-	// POST /settings/twitch-users/update
+	// POST /api/v1/settings/twitch-users/update
 	UpdateTwitchUser(ctx context.Context, req *UpdateTwitchUserPostRequest) (UpdateTwitchUserRes, error)
 }
 
