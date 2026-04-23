@@ -7,6 +7,7 @@ import (
 	"github.com/rofleksey/dredge/internal/usecase/auth"
 	"github.com/rofleksey/dredge/internal/usecase/rules"
 	"github.com/rofleksey/dredge/internal/usecase/settings"
+	"github.com/rofleksey/dredge/internal/usecase/stats"
 	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 )
 
@@ -22,5 +23,6 @@ type Handler struct {
 	twitch      *twitchuc.Usecase
 	twitchOAuth *twitchoauth.OAuth
 	ai          *ai.Usecase
+	stats       *stats.Collector
 	obs         *observability.Stack
 }

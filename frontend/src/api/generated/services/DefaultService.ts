@@ -45,6 +45,7 @@ import type { StartTwitchOAuthResponse } from '../models/StartTwitchOAuthRespons
 import type { StreamLeaderboardEntry } from '../models/StreamLeaderboardEntry';
 import type { StreamLeaderboardSort } from '../models/StreamLeaderboardSort';
 import type { SuspicionSettings } from '../models/SuspicionSettings';
+import type { SystemStatsResponse } from '../models/SystemStatsResponse';
 import type { TestRuleRegexRequest } from '../models/TestRuleRegexRequest';
 import type { TestRuleRegexResponse } from '../models/TestRuleRegexResponse';
 import type { TwitchAccount } from '../models/TwitchAccount';
@@ -87,6 +88,22 @@ export class DefaultService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/me',
+            errors: {
+                401: `Unauthorized`,
+            },
+        });
+    }
+    /**
+     * Aggregated DB counts, process, host, and cache snapshot
+     * Admin-only. Snapshot values are cached server-side for up to 5 seconds; repeated calls within that window return the same payload and captured_at.
+     *
+     * @returns SystemStatsResponse System statistics snapshot
+     * @throws ApiError
+     */
+    public static getSystemStats(): CancelablePromise<SystemStatsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stats',
             errors: {
                 401: `Unauthorized`,
             },

@@ -190,6 +190,16 @@ func (UnimplementedHandler) GetSuspicionSettings(ctx context.Context) (r *Suspic
 	return r, ht.ErrNotImplemented
 }
 
+// GetSystemStats implements getSystemStats operation.
+//
+// Admin-only. Snapshot values are cached server-side for up to 5 seconds; repeated calls within that
+// window return the same payload and captured_at.
+//
+// GET /api/v1/stats
+func (UnimplementedHandler) GetSystemStats(ctx context.Context) (r GetSystemStatsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetTwitchUserActivityTimeline implements getTwitchUserActivityTimeline operation.
 //
 // POST /api/v1/twitch/users/activity/timeline

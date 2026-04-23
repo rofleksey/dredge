@@ -55,6 +55,12 @@ const router = createRouter({
           meta: { fillMainOutlet: true },
         },
         {
+          path: 'stats',
+          name: 'stats',
+          component: () => import('../views/StatsView.vue'),
+          meta: { fillMainOutlet: true },
+        },
+        {
           path: 'messages',
           name: 'messages',
           component: () => import('../views/MessagesView.vue'),

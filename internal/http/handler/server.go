@@ -12,6 +12,7 @@ import (
 	"github.com/rofleksey/dredge/internal/usecase/auth"
 	"github.com/rofleksey/dredge/internal/usecase/rules"
 	"github.com/rofleksey/dredge/internal/usecase/settings"
+	"github.com/rofleksey/dredge/internal/usecase/stats"
 	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 )
 
@@ -19,8 +20,8 @@ func NewSecurity(a *auth.Usecase, obs *observability.Stack) *Security {
 	return &Security{auth: a, obs: obs}
 }
 
-func NewHandler(a *auth.Usecase, sett *settings.Usecase, rulesSvc *rules.Usecase, t *twitchuc.Usecase, oauth *twitchoauth.OAuth, aiSvc *ai.Usecase, obs *observability.Stack) *Handler {
-	return &Handler{auth: a, sett: sett, rules: rulesSvc, twitch: t, twitchOAuth: oauth, ai: aiSvc, obs: obs}
+func NewHandler(a *auth.Usecase, sett *settings.Usecase, rulesSvc *rules.Usecase, t *twitchuc.Usecase, oauth *twitchoauth.OAuth, aiSvc *ai.Usecase, obs *observability.Stack, statsCol *stats.Collector) *Handler {
+	return &Handler{auth: a, sett: sett, rules: rulesSvc, twitch: t, twitchOAuth: oauth, ai: aiSvc, stats: statsCol, obs: obs}
 }
 
 var _ gen.Handler = (*Handler)(nil)

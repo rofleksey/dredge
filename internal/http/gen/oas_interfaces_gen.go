@@ -49,6 +49,10 @@ type GetRecordedStreamRes interface {
 	getRecordedStreamRes()
 }
 
+type GetSystemStatsRes interface {
+	getSystemStatsRes()
+}
+
 type GetTwitchUserActivityTimelineRes interface {
 	getTwitchUserActivityTimelineRes()
 }

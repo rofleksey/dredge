@@ -59,6 +59,7 @@ var operationRolesBearerAuth = map[string][]string{
 	GetRecordedStreamOperation:                []string{},
 	GetRecordedStreamLeaderboardOperation:     []string{},
 	GetSuspicionSettingsOperation:             []string{},
+	GetSystemStatsOperation:                   []string{},
 	GetTwitchUserActivityTimelineOperation:    []string{},
 	GetTwitchUserProfileOperation:             []string{},
 	GetWatchUiHintsOperation:                  []string{},

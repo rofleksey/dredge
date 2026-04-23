@@ -5946,6 +5946,52 @@ func (s *LoginResponse) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes float64 as json.
+func (o NilFloat64) Encode(e *jx.Encoder) {
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.Float64(float64(o.Value))
+}
+
+// Decode decodes float64 from json.
+func (o *NilFloat64) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode NilFloat64 to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v float64
+		o.Value = v
+		o.Null = true
+		return nil
+	}
+	o.Null = false
+	v, err := d.Float64()
+	if err != nil {
+		return err
+	}
+	o.Value = float64(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NilFloat64) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NilFloat64) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes int64 as json.
 func (o NilInt64) Encode(e *jx.Encoder) {
 	if o.Null {
@@ -9044,6 +9090,1227 @@ func (s *SuspicionSettings) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SuspicionSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SystemStatsCaches) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SystemStatsCaches) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("helix_user_oauth_cache_entries")
+		e.Int32(s.HelixUserOAuthCacheEntries)
+	}
+	{
+		e.FieldStart("helix_app_access_token_cached")
+		e.Bool(s.HelixAppAccessTokenCached)
+	}
+	{
+		e.FieldStart("login_limiter_tracked_ips")
+		e.Int32(s.LoginLimiterTrackedIps)
+	}
+	{
+		e.FieldStart("pgx_acquired_conns")
+		e.Int32(s.PgxAcquiredConns)
+	}
+	{
+		e.FieldStart("pgx_idle_conns")
+		e.Int32(s.PgxIdleConns)
+	}
+	{
+		e.FieldStart("pgx_total_conns")
+		e.Int32(s.PgxTotalConns)
+	}
+	{
+		e.FieldStart("pgx_max_conns")
+		e.Int32(s.PgxMaxConns)
+	}
+	{
+		e.FieldStart("pgx_acquire_count")
+		e.Int64(s.PgxAcquireCount)
+	}
+	{
+		e.FieldStart("pgx_canceled_acquire_count")
+		e.Int64(s.PgxCanceledAcquireCount)
+	}
+}
+
+var jsonFieldsNameOfSystemStatsCaches = [9]string{
+	0: "helix_user_oauth_cache_entries",
+	1: "helix_app_access_token_cached",
+	2: "login_limiter_tracked_ips",
+	3: "pgx_acquired_conns",
+	4: "pgx_idle_conns",
+	5: "pgx_total_conns",
+	6: "pgx_max_conns",
+	7: "pgx_acquire_count",
+	8: "pgx_canceled_acquire_count",
+}
+
+// Decode decodes SystemStatsCaches from json.
+func (s *SystemStatsCaches) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SystemStatsCaches to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "helix_user_oauth_cache_entries":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int32()
+				s.HelixUserOAuthCacheEntries = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"helix_user_oauth_cache_entries\"")
+			}
+		case "helix_app_access_token_cached":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.HelixAppAccessTokenCached = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"helix_app_access_token_cached\"")
+			}
+		case "login_limiter_tracked_ips":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int32()
+				s.LoginLimiterTrackedIps = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"login_limiter_tracked_ips\"")
+			}
+		case "pgx_acquired_conns":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int32()
+				s.PgxAcquiredConns = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pgx_acquired_conns\"")
+			}
+		case "pgx_idle_conns":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int32()
+				s.PgxIdleConns = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pgx_idle_conns\"")
+			}
+		case "pgx_total_conns":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int32()
+				s.PgxTotalConns = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pgx_total_conns\"")
+			}
+		case "pgx_max_conns":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int32()
+				s.PgxMaxConns = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pgx_max_conns\"")
+			}
+		case "pgx_acquire_count":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int64()
+				s.PgxAcquireCount = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pgx_acquire_count\"")
+			}
+		case "pgx_canceled_acquire_count":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.PgxCanceledAcquireCount = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pgx_canceled_acquire_count\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SystemStatsCaches")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSystemStatsCaches) {
+					name = jsonFieldsNameOfSystemStatsCaches[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SystemStatsCaches) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SystemStatsCaches) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SystemStatsHost) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SystemStatsHost) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("cpu_percent")
+		s.CPUPercent.Encode(e)
+	}
+	{
+		e.FieldStart("memory_total_bytes")
+		e.Int64(s.MemoryTotalBytes)
+	}
+	{
+		e.FieldStart("memory_used_bytes")
+		e.Int64(s.MemoryUsedBytes)
+	}
+	{
+		e.FieldStart("memory_used_percent")
+		e.Float64(s.MemoryUsedPercent)
+	}
+	{
+		e.FieldStart("disk_path")
+		e.Str(s.DiskPath)
+	}
+	{
+		e.FieldStart("disk_total_bytes")
+		e.Int64(s.DiskTotalBytes)
+	}
+	{
+		e.FieldStart("disk_used_bytes")
+		e.Int64(s.DiskUsedBytes)
+	}
+	{
+		e.FieldStart("disk_used_percent")
+		e.Float64(s.DiskUsedPercent)
+	}
+}
+
+var jsonFieldsNameOfSystemStatsHost = [8]string{
+	0: "cpu_percent",
+	1: "memory_total_bytes",
+	2: "memory_used_bytes",
+	3: "memory_used_percent",
+	4: "disk_path",
+	5: "disk_total_bytes",
+	6: "disk_used_bytes",
+	7: "disk_used_percent",
+}
+
+// Decode decodes SystemStatsHost from json.
+func (s *SystemStatsHost) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SystemStatsHost to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "cpu_percent":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.CPUPercent.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"cpu_percent\"")
+			}
+		case "memory_total_bytes":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.MemoryTotalBytes = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"memory_total_bytes\"")
+			}
+		case "memory_used_bytes":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.MemoryUsedBytes = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"memory_used_bytes\"")
+			}
+		case "memory_used_percent":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Float64()
+				s.MemoryUsedPercent = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"memory_used_percent\"")
+			}
+		case "disk_path":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Str()
+				s.DiskPath = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disk_path\"")
+			}
+		case "disk_total_bytes":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.DiskTotalBytes = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disk_total_bytes\"")
+			}
+		case "disk_used_bytes":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int64()
+				s.DiskUsedBytes = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disk_used_bytes\"")
+			}
+		case "disk_used_percent":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Float64()
+				s.DiskUsedPercent = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disk_used_percent\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SystemStatsHost")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b11111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSystemStatsHost) {
+					name = jsonFieldsNameOfSystemStatsHost[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SystemStatsHost) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SystemStatsHost) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SystemStatsProcess) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SystemStatsProcess) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("goroutines")
+		e.Int32(s.Goroutines)
+	}
+	{
+		e.FieldStart("heap_alloc_bytes")
+		e.Int64(s.HeapAllocBytes)
+	}
+	{
+		e.FieldStart("heap_sys_bytes")
+		e.Int64(s.HeapSysBytes)
+	}
+	{
+		e.FieldStart("sys_bytes")
+		e.Int64(s.SysBytes)
+	}
+	{
+		e.FieldStart("total_alloc_bytes")
+		e.Int64(s.TotalAllocBytes)
+	}
+	{
+		e.FieldStart("num_gc")
+		e.Int32(s.NumGc)
+	}
+	{
+		e.FieldStart("gc_cpu_fraction")
+		e.Float64(s.GcCPUFraction)
+	}
+}
+
+var jsonFieldsNameOfSystemStatsProcess = [7]string{
+	0: "goroutines",
+	1: "heap_alloc_bytes",
+	2: "heap_sys_bytes",
+	3: "sys_bytes",
+	4: "total_alloc_bytes",
+	5: "num_gc",
+	6: "gc_cpu_fraction",
+}
+
+// Decode decodes SystemStatsProcess from json.
+func (s *SystemStatsProcess) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SystemStatsProcess to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "goroutines":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int32()
+				s.Goroutines = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"goroutines\"")
+			}
+		case "heap_alloc_bytes":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.HeapAllocBytes = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"heap_alloc_bytes\"")
+			}
+		case "heap_sys_bytes":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.HeapSysBytes = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"heap_sys_bytes\"")
+			}
+		case "sys_bytes":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.SysBytes = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sys_bytes\"")
+			}
+		case "total_alloc_bytes":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.TotalAllocBytes = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_alloc_bytes\"")
+			}
+		case "num_gc":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int32()
+				s.NumGc = int32(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"num_gc\"")
+			}
+		case "gc_cpu_fraction":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Float64()
+				s.GcCPUFraction = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gc_cpu_fraction\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SystemStatsProcess")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b01111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSystemStatsProcess) {
+					name = jsonFieldsNameOfSystemStatsProcess[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SystemStatsProcess) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SystemStatsProcess) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SystemStatsResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SystemStatsResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("captured_at")
+		json.EncodeDateTime(e, s.CapturedAt)
+	}
+	{
+		e.FieldStart("tables")
+		s.Tables.Encode(e)
+	}
+	{
+		e.FieldStart("process")
+		s.Process.Encode(e)
+	}
+	{
+		e.FieldStart("host")
+		s.Host.Encode(e)
+	}
+	{
+		e.FieldStart("caches")
+		s.Caches.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfSystemStatsResponse = [5]string{
+	0: "captured_at",
+	1: "tables",
+	2: "process",
+	3: "host",
+	4: "caches",
+}
+
+// Decode decodes SystemStatsResponse from json.
+func (s *SystemStatsResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SystemStatsResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "captured_at":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.CapturedAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"captured_at\"")
+			}
+		case "tables":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Tables.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tables\"")
+			}
+		case "process":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Process.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"process\"")
+			}
+		case "host":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.Host.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"host\"")
+			}
+		case "caches":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.Caches.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"caches\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SystemStatsResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00011111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSystemStatsResponse) {
+					name = jsonFieldsNameOfSystemStatsResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SystemStatsResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SystemStatsResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SystemStatsTables) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SystemStatsTables) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("twitch_users")
+		e.Int64(s.TwitchUsers)
+	}
+	{
+		e.FieldStart("twitch_accounts_active")
+		e.Int64(s.TwitchAccountsActive)
+	}
+	{
+		e.FieldStart("twitch_accounts_all")
+		e.Int64(s.TwitchAccountsAll)
+	}
+	{
+		e.FieldStart("rules")
+		e.Int64(s.Rules)
+	}
+	{
+		e.FieldStart("notification_entries")
+		e.Int64(s.NotificationEntries)
+	}
+	{
+		e.FieldStart("streams")
+		e.Int64(s.Streams)
+	}
+	{
+		e.FieldStart("streams_open")
+		e.Int64(s.StreamsOpen)
+	}
+	{
+		e.FieldStart("chat_messages")
+		e.Int64(s.ChatMessages)
+	}
+	{
+		e.FieldStart("channel_chatters")
+		e.Int64(s.ChannelChatters)
+	}
+	{
+		e.FieldStart("user_activity_events")
+		e.Int64(s.UserActivityEvents)
+	}
+	{
+		e.FieldStart("twitch_user_helix_meta")
+		e.Int64(s.TwitchUserHelixMeta)
+	}
+	{
+		e.FieldStart("twitch_user_channel_follows")
+		e.Int64(s.TwitchUserChannelFollows)
+	}
+	{
+		e.FieldStart("user_followed_channels")
+		e.Int64(s.UserFollowedChannels)
+	}
+	{
+		e.FieldStart("channel_blacklist")
+		e.Int64(s.ChannelBlacklist)
+	}
+	{
+		e.FieldStart("rule_trigger_events")
+		e.Int64(s.RuleTriggerEvents)
+	}
+	{
+		e.FieldStart("irc_joined_samples")
+		e.Int64(s.IrcJoinedSamples)
+	}
+	{
+		e.FieldStart("twitch_discovery_candidates")
+		e.Int64(s.TwitchDiscoveryCandidates)
+	}
+	{
+		e.FieldStart("twitch_discovery_denied")
+		e.Int64(s.TwitchDiscoveryDenied)
+	}
+	{
+		e.FieldStart("ai_conversations")
+		e.Int64(s.AiConversations)
+	}
+	{
+		e.FieldStart("ai_messages")
+		e.Int64(s.AiMessages)
+	}
+}
+
+var jsonFieldsNameOfSystemStatsTables = [20]string{
+	0:  "twitch_users",
+	1:  "twitch_accounts_active",
+	2:  "twitch_accounts_all",
+	3:  "rules",
+	4:  "notification_entries",
+	5:  "streams",
+	6:  "streams_open",
+	7:  "chat_messages",
+	8:  "channel_chatters",
+	9:  "user_activity_events",
+	10: "twitch_user_helix_meta",
+	11: "twitch_user_channel_follows",
+	12: "user_followed_channels",
+	13: "channel_blacklist",
+	14: "rule_trigger_events",
+	15: "irc_joined_samples",
+	16: "twitch_discovery_candidates",
+	17: "twitch_discovery_denied",
+	18: "ai_conversations",
+	19: "ai_messages",
+}
+
+// Decode decodes SystemStatsTables from json.
+func (s *SystemStatsTables) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SystemStatsTables to nil")
+	}
+	var requiredBitSet [3]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "twitch_users":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.TwitchUsers = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"twitch_users\"")
+			}
+		case "twitch_accounts_active":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.TwitchAccountsActive = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"twitch_accounts_active\"")
+			}
+		case "twitch_accounts_all":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.TwitchAccountsAll = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"twitch_accounts_all\"")
+			}
+		case "rules":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.Rules = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rules\"")
+			}
+		case "notification_entries":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.NotificationEntries = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"notification_entries\"")
+			}
+		case "streams":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.Streams = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"streams\"")
+			}
+		case "streams_open":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int64()
+				s.StreamsOpen = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"streams_open\"")
+			}
+		case "chat_messages":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int64()
+				s.ChatMessages = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"chat_messages\"")
+			}
+		case "channel_chatters":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.ChannelChatters = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"channel_chatters\"")
+			}
+		case "user_activity_events":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.UserActivityEvents = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_activity_events\"")
+			}
+		case "twitch_user_helix_meta":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.TwitchUserHelixMeta = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"twitch_user_helix_meta\"")
+			}
+		case "twitch_user_channel_follows":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.TwitchUserChannelFollows = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"twitch_user_channel_follows\"")
+			}
+		case "user_followed_channels":
+			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.UserFollowedChannels = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_followed_channels\"")
+			}
+		case "channel_blacklist":
+			requiredBitSet[1] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.ChannelBlacklist = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"channel_blacklist\"")
+			}
+		case "rule_trigger_events":
+			requiredBitSet[1] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int64()
+				s.RuleTriggerEvents = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rule_trigger_events\"")
+			}
+		case "irc_joined_samples":
+			requiredBitSet[1] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int64()
+				s.IrcJoinedSamples = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"irc_joined_samples\"")
+			}
+		case "twitch_discovery_candidates":
+			requiredBitSet[2] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.TwitchDiscoveryCandidates = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"twitch_discovery_candidates\"")
+			}
+		case "twitch_discovery_denied":
+			requiredBitSet[2] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.TwitchDiscoveryDenied = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"twitch_discovery_denied\"")
+			}
+		case "ai_conversations":
+			requiredBitSet[2] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.AiConversations = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ai_conversations\"")
+			}
+		case "ai_messages":
+			requiredBitSet[2] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.AiMessages = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ai_messages\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SystemStatsTables")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [3]uint8{
+		0b11111111,
+		0b11111111,
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSystemStatsTables) {
+					name = jsonFieldsNameOfSystemStatsTables[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SystemStatsTables) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SystemStatsTables) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -1663,6 +1663,11 @@ type GetRecordedStreamLeaderboardOKApplicationJSON []StreamLeaderboardEntry
 
 func (*GetRecordedStreamLeaderboardOKApplicationJSON) getRecordedStreamLeaderboardRes() {}
 
+// GetSystemStatsUnauthorized is response for GetSystemStats operation.
+type GetSystemStatsUnauthorized struct{}
+
+func (*GetSystemStatsUnauthorized) getSystemStatsRes() {}
+
 type GetTwitchUserActivityTimelineOKApplicationJSON []ActivityTimelineSegment
 
 func (*GetTwitchUserActivityTimelineOKApplicationJSON) getTwitchUserActivityTimelineRes() {}
@@ -1995,6 +2000,51 @@ func (*LoginUnauthorized) loginRes() {}
 type MeUnauthorized struct{}
 
 func (*MeUnauthorized) meRes() {}
+
+// NewNilFloat64 returns new NilFloat64 with value set to v.
+func NewNilFloat64(v float64) NilFloat64 {
+	return NilFloat64{
+		Value: v,
+	}
+}
+
+// NilFloat64 is nullable float64.
+type NilFloat64 struct {
+	Value float64
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilFloat64) SetTo(v float64) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilFloat64) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilFloat64) SetToNull() {
+	o.Null = true
+	var v float64
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilFloat64) Get() (v float64, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilFloat64) Or(d float64) float64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewNilInt64 returns new NilInt64 with value set to v.
 func NewNilInt64(v int64) NilInt64 {
@@ -3898,6 +3948,572 @@ func (s *SuspicionSettings) SetLowFollowsThreshold(val int) {
 // SetMaxGqlFollowPages sets the value of MaxGqlFollowPages.
 func (s *SuspicionSettings) SetMaxGqlFollowPages(val int) {
 	s.MaxGqlFollowPages = val
+}
+
+// Ref: #/components/schemas/SystemStatsCaches
+type SystemStatsCaches struct {
+	HelixUserOAuthCacheEntries int32 `json:"helix_user_oauth_cache_entries"`
+	HelixAppAccessTokenCached  bool  `json:"helix_app_access_token_cached"`
+	LoginLimiterTrackedIps     int32 `json:"login_limiter_tracked_ips"`
+	PgxAcquiredConns           int32 `json:"pgx_acquired_conns"`
+	PgxIdleConns               int32 `json:"pgx_idle_conns"`
+	PgxTotalConns              int32 `json:"pgx_total_conns"`
+	PgxMaxConns                int32 `json:"pgx_max_conns"`
+	PgxAcquireCount            int64 `json:"pgx_acquire_count"`
+	PgxCanceledAcquireCount    int64 `json:"pgx_canceled_acquire_count"`
+}
+
+// GetHelixUserOAuthCacheEntries returns the value of HelixUserOAuthCacheEntries.
+func (s *SystemStatsCaches) GetHelixUserOAuthCacheEntries() int32 {
+	return s.HelixUserOAuthCacheEntries
+}
+
+// GetHelixAppAccessTokenCached returns the value of HelixAppAccessTokenCached.
+func (s *SystemStatsCaches) GetHelixAppAccessTokenCached() bool {
+	return s.HelixAppAccessTokenCached
+}
+
+// GetLoginLimiterTrackedIps returns the value of LoginLimiterTrackedIps.
+func (s *SystemStatsCaches) GetLoginLimiterTrackedIps() int32 {
+	return s.LoginLimiterTrackedIps
+}
+
+// GetPgxAcquiredConns returns the value of PgxAcquiredConns.
+func (s *SystemStatsCaches) GetPgxAcquiredConns() int32 {
+	return s.PgxAcquiredConns
+}
+
+// GetPgxIdleConns returns the value of PgxIdleConns.
+func (s *SystemStatsCaches) GetPgxIdleConns() int32 {
+	return s.PgxIdleConns
+}
+
+// GetPgxTotalConns returns the value of PgxTotalConns.
+func (s *SystemStatsCaches) GetPgxTotalConns() int32 {
+	return s.PgxTotalConns
+}
+
+// GetPgxMaxConns returns the value of PgxMaxConns.
+func (s *SystemStatsCaches) GetPgxMaxConns() int32 {
+	return s.PgxMaxConns
+}
+
+// GetPgxAcquireCount returns the value of PgxAcquireCount.
+func (s *SystemStatsCaches) GetPgxAcquireCount() int64 {
+	return s.PgxAcquireCount
+}
+
+// GetPgxCanceledAcquireCount returns the value of PgxCanceledAcquireCount.
+func (s *SystemStatsCaches) GetPgxCanceledAcquireCount() int64 {
+	return s.PgxCanceledAcquireCount
+}
+
+// SetHelixUserOAuthCacheEntries sets the value of HelixUserOAuthCacheEntries.
+func (s *SystemStatsCaches) SetHelixUserOAuthCacheEntries(val int32) {
+	s.HelixUserOAuthCacheEntries = val
+}
+
+// SetHelixAppAccessTokenCached sets the value of HelixAppAccessTokenCached.
+func (s *SystemStatsCaches) SetHelixAppAccessTokenCached(val bool) {
+	s.HelixAppAccessTokenCached = val
+}
+
+// SetLoginLimiterTrackedIps sets the value of LoginLimiterTrackedIps.
+func (s *SystemStatsCaches) SetLoginLimiterTrackedIps(val int32) {
+	s.LoginLimiterTrackedIps = val
+}
+
+// SetPgxAcquiredConns sets the value of PgxAcquiredConns.
+func (s *SystemStatsCaches) SetPgxAcquiredConns(val int32) {
+	s.PgxAcquiredConns = val
+}
+
+// SetPgxIdleConns sets the value of PgxIdleConns.
+func (s *SystemStatsCaches) SetPgxIdleConns(val int32) {
+	s.PgxIdleConns = val
+}
+
+// SetPgxTotalConns sets the value of PgxTotalConns.
+func (s *SystemStatsCaches) SetPgxTotalConns(val int32) {
+	s.PgxTotalConns = val
+}
+
+// SetPgxMaxConns sets the value of PgxMaxConns.
+func (s *SystemStatsCaches) SetPgxMaxConns(val int32) {
+	s.PgxMaxConns = val
+}
+
+// SetPgxAcquireCount sets the value of PgxAcquireCount.
+func (s *SystemStatsCaches) SetPgxAcquireCount(val int64) {
+	s.PgxAcquireCount = val
+}
+
+// SetPgxCanceledAcquireCount sets the value of PgxCanceledAcquireCount.
+func (s *SystemStatsCaches) SetPgxCanceledAcquireCount(val int64) {
+	s.PgxCanceledAcquireCount = val
+}
+
+// Ref: #/components/schemas/SystemStatsHost
+type SystemStatsHost struct {
+	// Host CPU utilization percent; null when unavailable.
+	CPUPercent        NilFloat64 `json:"cpu_percent"`
+	MemoryTotalBytes  int64      `json:"memory_total_bytes"`
+	MemoryUsedBytes   int64      `json:"memory_used_bytes"`
+	MemoryUsedPercent float64    `json:"memory_used_percent"`
+	// Path passed to disk usage (e.g. / or a drive root).
+	DiskPath        string  `json:"disk_path"`
+	DiskTotalBytes  int64   `json:"disk_total_bytes"`
+	DiskUsedBytes   int64   `json:"disk_used_bytes"`
+	DiskUsedPercent float64 `json:"disk_used_percent"`
+}
+
+// GetCPUPercent returns the value of CPUPercent.
+func (s *SystemStatsHost) GetCPUPercent() NilFloat64 {
+	return s.CPUPercent
+}
+
+// GetMemoryTotalBytes returns the value of MemoryTotalBytes.
+func (s *SystemStatsHost) GetMemoryTotalBytes() int64 {
+	return s.MemoryTotalBytes
+}
+
+// GetMemoryUsedBytes returns the value of MemoryUsedBytes.
+func (s *SystemStatsHost) GetMemoryUsedBytes() int64 {
+	return s.MemoryUsedBytes
+}
+
+// GetMemoryUsedPercent returns the value of MemoryUsedPercent.
+func (s *SystemStatsHost) GetMemoryUsedPercent() float64 {
+	return s.MemoryUsedPercent
+}
+
+// GetDiskPath returns the value of DiskPath.
+func (s *SystemStatsHost) GetDiskPath() string {
+	return s.DiskPath
+}
+
+// GetDiskTotalBytes returns the value of DiskTotalBytes.
+func (s *SystemStatsHost) GetDiskTotalBytes() int64 {
+	return s.DiskTotalBytes
+}
+
+// GetDiskUsedBytes returns the value of DiskUsedBytes.
+func (s *SystemStatsHost) GetDiskUsedBytes() int64 {
+	return s.DiskUsedBytes
+}
+
+// GetDiskUsedPercent returns the value of DiskUsedPercent.
+func (s *SystemStatsHost) GetDiskUsedPercent() float64 {
+	return s.DiskUsedPercent
+}
+
+// SetCPUPercent sets the value of CPUPercent.
+func (s *SystemStatsHost) SetCPUPercent(val NilFloat64) {
+	s.CPUPercent = val
+}
+
+// SetMemoryTotalBytes sets the value of MemoryTotalBytes.
+func (s *SystemStatsHost) SetMemoryTotalBytes(val int64) {
+	s.MemoryTotalBytes = val
+}
+
+// SetMemoryUsedBytes sets the value of MemoryUsedBytes.
+func (s *SystemStatsHost) SetMemoryUsedBytes(val int64) {
+	s.MemoryUsedBytes = val
+}
+
+// SetMemoryUsedPercent sets the value of MemoryUsedPercent.
+func (s *SystemStatsHost) SetMemoryUsedPercent(val float64) {
+	s.MemoryUsedPercent = val
+}
+
+// SetDiskPath sets the value of DiskPath.
+func (s *SystemStatsHost) SetDiskPath(val string) {
+	s.DiskPath = val
+}
+
+// SetDiskTotalBytes sets the value of DiskTotalBytes.
+func (s *SystemStatsHost) SetDiskTotalBytes(val int64) {
+	s.DiskTotalBytes = val
+}
+
+// SetDiskUsedBytes sets the value of DiskUsedBytes.
+func (s *SystemStatsHost) SetDiskUsedBytes(val int64) {
+	s.DiskUsedBytes = val
+}
+
+// SetDiskUsedPercent sets the value of DiskUsedPercent.
+func (s *SystemStatsHost) SetDiskUsedPercent(val float64) {
+	s.DiskUsedPercent = val
+}
+
+// Ref: #/components/schemas/SystemStatsProcess
+type SystemStatsProcess struct {
+	Goroutines      int32   `json:"goroutines"`
+	HeapAllocBytes  int64   `json:"heap_alloc_bytes"`
+	HeapSysBytes    int64   `json:"heap_sys_bytes"`
+	SysBytes        int64   `json:"sys_bytes"`
+	TotalAllocBytes int64   `json:"total_alloc_bytes"`
+	NumGc           int32   `json:"num_gc"`
+	GcCPUFraction   float64 `json:"gc_cpu_fraction"`
+}
+
+// GetGoroutines returns the value of Goroutines.
+func (s *SystemStatsProcess) GetGoroutines() int32 {
+	return s.Goroutines
+}
+
+// GetHeapAllocBytes returns the value of HeapAllocBytes.
+func (s *SystemStatsProcess) GetHeapAllocBytes() int64 {
+	return s.HeapAllocBytes
+}
+
+// GetHeapSysBytes returns the value of HeapSysBytes.
+func (s *SystemStatsProcess) GetHeapSysBytes() int64 {
+	return s.HeapSysBytes
+}
+
+// GetSysBytes returns the value of SysBytes.
+func (s *SystemStatsProcess) GetSysBytes() int64 {
+	return s.SysBytes
+}
+
+// GetTotalAllocBytes returns the value of TotalAllocBytes.
+func (s *SystemStatsProcess) GetTotalAllocBytes() int64 {
+	return s.TotalAllocBytes
+}
+
+// GetNumGc returns the value of NumGc.
+func (s *SystemStatsProcess) GetNumGc() int32 {
+	return s.NumGc
+}
+
+// GetGcCPUFraction returns the value of GcCPUFraction.
+func (s *SystemStatsProcess) GetGcCPUFraction() float64 {
+	return s.GcCPUFraction
+}
+
+// SetGoroutines sets the value of Goroutines.
+func (s *SystemStatsProcess) SetGoroutines(val int32) {
+	s.Goroutines = val
+}
+
+// SetHeapAllocBytes sets the value of HeapAllocBytes.
+func (s *SystemStatsProcess) SetHeapAllocBytes(val int64) {
+	s.HeapAllocBytes = val
+}
+
+// SetHeapSysBytes sets the value of HeapSysBytes.
+func (s *SystemStatsProcess) SetHeapSysBytes(val int64) {
+	s.HeapSysBytes = val
+}
+
+// SetSysBytes sets the value of SysBytes.
+func (s *SystemStatsProcess) SetSysBytes(val int64) {
+	s.SysBytes = val
+}
+
+// SetTotalAllocBytes sets the value of TotalAllocBytes.
+func (s *SystemStatsProcess) SetTotalAllocBytes(val int64) {
+	s.TotalAllocBytes = val
+}
+
+// SetNumGc sets the value of NumGc.
+func (s *SystemStatsProcess) SetNumGc(val int32) {
+	s.NumGc = val
+}
+
+// SetGcCPUFraction sets the value of GcCPUFraction.
+func (s *SystemStatsProcess) SetGcCPUFraction(val float64) {
+	s.GcCPUFraction = val
+}
+
+// Ref: #/components/schemas/SystemStatsResponse
+type SystemStatsResponse struct {
+	// When this snapshot was produced (server clock).
+	CapturedAt time.Time          `json:"captured_at"`
+	Tables     SystemStatsTables  `json:"tables"`
+	Process    SystemStatsProcess `json:"process"`
+	Host       SystemStatsHost    `json:"host"`
+	Caches     SystemStatsCaches  `json:"caches"`
+}
+
+// GetCapturedAt returns the value of CapturedAt.
+func (s *SystemStatsResponse) GetCapturedAt() time.Time {
+	return s.CapturedAt
+}
+
+// GetTables returns the value of Tables.
+func (s *SystemStatsResponse) GetTables() SystemStatsTables {
+	return s.Tables
+}
+
+// GetProcess returns the value of Process.
+func (s *SystemStatsResponse) GetProcess() SystemStatsProcess {
+	return s.Process
+}
+
+// GetHost returns the value of Host.
+func (s *SystemStatsResponse) GetHost() SystemStatsHost {
+	return s.Host
+}
+
+// GetCaches returns the value of Caches.
+func (s *SystemStatsResponse) GetCaches() SystemStatsCaches {
+	return s.Caches
+}
+
+// SetCapturedAt sets the value of CapturedAt.
+func (s *SystemStatsResponse) SetCapturedAt(val time.Time) {
+	s.CapturedAt = val
+}
+
+// SetTables sets the value of Tables.
+func (s *SystemStatsResponse) SetTables(val SystemStatsTables) {
+	s.Tables = val
+}
+
+// SetProcess sets the value of Process.
+func (s *SystemStatsResponse) SetProcess(val SystemStatsProcess) {
+	s.Process = val
+}
+
+// SetHost sets the value of Host.
+func (s *SystemStatsResponse) SetHost(val SystemStatsHost) {
+	s.Host = val
+}
+
+// SetCaches sets the value of Caches.
+func (s *SystemStatsResponse) SetCaches(val SystemStatsCaches) {
+	s.Caches = val
+}
+
+func (*SystemStatsResponse) getSystemStatsRes() {}
+
+// Ref: #/components/schemas/SystemStatsTables
+type SystemStatsTables struct {
+	TwitchUsers int64 `json:"twitch_users"`
+	// Twitch_accounts rows with deleted_at IS NULL.
+	TwitchAccountsActive int64 `json:"twitch_accounts_active"`
+	TwitchAccountsAll    int64 `json:"twitch_accounts_all"`
+	Rules                int64 `json:"rules"`
+	NotificationEntries  int64 `json:"notification_entries"`
+	Streams              int64 `json:"streams"`
+	// Streams with ended_at IS NULL.
+	StreamsOpen               int64 `json:"streams_open"`
+	ChatMessages              int64 `json:"chat_messages"`
+	ChannelChatters           int64 `json:"channel_chatters"`
+	UserActivityEvents        int64 `json:"user_activity_events"`
+	TwitchUserHelixMeta       int64 `json:"twitch_user_helix_meta"`
+	TwitchUserChannelFollows  int64 `json:"twitch_user_channel_follows"`
+	UserFollowedChannels      int64 `json:"user_followed_channels"`
+	ChannelBlacklist          int64 `json:"channel_blacklist"`
+	RuleTriggerEvents         int64 `json:"rule_trigger_events"`
+	IrcJoinedSamples          int64 `json:"irc_joined_samples"`
+	TwitchDiscoveryCandidates int64 `json:"twitch_discovery_candidates"`
+	TwitchDiscoveryDenied     int64 `json:"twitch_discovery_denied"`
+	AiConversations           int64 `json:"ai_conversations"`
+	AiMessages                int64 `json:"ai_messages"`
+}
+
+// GetTwitchUsers returns the value of TwitchUsers.
+func (s *SystemStatsTables) GetTwitchUsers() int64 {
+	return s.TwitchUsers
+}
+
+// GetTwitchAccountsActive returns the value of TwitchAccountsActive.
+func (s *SystemStatsTables) GetTwitchAccountsActive() int64 {
+	return s.TwitchAccountsActive
+}
+
+// GetTwitchAccountsAll returns the value of TwitchAccountsAll.
+func (s *SystemStatsTables) GetTwitchAccountsAll() int64 {
+	return s.TwitchAccountsAll
+}
+
+// GetRules returns the value of Rules.
+func (s *SystemStatsTables) GetRules() int64 {
+	return s.Rules
+}
+
+// GetNotificationEntries returns the value of NotificationEntries.
+func (s *SystemStatsTables) GetNotificationEntries() int64 {
+	return s.NotificationEntries
+}
+
+// GetStreams returns the value of Streams.
+func (s *SystemStatsTables) GetStreams() int64 {
+	return s.Streams
+}
+
+// GetStreamsOpen returns the value of StreamsOpen.
+func (s *SystemStatsTables) GetStreamsOpen() int64 {
+	return s.StreamsOpen
+}
+
+// GetChatMessages returns the value of ChatMessages.
+func (s *SystemStatsTables) GetChatMessages() int64 {
+	return s.ChatMessages
+}
+
+// GetChannelChatters returns the value of ChannelChatters.
+func (s *SystemStatsTables) GetChannelChatters() int64 {
+	return s.ChannelChatters
+}
+
+// GetUserActivityEvents returns the value of UserActivityEvents.
+func (s *SystemStatsTables) GetUserActivityEvents() int64 {
+	return s.UserActivityEvents
+}
+
+// GetTwitchUserHelixMeta returns the value of TwitchUserHelixMeta.
+func (s *SystemStatsTables) GetTwitchUserHelixMeta() int64 {
+	return s.TwitchUserHelixMeta
+}
+
+// GetTwitchUserChannelFollows returns the value of TwitchUserChannelFollows.
+func (s *SystemStatsTables) GetTwitchUserChannelFollows() int64 {
+	return s.TwitchUserChannelFollows
+}
+
+// GetUserFollowedChannels returns the value of UserFollowedChannels.
+func (s *SystemStatsTables) GetUserFollowedChannels() int64 {
+	return s.UserFollowedChannels
+}
+
+// GetChannelBlacklist returns the value of ChannelBlacklist.
+func (s *SystemStatsTables) GetChannelBlacklist() int64 {
+	return s.ChannelBlacklist
+}
+
+// GetRuleTriggerEvents returns the value of RuleTriggerEvents.
+func (s *SystemStatsTables) GetRuleTriggerEvents() int64 {
+	return s.RuleTriggerEvents
+}
+
+// GetIrcJoinedSamples returns the value of IrcJoinedSamples.
+func (s *SystemStatsTables) GetIrcJoinedSamples() int64 {
+	return s.IrcJoinedSamples
+}
+
+// GetTwitchDiscoveryCandidates returns the value of TwitchDiscoveryCandidates.
+func (s *SystemStatsTables) GetTwitchDiscoveryCandidates() int64 {
+	return s.TwitchDiscoveryCandidates
+}
+
+// GetTwitchDiscoveryDenied returns the value of TwitchDiscoveryDenied.
+func (s *SystemStatsTables) GetTwitchDiscoveryDenied() int64 {
+	return s.TwitchDiscoveryDenied
+}
+
+// GetAiConversations returns the value of AiConversations.
+func (s *SystemStatsTables) GetAiConversations() int64 {
+	return s.AiConversations
+}
+
+// GetAiMessages returns the value of AiMessages.
+func (s *SystemStatsTables) GetAiMessages() int64 {
+	return s.AiMessages
+}
+
+// SetTwitchUsers sets the value of TwitchUsers.
+func (s *SystemStatsTables) SetTwitchUsers(val int64) {
+	s.TwitchUsers = val
+}
+
+// SetTwitchAccountsActive sets the value of TwitchAccountsActive.
+func (s *SystemStatsTables) SetTwitchAccountsActive(val int64) {
+	s.TwitchAccountsActive = val
+}
+
+// SetTwitchAccountsAll sets the value of TwitchAccountsAll.
+func (s *SystemStatsTables) SetTwitchAccountsAll(val int64) {
+	s.TwitchAccountsAll = val
+}
+
+// SetRules sets the value of Rules.
+func (s *SystemStatsTables) SetRules(val int64) {
+	s.Rules = val
+}
+
+// SetNotificationEntries sets the value of NotificationEntries.
+func (s *SystemStatsTables) SetNotificationEntries(val int64) {
+	s.NotificationEntries = val
+}
+
+// SetStreams sets the value of Streams.
+func (s *SystemStatsTables) SetStreams(val int64) {
+	s.Streams = val
+}
+
+// SetStreamsOpen sets the value of StreamsOpen.
+func (s *SystemStatsTables) SetStreamsOpen(val int64) {
+	s.StreamsOpen = val
+}
+
+// SetChatMessages sets the value of ChatMessages.
+func (s *SystemStatsTables) SetChatMessages(val int64) {
+	s.ChatMessages = val
+}
+
+// SetChannelChatters sets the value of ChannelChatters.
+func (s *SystemStatsTables) SetChannelChatters(val int64) {
+	s.ChannelChatters = val
+}
+
+// SetUserActivityEvents sets the value of UserActivityEvents.
+func (s *SystemStatsTables) SetUserActivityEvents(val int64) {
+	s.UserActivityEvents = val
+}
+
+// SetTwitchUserHelixMeta sets the value of TwitchUserHelixMeta.
+func (s *SystemStatsTables) SetTwitchUserHelixMeta(val int64) {
+	s.TwitchUserHelixMeta = val
+}
+
+// SetTwitchUserChannelFollows sets the value of TwitchUserChannelFollows.
+func (s *SystemStatsTables) SetTwitchUserChannelFollows(val int64) {
+	s.TwitchUserChannelFollows = val
+}
+
+// SetUserFollowedChannels sets the value of UserFollowedChannels.
+func (s *SystemStatsTables) SetUserFollowedChannels(val int64) {
+	s.UserFollowedChannels = val
+}
+
+// SetChannelBlacklist sets the value of ChannelBlacklist.
+func (s *SystemStatsTables) SetChannelBlacklist(val int64) {
+	s.ChannelBlacklist = val
+}
+
+// SetRuleTriggerEvents sets the value of RuleTriggerEvents.
+func (s *SystemStatsTables) SetRuleTriggerEvents(val int64) {
+	s.RuleTriggerEvents = val
+}
+
+// SetIrcJoinedSamples sets the value of IrcJoinedSamples.
+func (s *SystemStatsTables) SetIrcJoinedSamples(val int64) {
+	s.IrcJoinedSamples = val
+}
+
+// SetTwitchDiscoveryCandidates sets the value of TwitchDiscoveryCandidates.
+func (s *SystemStatsTables) SetTwitchDiscoveryCandidates(val int64) {
+	s.TwitchDiscoveryCandidates = val
+}
+
+// SetTwitchDiscoveryDenied sets the value of TwitchDiscoveryDenied.
+func (s *SystemStatsTables) SetTwitchDiscoveryDenied(val int64) {
+	s.TwitchDiscoveryDenied = val
+}
+
+// SetAiConversations sets the value of AiConversations.
+func (s *SystemStatsTables) SetAiConversations(val int64) {
+	s.AiConversations = val
+}
+
+// SetAiMessages sets the value of AiMessages.
+func (s *SystemStatsTables) SetAiMessages(val int64) {
+	s.AiMessages = val
 }
 
 // Ref: #/components/schemas/TestRuleRegexRequest

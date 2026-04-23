@@ -49,3 +49,27 @@ func NewClient(repo repository.Store, obs *observability.Stack, clientID, client
 		ClientSecret: clientSecret,
 	}
 }
+
+// StatsSnapshot reports in-process Helix OAuth cache telemetry (operator stats).
+func (c *Client) StatsSnapshot() (userOAuthEntries int, appAccessTokenCached bool) {
+	if c == nil {
+		return 0, false
+	}
+
+	c.userOAuthMu.Lock()
+
+	n := 0
+	if c.userOAuth != nil {
+		n = len(c.userOAuth)
+	}
+
+	c.userOAuthMu.Unlock()
+
+	c.appTokenMu.Lock()
+
+	warm := c.appToken != "" && time.Now().Before(c.appTokenExp.Add(-2*time.Minute))
+
+	c.appTokenMu.Unlock()
+
+	return n, warm
+}

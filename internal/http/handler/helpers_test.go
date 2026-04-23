@@ -21,6 +21,7 @@ import (
 	"github.com/rofleksey/dredge/internal/usecase/auth"
 	"github.com/rofleksey/dredge/internal/usecase/rules"
 	"github.com/rofleksey/dredge/internal/usecase/settings"
+	"github.com/rofleksey/dredge/internal/usecase/stats"
 	twitchuc "github.com/rofleksey/dredge/internal/usecase/twitch"
 )
 
@@ -59,7 +60,9 @@ func testHandler(t *testing.T) (*Handler, *gomock.Controller, *repomocks.MockSto
 
 	rulesSvc := rules.NewUsecase(repo, obs, nil, nil)
 
-	h := NewHandler(authSvc, setSvc, rulesSvc, twSvc, nil, nil, obs)
+	statCol := stats.NewCollector(repo, twSvc, nil, nil)
+
+	h := NewHandler(authSvc, setSvc, rulesSvc, twSvc, nil, nil, obs, statCol)
 
 	return h, ctrl, repo
 }

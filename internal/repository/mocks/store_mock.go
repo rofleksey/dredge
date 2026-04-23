@@ -1245,6 +1245,21 @@ func (mr *MockStoreMockRecorder) SetAIMessageMetadata(ctx, messageID, metadata a
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAIMessageMetadata", reflect.TypeOf((*MockStore)(nil).SetAIMessageMetadata), ctx, messageID, metadata)
 }
 
+// SystemStatsTableCounts mocks base method.
+func (m *MockStore) SystemStatsTableCounts(ctx context.Context) (entity.SystemStatsTableCounts, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SystemStatsTableCounts", ctx)
+	ret0, _ := ret[0].(entity.SystemStatsTableCounts)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SystemStatsTableCounts indicates an expected call of SystemStatsTableCounts.
+func (mr *MockStoreMockRecorder) SystemStatsTableCounts(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SystemStatsTableCounts", reflect.TypeOf((*MockStore)(nil).SystemStatsTableCounts), ctx)
+}
+
 // TouchAIConversation mocks base method.
 func (m *MockStore) TouchAIConversation(ctx context.Context, id int64) error {
 	m.ctrl.T.Helper()

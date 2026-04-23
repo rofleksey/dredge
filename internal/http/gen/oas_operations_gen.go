@@ -31,6 +31,7 @@ const (
 	GetRecordedStreamOperation                OperationName = "GetRecordedStream"
 	GetRecordedStreamLeaderboardOperation     OperationName = "GetRecordedStreamLeaderboard"
 	GetSuspicionSettingsOperation             OperationName = "GetSuspicionSettings"
+	GetSystemStatsOperation                   OperationName = "GetSystemStats"
 	GetTwitchUserActivityTimelineOperation    OperationName = "GetTwitchUserActivityTimeline"
 	GetTwitchUserProfileOperation             OperationName = "GetTwitchUserProfile"
 	GetWatchUiHintsOperation                  OperationName = "GetWatchUiHints"

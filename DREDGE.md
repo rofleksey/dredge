@@ -6,7 +6,7 @@
 | Module | `github.com/rofleksey/dredge` |
 | API surface | OpenAPI 3.0 (`api/openapi.yaml`), version **0.1.0** |
 | Document purpose | Capture **what** the system must do for operators and integrators; implementation detail lives in `AGENTS.md` and the codebase. |
-| Last reviewed | 2026-04-22 |
+| Last reviewed | 2026-04-23 |
 
 ---
 
@@ -246,6 +246,7 @@ All paths below are **admin-gated** unless noted. Full request/response schemas 
 | Area | Paths (summary) |
 | --- | --- |
 | Auth | `POST /api/v1/auth/login` (public), `GET /api/v1/me` (auth only) |
+| Stats | `GET /api/v1/stats` (aggregated DB counts, process/host metrics, cache and pool snapshot; server-side cache ~5s) |
 | Settings | `/api/v1/settings/twitch-users`, `…/update`, `…/channel-blacklist`, `…/suspicion-settings`, `…/irc-monitor-settings`, `…/channel-discovery`, `…/channel-discovery/candidates`, `…/rules*`, `…/rule-triggers`, `…/notifications*`, `…/twitch-accounts*` |
 | Twitch data | `/api/v1/twitch/send`, `…/chat/history`, `…/messages`, `…/users`, `…/channels/live`, `…/channels/chatters`, `…/watch/hints`, `…/irc-monitor/status`, `…/irc-monitor/joined-history`, `…/streams`, `…/streams/{streamId}`, `…/streams/{streamId}/messages|activity|leaderboard`, `…/users/activity`, `…/users/activity/timeline` |
 | AI (optional) | `/api/v1/ai/settings`, `/api/v1/ai/conversations`, `/api/v1/ai/conversations/{id}`, `…/messages`, `…/confirm`, `…/stop` |
@@ -264,6 +265,7 @@ the UI architecture and conventions that must remain consistent as the frontend 
 - Watch surface for live channel monitoring.
 - Settings flows for Twitch users/accounts, IRC monitor, rules, notifications, and AI options.
 - Analyst views for messages, users, streams, and rule trigger inspection.
+- **System stats** page (`/stats`) for operator visibility into database sizes, runtime and host resource usage, and in-process caches (polls the stats API on a fixed interval).
 
 ### 10.2 Frontend stack and API contract
 
@@ -295,7 +297,7 @@ Current frontend routes include:
 
 - Public: `/login`.
 - Authenticated: `/`, `/settings`, `/settings/rules/new`, `/settings/rules/:id/edit`, `/ai`,
-  `/messages`, `/rule-triggers`, `/irc-joined`, `/users`, `/users/:id`, `/streams`, `/streams/:id`.
+  `/stats`, `/messages`, `/rule-triggers`, `/irc-joined`, `/users`, `/users/:id`, `/streams`, `/streams/:id`.
 
 ### 10.6 Frontend coding standards
 
@@ -323,3 +325,4 @@ Current frontend routes include:
 | 0.3 | 2026-04-23 | Frontend §10: core primitives path `frontend/src/components/core`; scoped SCSS in SFCs (no CSS modules for core). |
 | 0.4 | 2026-04-23 | Frontend §10: flattened core primitives directly under `components/core` (no per-component subfolders). |
 | 0.5 | 2026-04-23 | Frontend §10: global muted utilities; core **PageHeader**, **LoadMoreRow**; `notifyApiError` helper; **TextInput** optional `name` prop. |
+| 0.6 | 2026-04-23 | `GET /api/v1/stats`; SPA `/stats` and nav; §9 API catalog and §10.5 routes. |

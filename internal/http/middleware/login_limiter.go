@@ -70,3 +70,15 @@ func (l *LoginLimiter) Allow(ip string) bool {
 
 	return true
 }
+
+// TrackedIPCount returns how many client IPs currently have rate-limit state in the LRU.
+func (l *LoginLimiter) TrackedIPCount() int {
+	if l == nil || l.byIP == nil {
+		return 0
+	}
+
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	return l.byIP.Len()
+}

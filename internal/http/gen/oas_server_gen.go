@@ -110,6 +110,13 @@ type Handler interface {
 	//
 	// GET /api/v1/settings/suspicion-settings
 	GetSuspicionSettings(ctx context.Context) (*SuspicionSettings, error)
+	// GetSystemStats implements getSystemStats operation.
+	//
+	// Admin-only. Snapshot values are cached server-side for up to 5 seconds; repeated calls within that
+	// window return the same payload and captured_at.
+	//
+	// GET /api/v1/stats
+	GetSystemStats(ctx context.Context) (GetSystemStatsRes, error)
 	// GetTwitchUserActivityTimeline implements getTwitchUserActivityTimeline operation.
 	//
 	// POST /api/v1/twitch/users/activity/timeline

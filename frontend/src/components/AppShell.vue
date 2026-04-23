@@ -45,6 +45,7 @@ function logout(): void {
       </RouterLink>
       <nav class="nav">
         <RouterLink to="/" active-class="active">Watch</RouterLink>
+        <RouterLink to="/stats" active-class="active">Stats</RouterLink>
         <RouterLink to="/messages" active-class="active">Messages</RouterLink>
         <RouterLink
           to="/users"

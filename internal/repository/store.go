@@ -115,4 +115,6 @@ type Store interface {
 	ListAIMessages(ctx context.Context, conversationID int64) ([]entity.AIMessage, error)
 	InsertAIMessage(ctx context.Context, m entity.AIMessage) (entity.AIMessage, error)
 	SetAIMessageMetadata(ctx context.Context, messageID int64, metadata map[string]any) error
+
+	SystemStatsTableCounts(ctx context.Context) (entity.SystemStatsTableCounts, error)
 }

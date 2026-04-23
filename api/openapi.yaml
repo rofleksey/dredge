@@ -41,6 +41,24 @@ paths:
                 $ref: "#/components/schemas/Account"
         "401":
           description: Unauthorized
+  /api/v1/stats:
+    get:
+      operationId: getSystemStats
+      security:
+        - bearerAuth: []
+      summary: Aggregated DB counts, process, host, and cache snapshot
+      description: >
+        Admin-only. Snapshot values are cached server-side for up to 5 seconds;
+        repeated calls within that window return the same payload and captured_at.
+      responses:
+        "200":
+          description: System statistics snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatsResponse"
+        "401":
+          description: Unauthorized
   /api/v1/settings/twitch-users:
     get:
       operationId: listTwitchUsers
@@ -2591,3 +2609,214 @@ components:
           items:
             type: string
             enum: [moderator, vip, bot, other]
+    SystemStatsResponse:
+      type: object
+      required: [captured_at, tables, process, host, caches]
+      properties:
+        captured_at:
+          type: string
+          format: date-time
+          description: When this snapshot was produced (server clock)
+        tables:
+          $ref: "#/components/schemas/SystemStatsTables"
+        process:
+          $ref: "#/components/schemas/SystemStatsProcess"
+        host:
+          $ref: "#/components/schemas/SystemStatsHost"
+        caches:
+          $ref: "#/components/schemas/SystemStatsCaches"
+    SystemStatsTables:
+      type: object
+      required:
+        - twitch_users
+        - twitch_accounts_active
+        - twitch_accounts_all
+        - rules
+        - notification_entries
+        - streams
+        - streams_open
+        - chat_messages
+        - channel_chatters
+        - user_activity_events
+        - twitch_user_helix_meta
+        - twitch_user_channel_follows
+        - user_followed_channels
+        - channel_blacklist
+        - rule_trigger_events
+        - irc_joined_samples
+        - twitch_discovery_candidates
+        - twitch_discovery_denied
+        - ai_conversations
+        - ai_messages
+      properties:
+        twitch_users:
+          type: integer
+          format: int64
+        twitch_accounts_active:
+          type: integer
+          format: int64
+          description: twitch_accounts rows with deleted_at IS NULL
+        twitch_accounts_all:
+          type: integer
+          format: int64
+        rules:
+          type: integer
+          format: int64
+        notification_entries:
+          type: integer
+          format: int64
+        streams:
+          type: integer
+          format: int64
+        streams_open:
+          type: integer
+          format: int64
+          description: streams with ended_at IS NULL
+        chat_messages:
+          type: integer
+          format: int64
+        channel_chatters:
+          type: integer
+          format: int64
+        user_activity_events:
+          type: integer
+          format: int64
+        twitch_user_helix_meta:
+          type: integer
+          format: int64
+        twitch_user_channel_follows:
+          type: integer
+          format: int64
+        user_followed_channels:
+          type: integer
+          format: int64
+        channel_blacklist:
+          type: integer
+          format: int64
+        rule_trigger_events:
+          type: integer
+          format: int64
+        irc_joined_samples:
+          type: integer
+          format: int64
+        twitch_discovery_candidates:
+          type: integer
+          format: int64
+        twitch_discovery_denied:
+          type: integer
+          format: int64
+        ai_conversations:
+          type: integer
+          format: int64
+        ai_messages:
+          type: integer
+          format: int64
+    SystemStatsProcess:
+      type: object
+      required:
+        - goroutines
+        - heap_alloc_bytes
+        - heap_sys_bytes
+        - sys_bytes
+        - total_alloc_bytes
+        - num_gc
+        - gc_cpu_fraction
+      properties:
+        goroutines:
+          type: integer
+          format: int32
+        heap_alloc_bytes:
+          type: integer
+          format: int64
+        heap_sys_bytes:
+          type: integer
+          format: int64
+        sys_bytes:
+          type: integer
+          format: int64
+        total_alloc_bytes:
+          type: integer
+          format: int64
+        num_gc:
+          type: integer
+          format: int32
+        gc_cpu_fraction:
+          type: number
+          format: double
+    SystemStatsHost:
+      type: object
+      required:
+        - cpu_percent
+        - memory_total_bytes
+        - memory_used_bytes
+        - memory_used_percent
+        - disk_path
+        - disk_total_bytes
+        - disk_used_bytes
+        - disk_used_percent
+      properties:
+        cpu_percent:
+          type: number
+          format: double
+          nullable: true
+          description: Host CPU utilization percent; null when unavailable
+        memory_total_bytes:
+          type: integer
+          format: int64
+        memory_used_bytes:
+          type: integer
+          format: int64
+        memory_used_percent:
+          type: number
+          format: double
+        disk_path:
+          type: string
+          description: Path passed to disk usage (e.g. / or a drive root)
+        disk_total_bytes:
+          type: integer
+          format: int64
+        disk_used_bytes:
+          type: integer
+          format: int64
+        disk_used_percent:
+          type: number
+          format: double
+    SystemStatsCaches:
+      type: object
+      required:
+        - helix_user_oauth_cache_entries
+        - helix_app_access_token_cached
+        - login_limiter_tracked_ips
+        - pgx_acquired_conns
+        - pgx_idle_conns
+        - pgx_total_conns
+        - pgx_max_conns
+        - pgx_acquire_count
+        - pgx_canceled_acquire_count
+      properties:
+        helix_user_oauth_cache_entries:
+          type: integer
+          format: int32
+        helix_app_access_token_cached:
+          type: boolean
+        login_limiter_tracked_ips:
+          type: integer
+          format: int32
+        pgx_acquired_conns:
+          type: integer
+          format: int32
+        pgx_idle_conns:
+          type: integer
+          format: int32
+        pgx_total_conns:
+          type: integer
+          format: int32
+        pgx_max_conns:
+          type: integer
+          format: int32
+        pgx_acquire_count:
+          type: integer
+          format: int64
+        pgx_canceled_acquire_count:
+          type: integer
+          format: int64

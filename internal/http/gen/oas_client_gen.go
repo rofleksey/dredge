@@ -130,6 +130,13 @@ type Invoker interface {
 	//
 	// GET /api/v1/settings/suspicion-settings
 	GetSuspicionSettings(ctx context.Context) (*SuspicionSettings, error)
+	// GetSystemStats invokes getSystemStats operation.
+	//
+	// Admin-only. Snapshot values are cached server-side for up to 5 seconds; repeated calls within that
+	// window return the same payload and captured_at.
+	//
+	// GET /api/v1/stats
+	GetSystemStats(ctx context.Context) (GetSystemStatsRes, error)
 	// GetTwitchUserActivityTimeline invokes getTwitchUserActivityTimeline operation.
 	//
 	// POST /api/v1/twitch/users/activity/timeline
@@ -3307,6 +3314,114 @@ func (c *Client) sendGetSuspicionSettings(ctx context.Context) (res *SuspicionSe
 
 	stage = "DecodeResponse"
 	result, err := decodeGetSuspicionSettingsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetSystemStats invokes getSystemStats operation.
+//
+// Admin-only. Snapshot values are cached server-side for up to 5 seconds; repeated calls within that
+// window return the same payload and captured_at.
+//
+// GET /api/v1/stats
+func (c *Client) GetSystemStats(ctx context.Context) (GetSystemStatsRes, error) {
+	res, err := c.sendGetSystemStats(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetSystemStats(ctx context.Context) (res GetSystemStatsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getSystemStats"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/api/v1/stats"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetSystemStatsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v1/stats"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetSystemStatsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetSystemStatsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
