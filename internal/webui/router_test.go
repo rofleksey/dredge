@@ -8,65 +8,19 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/rofleksey/dredge/internal/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewMux_routesAPIAndStatic(t *testing.T) {
+func TestNewMux_servesStatic(t *testing.T) {
 	t.Parallel()
 
-	apiHits := 0
-
-	api := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		apiHits++
-
-		w.WriteHeader(http.StatusNoContent)
-	})
-
-	mux := NewMux(api)
+	mux := NewMux()
 
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/me", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	mux.ServeHTTP(rec, req)
-	assert.Equal(t, http.StatusNoContent, rec.Code)
-	assert.Equal(t, 1, apiHits)
-
-	rec2 := httptest.NewRecorder()
-	req2 := httptest.NewRequest(http.MethodGet, "/", nil)
-	mux.ServeHTTP(rec2, req2)
-	assert.NotEqual(t, http.StatusNotFound, rec2.Code)
-}
-
-func TestIsAPIPath(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		path string
-		want bool
-	}{
-		{"/api/v1/auth/login", true},
-		{"/api/v1/auth/x", true},
-		{"/api/v1/me", true},
-		{"/api/v1/me/foo", true},
-		{"/api/v1/settings/x", true},
-		{"/api/v1/twitch/foo", true},
-		{"/api/v1/ai/settings", true},
-		{"/api/v1/ai/conversations", true},
-		{"/", false},
-		{"/auth/login", false},
-		{"/me", false},
-		{"/index.html", false},
-		{"/assets/app.js", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.path, func(t *testing.T) {
-			t.Parallel()
-
-			assert.Equal(t, tt.want, api.IsAPIPath(tt.path))
-		})
-	}
+	assert.NotEqual(t, http.StatusNotFound, rec.Code)
 }
 
 func TestSpaFS_Open_existingFile(t *testing.T) {

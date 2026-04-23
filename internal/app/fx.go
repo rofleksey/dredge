@@ -111,7 +111,8 @@ func fxOptions() fx.Option {
 				})
 				mux.Handle("/ws", handler.LiveWebsocketHandler(authSvc, hub, tw, obs.Logger))
 				mux.Handle(handler.TwitchOAuthCallbackPath, handler.NewTwitchOAuthCallback(oauth, sett, obs))
-				mux.Handle("/", webui.NewMux(srv))
+				mux.Handle("/api/v1/", srv)
+				mux.Handle("/", webui.NewMux())
 
 				chain := httpmw.WrapSecurityHeaders(httpmw.WrapCORS(string(origin), mux))
 
